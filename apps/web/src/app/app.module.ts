@@ -9,10 +9,6 @@ import { AppComponent } from "./app.component";
 import { CoreModule } from "./core";
 import { OssRoutingModule } from "./oss-routing.module";
 import { OssModule } from "./oss.module";
-import { AccessComponent } from "./tools/send/access.component";
-import { SendAccessFileComponent } from "./tools/send/send-access-file.component";
-import { SendAccessPasswordComponent } from "./tools/send/send-access-password.component";
-import { SendAccessTextComponent } from "./tools/send/send-access-text.component";
 import { SendComponent } from "./tools/send/send.component";
 import { WildcardRoutingModule } from "./wildcard-routing.module";
 
@@ -27,10 +23,6 @@ import { WildcardRoutingModule } from "./wildcard-routing.module";
     LayoutModule,
     OssRoutingModule,
     SendComponent,
-    AccessComponent,
-    SendAccessFileComponent,
-    SendAccessTextComponent,
-    SendAccessPasswordComponent,
     WildcardRoutingModule, // Needs to be last to catch all non-existing routes
   ],
   declarations: [AppComponent],

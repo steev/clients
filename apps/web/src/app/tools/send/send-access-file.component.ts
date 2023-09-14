@@ -20,7 +20,7 @@ import { SharedModule } from "../../shared";
   standalone: true,
 })
 export class SendAccessFileComponent {
-  downloading = false;
+  protected downloading = false;
   @Input() send: SendAccessView;
   @Input() decKey: SymmetricCryptoKey;
   @Input() accessRequest: SendAccessRequest;

@@ -14,7 +14,7 @@ import { SharedModule } from "../../shared";
 })
 export class SendAccessTextComponent {
   private _send: SendAccessView = null;
-  showText = false;
+  protected showText = false;
 
   constructor(
     private i18nService: I18nService,
@@ -30,14 +30,14 @@ export class SendAccessTextComponent {
     this.showText = this.send.text != null ? !this.send.text.hidden : true;
   }
 
-  get sendText() {
+  protected get sendText() {
     if (this.send == null || this.send.text == null) {
       return null;
     }
     return this.showText ? this.send.text.text : this.send.text.maskedText;
   }
 
-  copyText() {
+  protected copyText() {
     this.platformUtilsService.copyToClipboard(this.send.text.text);
     this.platformUtilsService.showToast(
       "success",
@@ -46,7 +46,7 @@ export class SendAccessTextComponent {
     );
   }
 
-  toggleText() {
+  protected toggleText() {
     this.showText = !this.showText;
   }
 }

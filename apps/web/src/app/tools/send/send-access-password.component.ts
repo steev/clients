@@ -10,7 +10,7 @@ import { SharedModule } from "../../shared";
   standalone: true,
 })
 export class SendAccessPasswordComponent {
-  formGroup = this.formBuilder.group({
+  protected formGroup = this.formBuilder.group({
     password: ["", [Validators.required]],
   });
 
@@ -19,7 +19,7 @@ export class SendAccessPasswordComponent {
 
   constructor(private formBuilder: FormBuilder) {}
 
-  setPassword(value: string) {
+  protected setPassword(value: string) {
     this.setPasswordEvent.emit(value);
   }
 }

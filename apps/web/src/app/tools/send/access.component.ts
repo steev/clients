@@ -5,8 +5,6 @@ import { SEND_KDF_ITERATIONS } from "@bitwarden/common/enums";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
-import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
 import { SendType } from "@bitwarden/common/tools/send/enums/send-type";
@@ -23,6 +21,7 @@ import { ExpiredSend } from "./icons/expired-send.icon";
 import { SendAccessFileComponent } from "./send-access-file.component";
 import { SendAccessPasswordComponent } from "./send-access-password.component";
 import { SendAccessTextComponent } from "./send-access-text.component";
+import { FormBuilder } from "@angular/forms";
 
 @Component({
   selector: "app-send-access",
@@ -37,41 +36,41 @@ import { SendAccessTextComponent } from "./send-access-text.component";
     NoItemsModule,
   ],
 })
-// eslint-disable-next-line rxjs-angular/prefer-takeuntil
 export class AccessComponent implements OnInit {
-  send: SendAccessView;
-  sendType = SendType;
-  loading = true;
-  passwordRequired = false;
-  formPromise: Promise<SendAccessResponse>;
-  password: string;
-  unavailable = false;
-  error = false;
-  hideEmail = false;
+  protected send: SendAccessView;
+  protected sendType = SendType;
+  protected loading = true;
+  protected passwordRequired = false;
+  protected formPromise: Promise<SendAccessResponse>;
+  protected password: string;
+  protected unavailable = false;
+  protected error = false;
+  protected hideEmail = false;
+  protected decKey: SymmetricCryptoKey;
+  protected accessRequest: SendAccessRequest;
+  protected expiredSendIcon = ExpiredSend;
+
+  protected formGroup = this.formBuilder.group({});
 
   private id: string;
   private key: string;
-  decKey: SymmetricCryptoKey;
-  accessRequest: SendAccessRequest;
-  expiredSendIcon = ExpiredSend;
 
   constructor(
-    private i18nService: I18nService,
     private cryptoFunctionService: CryptoFunctionService,
-    private platformUtilsService: PlatformUtilsService,
     private route: ActivatedRoute,
     private cryptoService: CryptoService,
-    private sendApiService: SendApiService
+    private sendApiService: SendApiService,
+    protected formBuilder: FormBuilder
   ) {}
 
-  get expirationDate() {
+  protected get expirationDate() {
     if (this.send == null || this.send.expirationDate == null) {
       return null;
     }
     return this.send.expirationDate;
   }
 
-  get creatorIdentifier() {
+  protected get creatorIdentifier() {
     if (this.send == null || this.send.creatorIdentifier == null) {
       return null;
     }
@@ -90,16 +89,7 @@ export class AccessComponent implements OnInit {
     });
   }
 
-  copyText() {
-    this.platformUtilsService.copyToClipboard(this.send.text.text);
-    this.platformUtilsService.showToast(
-      "success",
-      null,
-      this.i18nService.t("valueCopied", this.i18nService.t("sendTypeText"))
-    );
-  }
-
-  async load() {
+  protected load = async () => {
     this.unavailable = false;
     this.error = false;
     this.hideEmail = false;
@@ -145,8 +135,9 @@ export class AccessComponent implements OnInit {
       !this.passwordRequired &&
       !this.loading &&
       !this.unavailable;
-  }
-  getPassword(password: string) {
+  };
+
+  protected setPassword(password: string) {
     this.password = password;
   }
 }

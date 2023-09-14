@@ -122,6 +122,8 @@ export class AccessComponent implements OnInit {
           this.passwordRequired = true;
         } else if (e.statusCode === 404) {
           this.unavailable = true;
+        } else if (e.statusCode === 400) {
+          //this status is returned on wrong password and we should do nothing.
         } else {
           this.error = true;
         }

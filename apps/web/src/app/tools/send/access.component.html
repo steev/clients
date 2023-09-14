@@ -28,47 +28,50 @@
     <div
       class="tw-mt-3 tw-w-10/12 tw-rounded-md tw-border tw-border-solid tw-border-secondary-300 tw-bg-background tw-p-6"
     >
-      <div *ngIf="loading" class="tw-text-center">
-        <i
-          class="bwi bwi-spinner bwi-spin bwi-2x text-muted"
-          title="{{ 'loading' | i18n }}"
-          aria-hidden="true"
-        ></i>
-        <span class="sr-only">{{ "loading" | i18n }}</span>
-      </div>
-      <div *ngIf="!loading && passwordRequired">
+      <ng-container *ngIf="!loading; else spinner">
         <app-send-access-password
           [loading]="form.loading"
-          (setPasswordEvent)="getPassword($event)"
+          (setPasswordEvent)="setPassword($event)"
+          *ngIf="passwordRequired"
         ></app-send-access-password>
-      </div>
-      <bit-no-items [icon]="expiredSendIcon" class="tw-text-main" *ngIf="!loading && unavailable">
-        <ng-container slot="description">{{ "sendAccessUnavailable" | i18n }}</ng-container>
-      </bit-no-items>
-      <bit-no-items [icon]="expiredSendIcon" class="tw-text-main" *ngIf="!loading && error">
-        <ng-container slot="description">{{ "unexpectedErrorSend" | i18n }}</ng-container>
-      </bit-no-items>
-      <div *ngIf="!loading && !passwordRequired && send && !error">
-        <p class="text-center">
-          <b>{{ send.name }}</b>
-        </p>
-        <hr />
-        <!-- Text -->
-        <ng-container *ngIf="send.type === sendType.Text">
-          <app-send-access-text [send]="send"></app-send-access-text>
-        </ng-container>
-        <!-- File -->
-        <ng-container *ngIf="send.type === sendType.File">
-          <app-send-access-file
-            [send]="send"
-            [decKey]="decKey"
-            [accessRequest]="accessRequest"
-          ></app-send-access-file>
-        </ng-container>
-        <p *ngIf="expirationDate" class="text-muted tw-text-center">
-          Expires: {{ expirationDate | date : "medium" }}
-        </p>
-      </div>
+        <bit-no-items [icon]="expiredSendIcon" class="tw-text-main" *ngIf="unavailable">
+          <ng-container slot="description">{{ "sendAccessUnavailable" | i18n }}</ng-container>
+        </bit-no-items>
+        <bit-no-items [icon]="expiredSendIcon" class="tw-text-main" *ngIf="error">
+          <ng-container slot="description">{{ "unexpectedErrorSend" | i18n }}</ng-container>
+        </bit-no-items>
+        <div *ngIf="!passwordRequired && send && !error && !unavailable">
+          <p class="tw-text-center">
+            <b>{{ send.name }}</b>
+          </p>
+          <hr />
+          <!-- Text -->
+          <ng-container *ngIf="send.type === sendType.Text">
+            <app-send-access-text [send]="send"></app-send-access-text>
+          </ng-container>
+          <!-- File -->
+          <ng-container *ngIf="send.type === sendType.File">
+            <app-send-access-file
+              [send]="send"
+              [decKey]="decKey"
+              [accessRequest]="accessRequest"
+            ></app-send-access-file>
+          </ng-container>
+          <p *ngIf="expirationDate" class="text-muted tw-text-center">
+            Expires: {{ expirationDate | date : "medium" }}
+          </p>
+        </div>
+      </ng-container>
+      <ng-template #spinner>
+        <div class="tw-text-center">
+          <i
+            class="bwi bwi-spinner bwi-spin bwi-2x tw-text-muted"
+            title="{{ 'loading' | i18n }}"
+            aria-hidden="true"
+          ></i>
+          <span class="sr-only">{{ "loading" | i18n }}</span>
+        </div>
+      </ng-template>
     </div>
     <div class="tw-mt-5 tw-w-10/12 tw-text-center tw-text-muted">
       <p bitTypography="body2" class="tw-mb-0">

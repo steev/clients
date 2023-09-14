@@ -1,10 +1,4 @@
-<form
-  #form
-  (ngSubmit)="load()"
-  [appApiAction]="formPromise"
-  class="tw-container tw-mx-auto"
-  ngNativeValidate
->
+<form [formGroup]="formGroup" [bitSubmit]="load">
   <div
     class="tw-mx-auto tw-mt-5 tw-flex tw-max-w-xl tw-flex-col tw-items-center tw-justify-center tw-p-8"
   >
@@ -30,7 +24,6 @@
     >
       <ng-container *ngIf="!loading; else spinner">
         <app-send-access-password
-          [loading]="form.loading"
           (setPasswordEvent)="setPassword($event)"
           *ngIf="passwordRequired && !error"
         ></app-send-access-password>

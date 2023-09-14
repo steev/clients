@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { FormBuilder } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 
 import { SEND_KDF_ITERATIONS } from "@bitwarden/common/enums";
@@ -21,7 +22,6 @@ import { ExpiredSend } from "./icons/expired-send.icon";
 import { SendAccessFileComponent } from "./send-access-file.component";
 import { SendAccessPasswordComponent } from "./send-access-password.component";
 import { SendAccessTextComponent } from "./send-access-text.component";
-import { FormBuilder } from "@angular/forms";
 
 @Component({
   selector: "app-send-access",
@@ -36,6 +36,7 @@ import { FormBuilder } from "@angular/forms";
     NoItemsModule,
   ],
 })
+// eslint-disable-next-line rxjs-angular/prefer-takeuntil
 export class AccessComponent implements OnInit {
   protected send: SendAccessView;
   protected sendType = SendType;

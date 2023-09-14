@@ -20,7 +20,6 @@ import { SharedModule } from "../../shared";
   standalone: true,
 })
 export class SendAccessFileComponent {
-  protected downloading = false;
   @Input() send: SendAccessView;
   @Input() decKey: SymmetricCryptoKey;
   @Input() accessRequest: SendAccessRequest;
@@ -32,12 +31,8 @@ export class SendAccessFileComponent {
     private sendApiService: SendApiService
   ) {}
 
-  async download() {
+  protected download = async () => {
     if (this.send == null || this.decKey == null) {
-      return;
-    }
-
-    if (this.downloading) {
       return;
     }
 
@@ -51,11 +46,9 @@ export class SendAccessFileComponent {
       return;
     }
 
-    this.downloading = true;
     const response = await fetch(new Request(downloadData.url, { cache: "no-store" }));
     if (response.status !== 200) {
       this.platformUtilsService.showToast("error", null, this.i18nService.t("errorOccurred"));
-      this.downloading = false;
       return;
     }
 
@@ -70,7 +63,5 @@ export class SendAccessFileComponent {
     } catch (e) {
       this.platformUtilsService.showToast("error", null, this.i18nService.t("errorOccurred"));
     }
-
-    this.downloading = false;
-  }
+  };
 }

@@ -122,4 +122,44 @@ describe("FilelessImporterBackground", () => {
       );
     });
   });
+
+  describe("handleImporterPortMessage", () => {
+    it("will return without triggering a handler if the command does not exist", () => {
+      const port = mock<chrome.runtime.Port>({
+        name: "lp-fileless-importer",
+      });
+      const msg = { command: "test" };
+
+      filelessImporterBackground["handleImporterPortMessage"](msg, port);
+
+      expect(filelessImporterBackground["lpImporterPortMessageHandlers"]["test"]).toBeUndefined();
+    });
+
+    it("will trigger a handler if the command exists", () => {
+      const port = mock<chrome.runtime.Port>({
+        name: "lp-fileless-importer",
+      });
+      const msg = { command: "test" };
+      filelessImporterBackground["lpImporterPortMessageHandlers"]["test"] = jest.fn();
+
+      filelessImporterBackground["handleImporterPortMessage"](msg, port);
+
+      expect(
+        filelessImporterBackground["lpImporterPortMessageHandlers"]["test"]
+      ).toHaveBeenCalled();
+    });
+  });
+
+  describe("handleImporterPortDisconnect", () => {
+    it("will set the port reference to null", () => {
+      const port = mock<chrome.runtime.Port>({
+        name: "lp-fileless-importer",
+      });
+      filelessImporterBackground["lpImporterPort"] = port;
+
+      filelessImporterBackground["handleImporterPortDisconnect"](port);
+
+      expect(filelessImporterBackground["lpImporterPort"]).toBeNull();
+    });
+  });
 });

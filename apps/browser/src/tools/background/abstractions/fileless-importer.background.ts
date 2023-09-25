@@ -7,6 +7,7 @@ type ImportNotificationMessageHandlers = {
 type LpImporterMessageHandlers = {
   [key: string]: ({ message, port }: { message: any; port: chrome.runtime.Port }) => void;
   displayLpImportNotification: ({ port }: { port: chrome.runtime.Port }) => void;
+  startLpImport: ({ message, port }: { message: any; port: chrome.runtime.Port }) => void;
 };
 
 export { ImportNotificationMessageHandlers, LpImporterMessageHandlers };

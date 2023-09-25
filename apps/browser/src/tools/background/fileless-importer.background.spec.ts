@@ -4,6 +4,8 @@ import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/services/config/config.service";
+import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
+import { ImportServiceAbstraction } from "@bitwarden/importer";
 
 import NotificationBackground from "../../autofill/background/notification.background";
 import { BrowserApi } from "../../platform/browser/browser-api";
@@ -16,12 +18,16 @@ describe("FilelessImporterBackground", () => {
   const configService = mock<ConfigService>();
   const authService = mock<AuthService>();
   const notificationBackground = mock<NotificationBackground>();
+  const importService = mock<ImportServiceAbstraction>();
+  const syncService = mock<SyncService>();
 
   beforeEach(() => {
     filelessImporterBackground = new FilelessImporterBackground(
       configService,
       authService,
-      notificationBackground
+      notificationBackground,
+      importService,
+      syncService
     );
   });
 

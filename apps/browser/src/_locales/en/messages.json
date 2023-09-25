@@ -2430,5 +2430,9 @@
   "dataSuccessfullyImported": {
     "message": "Data successfully imported!",
     "description": "Notification message for when an import has completed successfully."
+  },
+  "dataImportFailed": {
+    "message": "Import completed with errors.",
+    "description": "Notification message for when an import has failed."
   }
 }

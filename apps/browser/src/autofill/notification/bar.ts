@@ -231,7 +231,8 @@ function handleTypeFilelessImport() {
   const startFilelessImportButton = document.getElementById("start-fileless-import");
   startFilelessImportButton.addEventListener("click", () => {
     port.postMessage({ command: "startFilelessImport", importType });
-    document.getElementById("import-buttons").innerHTML = chrome.i18n.getMessage("importing");
+    document.getElementById("fileless-import-buttons").innerHTML =
+      chrome.i18n.getMessage("importing");
   });
 
   const cancelFilelessImportButton = document.getElementById("cancel-fileless-import");
@@ -240,14 +241,25 @@ function handleTypeFilelessImport() {
   });
 
   const handlePortMessage = (msg: any) => {
+    if (msg.command !== "lpImportCompleted" && msg.command !== "lpImportFailed") {
+      return;
+    }
+
+    port.disconnect();
+
     if (msg.command === "lpImportCompleted") {
       document.getElementById("fileless-import-buttons").innerHTML = chrome.i18n.getMessage(
         "dataSuccessfullyImported"
       );
       document.getElementById("fileless-import-buttons").classList.add("success-message");
-      port.disconnect();
       return;
     }
+
+    document.getElementById("fileless-import-buttons").innerHTML =
+      chrome.i18n.getMessage("dataImportFailed");
+    document.getElementById("fileless-import-buttons").classList.add("error-message");
+    // eslint-disable-next-line no-console
+    console.error(msg.importErrorMessage);
   };
   port.onMessage.addListener(handlePortMessage);
 }

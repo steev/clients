@@ -631,7 +631,9 @@ export default class MainBackground {
     this.filelessImporterBackground = new FilelessImporterBackground(
       this.configService,
       this.authService,
-      this.notificationBackground
+      this.notificationBackground,
+      this.importService,
+      this.syncService
     );
 
     this.tabsBackground = new TabsBackground(this, this.notificationBackground);

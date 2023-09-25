@@ -2,6 +2,8 @@ import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
+import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
+import { ImportServiceAbstraction } from "@bitwarden/importer";
 
 import NotificationBackground from "../../autofill/background/notification.background";
 import { BrowserApi } from "../../platform/browser/browser-api";
@@ -23,12 +25,15 @@ class FilelessImporterBackground {
   private readonly lpImporterPortMessageHandlers: LpImporterMessageHandlers = {
     displayLpImportNotification: ({ port }) =>
       this.displayFilelessImportNotification(port.sender.tab, FilelessImportType.LP),
+    startLpImport: ({ message, port }) => this.startLpImport(message.data, port.sender),
   };
 
   constructor(
     private configService: ConfigServiceAbstraction,
     private authService: AuthService,
-    private notificationBackground: NotificationBackground
+    private notificationBackground: NotificationBackground,
+    private importService: ImportServiceAbstraction,
+    private syncService: SyncService
   ) {
     this.setupExtensionMessageListeners();
   }
@@ -40,7 +45,7 @@ class FilelessImporterBackground {
    */
   private startFilelessImport(importType: string) {
     if (importType === FilelessImportType.LP) {
-      // Start import
+      this.lpImporterPort?.postMessage({ command: "startLpFilelessImport" });
     }
   }
 
@@ -78,6 +83,32 @@ class FilelessImporterBackground {
   private triggerLpImporterCsvDownload() {
     this.lpImporterPort?.postMessage({ command: "triggerCsvDownload" });
     this.lpImporterPort?.disconnect();
+  }
+
+  private async startLpImport(data: string, sender: chrome.runtime.MessageSender) {
+    if (!data) {
+      return;
+    }
+
+    const promptForPassword_callback = async () => "";
+    const importer = this.importService.getImporter(
+      "lastpasscsv",
+      promptForPassword_callback,
+      null
+    );
+
+    try {
+      const result = await this.importService.import(importer, data, null, null, false);
+      if (result.success) {
+        this.importNotificationsPort?.postMessage({ command: "lpImportCompleted" });
+        await this.syncService.fullSync(true);
+      }
+    } catch (error) {
+      this.importNotificationsPort?.postMessage({
+        command: "lpImportFailed",
+        importErrorMessage: error,
+      });
+    }
   }
 
   /**

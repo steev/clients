@@ -12,6 +12,7 @@ class LpFilelessImporter implements LpFilelessImporterInterface {
   private readonly portMessageHandlers: LpFilelessImporterMessageHandlers = {
     verifyFeatureFlag: ({ message }) => this.handleFeatureFlagVerification(message),
     triggerCsvDownload: ({ message }) => this.postWindowMessage(message),
+    startLpFilelessImport: () => this.startLpImport(),
   };
 
   /**
@@ -161,6 +162,15 @@ class LpFilelessImporter implements LpFilelessImporterInterface {
    */
   private postWindowMessage(message: any) {
     globalThis.postMessage(message, "https://lastpass.com");
+  }
+
+  private startLpImport() {
+    if (!this.exportData) {
+      return;
+    }
+
+    this.postPortMessage({ command: "startLpImport", data: this.exportData });
+    this.messagePort?.disconnect();
   }
 
   /**

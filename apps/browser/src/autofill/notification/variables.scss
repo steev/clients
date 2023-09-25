@@ -21,6 +21,9 @@ $solarizedDarkGreen: #859900;
 $success-color-light: #017e45;
 $success-color-dark: #8db89b;
 
+$error-color-light: #c83522;
+$error-color-dark: #ee9792;
+
 $themes: (
   light: (
     textColor: $text-color,
@@ -32,6 +35,7 @@ $themes: (
     inputBorderColor: darken($border-color-dark, 7%),
     inputBackgroundColor: #ffffff,
     successColor: $success-color-light,
+    errorColor: $error-color-light,
   ),
   dark: (
     textColor: #ffffff,
@@ -43,6 +47,7 @@ $themes: (
     inputBorderColor: #4c525f,
     inputBackgroundColor: #2f343d,
     successColor: $success-color-dark,
+    errorColor: $error-color-dark,
   ),
   nord: (
     textColor: $nord5,

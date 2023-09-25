@@ -7,21 +7,20 @@ import NotificationBackground from "../../autofill/background/notification.backg
 import { BrowserApi } from "../../platform/browser/browser-api";
 import { FilelessImportPortNames, FilelessImportType } from "../enums/fileless-import.enums";
 
+import {
+  ImportNotificationMessageHandlers,
+  LpImporterMessageHandlers,
+} from "./abstractions/fileless-importer.background";
+
 class FilelessImporterBackground {
   private importNotificationsPort: chrome.runtime.Port;
   private lpImporterPort: chrome.runtime.Port;
-  private readonly importNotificationsPortMessageHandlers: Record<
-    string,
-    ({ message, port }: { message: any; port: chrome.runtime.Port }) => void
-  > = {
+  private readonly importNotificationsPortMessageHandlers: ImportNotificationMessageHandlers = {
     startFilelessImport: ({ message }) => this.startFilelessImport(message.importType),
     cancelFilelessImport: ({ message, port }) =>
       this.cancelFilelessImport(message.importType, port.sender),
   };
-  private readonly lpImporterPortMessageHandlers: Record<
-    string,
-    ({ message, port }: { message: any; port: chrome.runtime.Port }) => void
-  > = {
+  private readonly lpImporterPortMessageHandlers: LpImporterMessageHandlers = {
     displayLpImportNotification: ({ port }) =>
       this.displayFilelessImportNotification(port.sender.tab, FilelessImportType.LP),
   };

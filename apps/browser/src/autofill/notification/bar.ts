@@ -235,7 +235,7 @@ function handleTypeFilelessImport() {
   });
 
   const cancelFilelessImportButton = document.getElementById("cancel-fileless-import");
-  cancelFilelessImportButton.addEventListener("click", (e) => {
+  cancelFilelessImportButton.addEventListener("click", () => {
     port.postMessage({ command: "cancelFilelessImport", importType });
   });
 

@@ -1,15 +1,17 @@
 import { FilelessImportPortNames } from "../enums/fileless-import.enums";
 
-class LpFilelessImporter {
+import {
+  LpFilelessImporter as LpFilelessImporterInterface,
+  LpFilelessImporterMessageHandlers,
+} from "./abstractions/lp-fileless-importer";
+
+class LpFilelessImporter implements LpFilelessImporterInterface {
   private exportData: string;
   private messagePort: chrome.runtime.Port;
   private mutationObserver: MutationObserver;
-  private readonly portMessageHandlers: Record<
-    string,
-    (message: any, port: chrome.runtime.Port) => void
-  > = {
-    verifyFeatureFlag: (message, port) => this.handleFeatureFlagVerification(message),
-    triggerCsvDownload: (message) => this.postWindowMessage(message),
+  private readonly portMessageHandlers: LpFilelessImporterMessageHandlers = {
+    verifyFeatureFlag: ({ message }) => this.handleFeatureFlagVerification(message),
+    triggerCsvDownload: ({ message }) => this.postWindowMessage(message),
   };
 
   /**
@@ -81,6 +83,10 @@ class LpFilelessImporter {
     document.documentElement.appendChild(script);
   }
 
+  /**
+   * Initializes the importing mechanism used to import the CSV file into Bitwarden.
+   * This is done by observing the DOM for the addition of the LP importer element.
+   */
   private loadImporter = () => {
     this.mutationObserver = new MutationObserver(this.handleMutation);
     this.mutationObserver.observe(document.body, {
@@ -89,6 +95,13 @@ class LpFilelessImporter {
     });
   };
 
+  /**
+   * Handles mutations that are observed by the mutation observer. When the exported data
+   * element is added to the DOM, the export data is extracted and the import prompt is
+   * displayed.
+   *
+   * @param mutations - The mutations that were observed.
+   */
   private handleMutation = (mutations: MutationRecord[]) => {
     if (!mutations?.length) {
       return;
@@ -109,28 +122,36 @@ class LpFilelessImporter {
         }
 
         const preElement: HTMLPreElement = addedNode as HTMLPreElement;
-        if (!preElement.innerText) {
+        const textContent: string = preElement.textContent?.trim();
+        if (!textContent) {
           continue;
         }
 
-        const innerText: string = preElement.innerText.trim();
-        if (!innerText) {
-          continue;
-        }
-
-        this.exportData = innerText;
-        this.displayImportPrompt();
+        this.exportData = textContent;
+        this.displayImportNotification();
         this.mutationObserver.disconnect();
       }
     }
   };
 
-  private displayImportPrompt() {
+  /**
+   * Posts a message to the notification bar content script to display the import prompt.
+   */
+  private displayImportNotification() {
     if (!this.exportData) {
       return;
     }
 
     this.postPortMessage({ command: "displayLpImportNotification" });
+  }
+
+  /**
+   * Posts a message to the background script.
+   *
+   * @param message - The message to post.
+   */
+  private postPortMessage(message: any) {
+    this.messagePort?.postMessage(message);
   }
 
   /**
@@ -140,10 +161,6 @@ class LpFilelessImporter {
    */
   private postWindowMessage(message: any) {
     globalThis.postMessage(message, "https://lastpass.com");
-  }
-
-  private postPortMessage(message: any) {
-    this.messagePort?.postMessage(message);
   }
 
   /**
@@ -167,7 +184,7 @@ class LpFilelessImporter {
       return;
     }
 
-    handler(message, port);
+    handler({ message, port });
   };
 }
 

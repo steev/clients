@@ -272,6 +272,7 @@ const devServer =
                   https://api.2fa.directory/v3/totp.json
                   https://api.stripe.com
                   https://www.paypal.com
+                  https://api.sandbox.braintreegateway.com
                   https://api.braintreegateway.com
                   https://client-analytics.braintreegateway.com
                   https://*.braintree-api.com
@@ -349,10 +350,6 @@ const webpackConfig = {
     extensions: [".ts", ".js"],
     symlinks: false,
     modules: [path.resolve("../../node_modules")],
-    alias: {
-      sweetalert2: require.resolve("sweetalert2/dist/sweetalert2.js"),
-      "#sweetalert2": require.resolve("sweetalert2/src/sweetalert2.scss"),
-    },
     fallback: {
       buffer: false,
       util: require.resolve("util/"),

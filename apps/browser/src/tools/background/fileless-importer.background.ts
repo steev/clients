@@ -7,7 +7,7 @@ class FilelessImporterBackground {
   private lpImporterPort: chrome.runtime.Port;
   private readonly lpImporterPortMessageHandlers: Record<
     string,
-    (msg: any, port: chrome.runtime.Port) => void
+    (message: any, port: chrome.runtime.Port) => void
   > = {};
 
   constructor(private configService: ConfigServiceAbstraction, private authService: AuthService) {
@@ -60,21 +60,21 @@ class FilelessImporterBackground {
 
   /**
    * Handles messages that are sent from fileless importer content scripts.
-   * @param msg - The message that was sent.
+   * @param message - The message that was sent.
    * @param port - The port that the message was sent from.
    */
-  private handleImporterPortMessage = (msg: any, port: chrome.runtime.Port) => {
+  private handleImporterPortMessage = (message: any, port: chrome.runtime.Port) => {
     let handler: CallableFunction | undefined;
 
     if (port.name === "lp-fileless-importer") {
-      handler = this.lpImporterPortMessageHandlers[msg.command];
+      handler = this.lpImporterPortMessageHandlers[message.command];
     }
 
     if (!handler) {
       return;
     }
 
-    handler(msg, port);
+    handler(message, port);
   };
 
   /**

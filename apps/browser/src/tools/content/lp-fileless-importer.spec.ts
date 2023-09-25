@@ -32,18 +32,18 @@ describe("LpFilelessImporter", () => {
 
   describe("handleFeatureFlagVerification", () => {
     it("will disconnect the port and return early if the feature flag is not set", () => {
-      const msg = {
+      const message = {
         command: "verifyFeatureFlag",
         filelessImportFeatureFlagEnabled: false,
       };
 
-      lpFilelessImporter["handleFeatureFlagVerification"](msg);
+      lpFilelessImporter["handleFeatureFlagVerification"](message);
 
       expect(lpFilelessImporter["messagePort"].disconnect).toHaveBeenCalled();
     });
 
     it("will suppress the download if the feature flag is set", () => {
-      const msg = {
+      const message = {
         command: "verifyFeatureFlag",
         filelessImportFeatureFlagEnabled: true,
       };
@@ -51,7 +51,7 @@ describe("LpFilelessImporter", () => {
         .spyOn(lpFilelessImporter as any, "suppressDownload")
         .mockImplementationOnce(jest.fn());
 
-      lpFilelessImporter["handleFeatureFlagVerification"](msg);
+      lpFilelessImporter["handleFeatureFlagVerification"](message);
 
       expect(suppressDownload).toHaveBeenCalled();
     });
@@ -260,20 +260,20 @@ describe("LpFilelessImporter", () => {
 
   describe("handlePortMessage", () => {
     it("will not trigger the handler if it does not exist on the port message handlers", () => {
-      const msg = { command: "test" };
+      const message = { command: "test" };
       const port = mock<chrome.runtime.Port>();
 
-      lpFilelessImporter["handlePortMessage"](msg, port);
+      lpFilelessImporter["handlePortMessage"](message, port);
 
       expect(lpFilelessImporter["portMessageHandlers"]["test"]).toBeUndefined();
     });
 
     it("will trigger the handler if it exists on the port message handlers", () => {
-      const msg = { command: "test" };
+      const message = { command: "test" };
       const port = mock<chrome.runtime.Port>();
       lpFilelessImporter["portMessageHandlers"]["test"] = jest.fn();
 
-      lpFilelessImporter["handlePortMessage"](msg, port);
+      lpFilelessImporter["handlePortMessage"](message, port);
 
       expect(lpFilelessImporter["portMessageHandlers"]["test"]).toHaveBeenCalled();
     });

@@ -135,9 +135,9 @@ describe("FilelessImporterBackground", () => {
       const port = mock<chrome.runtime.Port>({
         name: "lp-fileless-importer",
       });
-      const msg = { command: "test" };
+      const message = { command: "test" };
 
-      filelessImporterBackground["handleImporterPortMessage"](msg, port);
+      filelessImporterBackground["handleImporterPortMessage"](message, port);
 
       expect(filelessImporterBackground["lpImporterPortMessageHandlers"]["test"]).toBeUndefined();
     });
@@ -146,10 +146,10 @@ describe("FilelessImporterBackground", () => {
       const port = mock<chrome.runtime.Port>({
         name: "lp-fileless-importer",
       });
-      const msg = { command: "test" };
+      const message = { command: "test" };
       filelessImporterBackground["lpImporterPortMessageHandlers"]["test"] = jest.fn();
 
-      filelessImporterBackground["handleImporterPortMessage"](msg, port);
+      filelessImporterBackground["handleImporterPortMessage"](message, port);
 
       expect(
         filelessImporterBackground["lpImporterPortMessageHandlers"]["test"]

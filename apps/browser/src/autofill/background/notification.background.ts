@@ -12,6 +12,7 @@ import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folde
 import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 
+import AddRequestFilelessImportQueueMessage from "../../background/models/add-request-fileless-import-queue-message";
 import AddUnlockVaultQueueMessage from "../../background/models/add-unlock-vault-queue-message";
 import AddChangePasswordQueueMessage from "../../background/models/addChangePasswordQueueMessage";
 import AddLoginQueueMessage from "../../background/models/addLoginQueueMessage";
@@ -28,6 +29,7 @@ export default class NotificationBackground {
     | AddLoginQueueMessage
     | AddChangePasswordQueueMessage
     | AddUnlockVaultQueueMessage
+    | AddRequestFilelessImportQueueMessage
   )[] = [];
 
   constructor(
@@ -162,38 +164,52 @@ export default class NotificationBackground {
     }
 
     for (let i = 0; i < this.notificationQueue.length; i++) {
+      const notificationQueueMessage = this.notificationQueue[i];
       if (
-        this.notificationQueue[i].tabId !== tab.id ||
-        this.notificationQueue[i].domain !== tabDomain
+        notificationQueueMessage.tabId !== tab.id ||
+        notificationQueueMessage.domain !== tabDomain
       ) {
         continue;
       }
 
-      if (this.notificationQueue[i].type === NotificationQueueMessageType.AddLogin) {
+      if (notificationQueueMessage.type === NotificationQueueMessageType.AddLogin) {
         BrowserApi.tabSendMessageData(tab, "openNotificationBar", {
           type: "add",
           typeData: {
-            isVaultLocked: this.notificationQueue[i].wasVaultLocked,
+            isVaultLocked: notificationQueueMessage.wasVaultLocked,
             theme: await this.getCurrentTheme(),
             removeIndividualVault: await this.removeIndividualVault(),
             webVaultURL: await this.environmentService.getWebVaultUrl(),
           },
         });
-      } else if (this.notificationQueue[i].type === NotificationQueueMessageType.ChangePassword) {
+      } else if (notificationQueueMessage.type === NotificationQueueMessageType.ChangePassword) {
         BrowserApi.tabSendMessageData(tab, "openNotificationBar", {
           type: "change",
           typeData: {
-            isVaultLocked: this.notificationQueue[i].wasVaultLocked,
+            isVaultLocked: notificationQueueMessage.wasVaultLocked,
             theme: await this.getCurrentTheme(),
             webVaultURL: await this.environmentService.getWebVaultUrl(),
           },
         });
-      } else if (this.notificationQueue[i].type === NotificationQueueMessageType.UnlockVault) {
+      } else if (notificationQueueMessage.type === NotificationQueueMessageType.UnlockVault) {
         BrowserApi.tabSendMessageData(tab, "openNotificationBar", {
           type: "unlock",
           typeData: {
-            isVaultLocked: this.notificationQueue[i].wasVaultLocked,
+            isVaultLocked: notificationQueueMessage.wasVaultLocked,
             theme: await this.getCurrentTheme(),
+          },
+        });
+      } else if (
+        notificationQueueMessage.type === NotificationQueueMessageType.RequestFilelessImport
+      ) {
+        BrowserApi.tabSendMessageData(tab, "openNotificationBar", {
+          type: "fileless-import",
+          typeData: {
+            isVaultLocked: notificationQueueMessage.wasVaultLocked,
+            theme: await this.getCurrentTheme(),
+            webVaultURL: await this.environmentService.getWebVaultUrl(),
+            importType: (notificationQueueMessage as AddRequestFilelessImportQueueMessage)
+              .importType,
           },
         });
       }
@@ -334,6 +350,20 @@ export default class NotificationBackground {
     this.pushUnlockVaultToQueue(loginDomain, tab);
   }
 
+  async requestFilelessImport(tab: chrome.tabs.Tab, importType: string) {
+    const currentAuthStatus = await this.authService.getAuthStatus();
+    if (currentAuthStatus !== AuthenticationStatus.Unlocked || this.notificationQueue.length) {
+      return;
+    }
+
+    const loginDomain = Utils.getDomain(tab.url);
+    if (!loginDomain) {
+      return;
+    }
+
+    this.pushRequestFilelessImportToQueue(loginDomain, tab, importType);
+  }
+
   private async pushChangePasswordToQueue(
     cipherId: string,
     loginDomain: string,
@@ -364,6 +394,25 @@ export default class NotificationBackground {
       tabId: tab.id,
       expires: new Date(new Date().getTime() + 0.5 * 60000), // 30 seconds
       wasVaultLocked: true,
+    };
+    this.notificationQueue.push(message);
+    await this.checkNotificationQueue(tab);
+    this.removeTabFromNotificationQueue(tab);
+  }
+
+  private async pushRequestFilelessImportToQueue(
+    loginDomain: string,
+    tab: chrome.tabs.Tab,
+    importType?: string
+  ) {
+    this.removeTabFromNotificationQueue(tab);
+    const message: AddRequestFilelessImportQueueMessage = {
+      type: NotificationQueueMessageType.RequestFilelessImport,
+      domain: loginDomain,
+      tabId: tab.id,
+      expires: new Date(new Date().getTime() + 0.5 * 60000), // 30 seconds
+      wasVaultLocked: false,
+      importType,
     };
     this.notificationQueue.push(message);
     await this.checkNotificationQueue(tab);

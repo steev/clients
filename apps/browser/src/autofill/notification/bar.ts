@@ -2,6 +2,11 @@ import type { Jsonify } from "type-fest";
 
 import type { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
 
+import {
+  FilelessImportPortNames,
+  FilelessImportType,
+} from "../../tools/enums/fileless-import.enums";
+
 require("./bar.scss");
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -30,6 +35,11 @@ function load() {
     notificationChangeDesc: chrome.i18n.getMessage("notificationChangeDesc"),
     notificationUnlock: chrome.i18n.getMessage("notificationUnlock"),
     notificationUnlockDesc: chrome.i18n.getMessage("notificationUnlockDesc"),
+    filelessImport: chrome.i18n.getMessage("filelessImport"),
+    lpFilelessImport: chrome.i18n.getMessage("lpFilelessImport"),
+    cancelFilelessImport: chrome.i18n.getMessage("no"),
+    lpCancelFilelessImport: chrome.i18n.getMessage("lpCancelFilelessImport"),
+    startFilelessImport: chrome.i18n.getMessage("startFilelessImport"),
   };
 
   const logoLink = document.getElementById("logo-link") as HTMLAnchorElement;
@@ -74,12 +84,29 @@ function load() {
 
   changeTemplate.content.getElementById("change-text").textContent = i18n.notificationChangeDesc;
 
+  // i18n for "Unlock" (unlock extension) template
   const unlockTemplate = document.getElementById("template-unlock") as HTMLTemplateElement;
 
   const unlockButton = unlockTemplate.content.getElementById("unlock-vault");
   unlockButton.textContent = i18n.notificationUnlock;
 
   unlockTemplate.content.getElementById("unlock-text").textContent = i18n.notificationUnlockDesc;
+
+  // i18n for "Fileless Import" (fileless-import) template
+  const isLpImport = getQueryVariable("importType") === FilelessImportType.LP;
+  const importTemplate = document.getElementById("template-fileless-import") as HTMLTemplateElement;
+
+  const startImportButton = importTemplate.content.getElementById("start-fileless-import");
+  startImportButton.textContent = i18n.startFilelessImport;
+
+  const cancelImportButton = importTemplate.content.getElementById("cancel-fileless-import");
+  cancelImportButton.textContent = isLpImport
+    ? i18n.lpCancelFilelessImport
+    : i18n.cancelFilelessImport;
+
+  importTemplate.content.getElementById("fileless-import-text").textContent = isLpImport
+    ? i18n.lpFilelessImport
+    : i18n.filelessImport;
 
   // i18n for body content
   const closeButton = document.getElementById("close-button");
@@ -91,6 +118,8 @@ function load() {
     handleTypeChange();
   } else if (getQueryVariable("type") === "unlock") {
     handleTypeUnlock();
+  } else if (getQueryVariable("type") === "fileless-import") {
+    handleTypeFilelessImport();
   }
 
   closeButton.addEventListener("click", (e) => {
@@ -192,6 +221,35 @@ function handleTypeUnlock() {
       command: "bgReopenPromptForLogin",
     });
   });
+}
+
+function handleTypeFilelessImport() {
+  const importType = getQueryVariable("importType");
+  const port = chrome.runtime.connect({ name: FilelessImportPortNames.NotificationBar });
+  setContent(document.getElementById("template-fileless-import") as HTMLTemplateElement);
+
+  const startFilelessImportButton = document.getElementById("start-fileless-import");
+  startFilelessImportButton.addEventListener("click", () => {
+    port.postMessage({ command: "startFilelessImport", importType });
+    document.getElementById("import-buttons").innerHTML = chrome.i18n.getMessage("importing");
+  });
+
+  const cancelFilelessImportButton = document.getElementById("cancel-fileless-import");
+  cancelFilelessImportButton.addEventListener("click", (e) => {
+    port.postMessage({ command: "cancelFilelessImport", importType });
+  });
+
+  const handlePortMessage = (msg: any) => {
+    if (msg.command === "lpImportCompleted") {
+      document.getElementById("fileless-import-buttons").innerHTML = chrome.i18n.getMessage(
+        "dataSuccessfullyImported"
+      );
+      document.getElementById("fileless-import-buttons").classList.add("success-message");
+      port.disconnect();
+      return;
+    }
+  };
+  port.onMessage.addListener(handlePortMessage);
 }
 
 function setContent(template: HTMLTemplateElement) {

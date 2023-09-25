@@ -5,15 +5,22 @@ import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authenticatio
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/services/config/config.service";
 
+import NotificationBackground from "../../autofill/background/notification.background";
+
 import FilelessImporterBackground from "./fileless-importer.background";
 
 describe("FilelessImporterBackground", () => {
   let filelessImporterBackground: FilelessImporterBackground;
   const configService = mock<ConfigService>();
   const authService = mock<AuthService>();
+  const notificationBackground = mock<NotificationBackground>();
 
   beforeEach(() => {
-    filelessImporterBackground = new FilelessImporterBackground(configService, authService);
+    filelessImporterBackground = new FilelessImporterBackground(
+      configService,
+      authService,
+      notificationBackground
+    );
   });
 
   afterEach(() => {

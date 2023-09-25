@@ -3,15 +3,53 @@ import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authenticatio
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
 
+import NotificationBackground from "../../autofill/background/notification.background";
+import { BrowserApi } from "../../platform/browser/browser-api";
+import { FilelessImportPortNames, FilelessImportType } from "../enums/fileless-import.enums";
+
 class FilelessImporterBackground {
+  private importNotificationsPort: chrome.runtime.Port;
   private lpImporterPort: chrome.runtime.Port;
+  private readonly importNotificationsPortMessageHandlers: Record<
+    string,
+    ({ message, port }: { message: any; port: chrome.runtime.Port }) => void
+  > = {
+    startFilelessImport: ({ message }) => this.startFilelessImport(message.importType),
+    cancelFilelessImport: ({ message, port }) =>
+      this.cancelFilelessImport(message.importType, port.sender),
+  };
   private readonly lpImporterPortMessageHandlers: Record<
     string,
-    (msg: any, port: chrome.runtime.Port) => void
-  > = {};
+    ({ message, port }: { message: any; port: chrome.runtime.Port }) => void
+  > = {
+    displayLpImportNotification: ({ port }) =>
+      this.displayFilelessImportNotification(port.sender.tab, FilelessImportType.LP),
+  };
 
-  constructor(private configService: ConfigServiceAbstraction, private authService: AuthService) {
+  constructor(
+    private configService: ConfigServiceAbstraction,
+    private authService: AuthService,
+    private notificationBackground: NotificationBackground
+  ) {
     this.setupExtensionMessageListeners();
+  }
+
+  private startFilelessImport(importType: string) {
+    if (importType === FilelessImportType.LP) {
+      // Start import
+    }
+  }
+
+  private async cancelFilelessImport(importType: string, sender: chrome.runtime.MessageSender) {
+    if (importType === FilelessImportType.LP) {
+      this.triggerLpImporterCsvDownload();
+    }
+
+    await BrowserApi.tabSendMessageData(sender.tab, "closeNotificationBar");
+  }
+
+  private async displayFilelessImportNotification(tab: chrome.tabs.Tab, importType: string) {
+    await this.notificationBackground.requestFilelessImport(tab, importType);
   }
 
   /**
@@ -53,28 +91,36 @@ class FilelessImporterBackground {
     port.onMessage.addListener(this.handleImporterPortMessage);
     port.onDisconnect.addListener(this.handleImporterPortDisconnect);
 
-    if (port.name === "lp-fileless-importer") {
+    if (port.name === FilelessImportPortNames.LpImport) {
       this.lpImporterPort = port;
+    }
+
+    if (port.name === FilelessImportPortNames.NotificationBar) {
+      this.importNotificationsPort = port;
     }
   };
 
   /**
    * Handles messages that are sent from fileless importer content scripts.
-   * @param msg - The message that was sent.
+   * @param message - The message that was sent.
    * @param port - The port that the message was sent from.
    */
-  private handleImporterPortMessage = (msg: any, port: chrome.runtime.Port) => {
+  private handleImporterPortMessage = (message: any, port: chrome.runtime.Port) => {
     let handler: CallableFunction | undefined;
 
-    if (port.name === "lp-fileless-importer") {
-      handler = this.lpImporterPortMessageHandlers[msg.command];
+    if (port.name === FilelessImportPortNames.LpImport) {
+      handler = this.lpImporterPortMessageHandlers[message.command];
+    }
+
+    if (port.name === FilelessImportPortNames.NotificationBar) {
+      handler = this.importNotificationsPortMessageHandlers[message.command];
     }
 
     if (!handler) {
       return;
     }
 
-    handler(msg, port);
+    handler({ message, port });
   };
 
   /**
@@ -82,7 +128,7 @@ class FilelessImporterBackground {
    * @param port - The port that was disconnected.
    */
   private handleImporterPortDisconnect = (port: chrome.runtime.Port) => {
-    if (port.name === "lp-fileless-importer") {
+    if (port.name === FilelessImportPortNames.LpImport) {
       this.lpImporterPort = null;
     }
   };

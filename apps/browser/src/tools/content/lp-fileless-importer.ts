@@ -1,11 +1,15 @@
+import { FilelessImportPortNames } from "../enums/fileless-import.enums";
+
 class LpFilelessImporter {
+  private exportData: string;
   private messagePort: chrome.runtime.Port;
+  private mutationObserver: MutationObserver;
   private readonly portMessageHandlers: Record<
     string,
-    (msg: any, port: chrome.runtime.Port) => void
+    (message: any, port: chrome.runtime.Port) => void
   > = {
-    verifyFeatureFlag: (msg, port) => this.handleFeatureFlagVerification(msg),
-    triggerCsvDownload: (msg) => this.postWindowMessage(msg),
+    verifyFeatureFlag: (message, port) => this.handleFeatureFlagVerification(message),
+    triggerCsvDownload: (message) => this.postWindowMessage(message),
   };
 
   /**
@@ -20,15 +24,21 @@ class LpFilelessImporter {
    * not enabled, the message port is disconnected. If the feature flag is enabled, the
    * download of the CSV file is suppressed.
    *
-   * @param msg - The port message, contains the feature flag indicator.
+   * @param message - The port message, contains the feature flag indicator.
    */
-  private handleFeatureFlagVerification(msg: any) {
-    if (!msg.filelessImportFeatureFlagEnabled) {
+  private handleFeatureFlagVerification(message: any) {
+    if (!message.filelessImportFeatureFlagEnabled) {
       this.messagePort?.disconnect();
       return;
     }
 
     this.suppressDownload();
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", this.loadImporter);
+      return;
+    }
+
+    this.loadImporter();
   }
 
   /**
@@ -71,13 +81,69 @@ class LpFilelessImporter {
     document.documentElement.appendChild(script);
   }
 
+  private loadImporter = () => {
+    this.mutationObserver = new MutationObserver(this.handleMutation);
+    this.mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  };
+
+  private handleMutation = (mutations: MutationRecord[]) => {
+    if (!mutations?.length) {
+      return;
+    }
+
+    for (let index = 0; index < mutations.length; index++) {
+      const mutation: MutationRecord = mutations[index];
+      if (!mutation.addedNodes?.length) {
+        continue;
+      }
+
+      for (let index = 0; index < mutation.addedNodes.length; index++) {
+        const addedNode: Node = mutation.addedNodes[index];
+
+        const tagName: string = addedNode.nodeName.toLowerCase();
+        if (tagName !== "pre") {
+          continue;
+        }
+
+        const preElement: HTMLPreElement = addedNode as HTMLPreElement;
+        if (!preElement.innerText) {
+          continue;
+        }
+
+        const innerText: string = preElement.innerText.trim();
+        if (!innerText) {
+          continue;
+        }
+
+        this.exportData = innerText;
+        this.displayImportPrompt();
+        this.mutationObserver.disconnect();
+      }
+    }
+  };
+
+  private displayImportPrompt() {
+    if (!this.exportData) {
+      return;
+    }
+
+    this.postPortMessage({ command: "displayLpImportNotification" });
+  }
+
   /**
    * Posts a message to the global context of the page.
    *
-   * @param msg - The message to post.
+   * @param message - The message to post.
    */
-  private postWindowMessage(msg: any) {
-    globalThis.postMessage(msg, "https://lastpass.com");
+  private postWindowMessage(message: any) {
+    globalThis.postMessage(message, "https://lastpass.com");
+  }
+
+  private postPortMessage(message: any) {
+    this.messagePort?.postMessage(message);
   }
 
   /**
@@ -85,23 +151,23 @@ class LpFilelessImporter {
    * background script and the content script.
    */
   private setupMessagePort() {
-    this.messagePort = chrome.runtime.connect({ name: "lp-fileless-importer" });
+    this.messagePort = chrome.runtime.connect({ name: FilelessImportPortNames.LpImport });
     this.messagePort.onMessage.addListener(this.handlePortMessage);
   }
 
   /**
    * Handles messages that are sent from the background script.
    *
-   * @param msg - The message that was sent.
+   * @param message - The message that was sent.
    * @param port - The port that the message was sent from.
    */
-  private handlePortMessage = (msg: any, port: chrome.runtime.Port) => {
-    const handler = this.portMessageHandlers[msg.command];
+  private handlePortMessage = (message: any, port: chrome.runtime.Port) => {
+    const handler = this.portMessageHandlers[message.command];
     if (!handler) {
       return;
     }
 
-    handler(msg, port);
+    handler(message, port);
   };
 }
 

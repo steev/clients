@@ -1,7 +1,7 @@
 import { mock } from "jest-mock-extended";
 
 describe("LpFilelessImporter", () => {
-  let lpFilelessImporter: LpFilelessImporter;
+  let lpFilelessImporter: any;
 
   beforeEach(() => {
     require("./lp-fileless-importer");

@@ -1,4 +1,5 @@
 class LpFilelessImporter {
+  private messagePort: chrome.runtime.Port;
   private readonly portMessageHandlers: Record<
     string,
     (msg: any, port: chrome.runtime.Port) => void
@@ -12,7 +13,8 @@ class LpFilelessImporter {
   }
 
   private handleFeatureFlagVerification(msg: any) {
-    if (!msg.filelessImportFeatureFlag) {
+    if (!msg.filelessImportFeatureFlagEnabled) {
+      this.messagePort?.disconnect();
       return;
     }
 
@@ -59,8 +61,8 @@ class LpFilelessImporter {
   }
 
   private setupMessagePort() {
-    const messagePort = chrome.runtime.connect({ name: "lp-fileless-importer" });
-    messagePort.onMessage.addListener(this.handlePortMessage);
+    this.messagePort = chrome.runtime.connect({ name: "lp-fileless-importer" });
+    this.messagePort.onMessage.addListener(this.handlePortMessage);
   }
 
   private handlePortMessage = (msg: any, port: chrome.runtime.Port) => {

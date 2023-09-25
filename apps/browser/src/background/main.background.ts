@@ -226,8 +226,8 @@ export default class MainBackground {
   private commandsBackground: CommandsBackground;
   private contextMenusBackground: ContextMenusBackground;
   private idleBackground: IdleBackground;
-  private filelessImporterBackground: FilelessImporterBackground;
   private notificationBackground: NotificationBackground;
+  private filelessImporterBackground: FilelessImporterBackground;
   private runtimeBackground: RuntimeBackground;
   private tabsBackground: TabsBackground;
   private webRequestBackground: WebRequestBackground;
@@ -619,7 +619,6 @@ export default class MainBackground {
       this.vaultTimeoutService,
       this.authService
     );
-    this.filelessImporterBackground = new FilelessImporterBackground(this.configService);
     this.notificationBackground = new NotificationBackground(
       this.autofillService,
       this.cipherService,
@@ -628,6 +627,10 @@ export default class MainBackground {
       this.folderService,
       this.stateService,
       this.environmentService
+    );
+    this.filelessImporterBackground = new FilelessImporterBackground(
+      this.configService,
+      this.authService
     );
 
     this.tabsBackground = new TabsBackground(this, this.notificationBackground);

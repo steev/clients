@@ -1,3 +1,5 @@
+import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
+import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
 
@@ -8,34 +10,42 @@ class FilelessImporterBackground {
     (msg: any, port: chrome.runtime.Port) => void
   > = {};
 
-  constructor(private configService: ConfigServiceAbstraction) {
+  constructor(private configService: ConfigServiceAbstraction, private authService: AuthService) {
     this.setupExtensionMessageListeners();
   }
 
+  /**
+   * Triggers the download of the CSV file from the LP importer. This is triggered
+   * when the user opts to not save the export to Bitwarden within the notification bar.
+   */
   private triggerLpImporterCsvDownload() {
-    if (!this.lpImporterPort) {
-      return;
-    }
-
-    this.lpImporterPort.postMessage({
-      command: "triggerCsvDownload",
-    });
+    this.lpImporterPort?.postMessage({ command: "triggerCsvDownload" });
+    this.lpImporterPort?.disconnect();
   }
 
+  /**
+   * Sets up onConnect listeners for the extension.
+   */
   private setupExtensionMessageListeners() {
     chrome.runtime.onConnect.addListener(this.handlePortOnConnect);
   }
 
+  /**
+   * Handles connections that are made from fileless importer content scripts.
+   */
   private handlePortOnConnect = async (port: chrome.runtime.Port) => {
+    const userAuthStatus = await this.authService.getAuthStatus();
     const filelessImportFeatureFlag = await this.configService.getFeatureFlag<boolean>(
       FeatureFlag.BrowserFilelessImport
     );
+    const filelessImportFeatureFlagEnabled =
+      filelessImportFeatureFlag && userAuthStatus === AuthenticationStatus.Unlocked;
     port.postMessage({
       command: "verifyFeatureFlag",
-      filelessImportFeatureFlag: filelessImportFeatureFlag,
+      filelessImportFeatureFlagEnabled: filelessImportFeatureFlagEnabled,
     });
 
-    if (!filelessImportFeatureFlag) {
+    if (!filelessImportFeatureFlagEnabled) {
       port.disconnect();
       return;
     }
@@ -48,6 +58,11 @@ class FilelessImporterBackground {
     }
   };
 
+  /**
+   * Handles messages that are sent from fileless importer content scripts.
+   * @param msg - The message that was sent.
+   * @param port - The port that the message was sent from.
+   */
   private handleImporterPortMessage = (msg: any, port: chrome.runtime.Port) => {
     let handler: CallableFunction | undefined;
 
@@ -62,6 +77,10 @@ class FilelessImporterBackground {
     handler(msg, port);
   };
 
+  /**
+   * Handles disconnections from fileless importer content scripts.
+   * @param port - The port that was disconnected.
+   */
   private handleImporterPortDisconnect = (port: chrome.runtime.Port) => {
     if (port.name === "lp-fileless-importer") {
       this.lpImporterPort = null;

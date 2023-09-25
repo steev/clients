@@ -23,6 +23,9 @@ const runtime = {
   },
   sendMessage: jest.fn(),
   getManifest: jest.fn(),
+  onConnect: {
+    addListener: jest.fn(),
+  },
 };
 
 const contextMenus = {

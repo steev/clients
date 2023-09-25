@@ -26,6 +26,13 @@ const runtime = {
   onConnect: {
     addListener: jest.fn(),
   },
+  connect: jest.fn().mockReturnValue({
+    onMessage: {
+      addListener: jest.fn(),
+    },
+    postMessage: jest.fn(),
+    disconnect: jest.fn(),
+  }),
 };
 
 const contextMenus = {

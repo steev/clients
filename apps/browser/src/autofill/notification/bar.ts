@@ -241,13 +241,13 @@ function handleTypeFilelessImport() {
   });
 
   const handlePortMessage = (msg: any) => {
-    if (msg.command !== "lpImportCompleted" && msg.command !== "lpImportFailed") {
+    if (msg.command !== "filelessImportCompleted" && msg.command !== "filelessImportFailed") {
       return;
     }
 
     port.disconnect();
 
-    if (msg.command === "lpImportCompleted") {
+    if (msg.command === "filelessImportCompleted") {
       document.getElementById("fileless-import-buttons").innerHTML = chrome.i18n.getMessage(
         "dataSuccessfullyImported"
       );

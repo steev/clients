@@ -5,7 +5,7 @@ import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authenticatio
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/services/config/config.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
-import { ImportServiceAbstraction } from "@bitwarden/importer";
+import { Importer, ImportResult, ImportServiceAbstraction } from "@bitwarden/importer";
 
 import NotificationBackground from "../../autofill/background/notification.background";
 import { BrowserApi } from "../../platform/browser/browser-api";
@@ -33,6 +33,18 @@ describe("FilelessImporterBackground", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe("startFilelessImport", () => {
+    it("sends a message to the LpImporter port to start the import", () => {
+      filelessImporterBackground["lpImporterPort"] = mock<chrome.runtime.Port>();
+
+      filelessImporterBackground["startFilelessImport"](FilelessImportType.LP);
+
+      expect(filelessImporterBackground["lpImporterPort"].postMessage).toHaveBeenCalledWith({
+        command: "startLpFilelessImport",
+      });
+    });
   });
 
   describe("cancelFilelessImport", () => {
@@ -81,6 +93,96 @@ describe("FilelessImporterBackground", () => {
         command: "triggerCsvDownload",
       });
       expect(filelessImporterBackground["lpImporterPort"].disconnect).toHaveBeenCalled();
+    });
+  });
+
+  describe("triggerLpImport", () => {
+    it("returns early if the data is not present", async () => {
+      jest.spyOn(filelessImporterBackground["importService"], "import");
+
+      await filelessImporterBackground["triggerLpImport"](null);
+
+      expect(filelessImporterBackground["importService"].import).not.toHaveBeenCalled();
+    });
+
+    it("imports the data into the user vault", async () => {
+      const data = "test";
+      const importer = mock<Importer>();
+      jest
+        .spyOn(filelessImporterBackground["importService"], "getImporter")
+        .mockReturnValue(importer);
+      jest.spyOn(filelessImporterBackground["importService"], "import");
+
+      await filelessImporterBackground["triggerLpImport"]("test");
+
+      expect(filelessImporterBackground["importService"].import).toHaveBeenCalledWith(
+        importer,
+        data,
+        null,
+        null,
+        false
+      );
+    });
+
+    it("sends a `filelessImportCompleted` on success of the import", async () => {
+      const data = "test";
+      const importer = mock<Importer>();
+      filelessImporterBackground["importNotificationsPort"] = mock<chrome.runtime.Port>({
+        postMessage: jest.fn(),
+      });
+      jest
+        .spyOn(filelessImporterBackground["importService"], "getImporter")
+        .mockReturnValue(importer);
+      jest
+        .spyOn(filelessImporterBackground["importService"], "import")
+        .mockResolvedValue(mock<ImportResult>({ success: true }));
+
+      await filelessImporterBackground["triggerLpImport"](data);
+
+      expect(
+        filelessImporterBackground["importNotificationsPort"].postMessage
+      ).toHaveBeenCalledWith({ command: "filelessImportCompleted" });
+    });
+
+    it("does a full sync of the vault on success of the import", async () => {
+      const data = "test";
+      const importer = mock<Importer>();
+      filelessImporterBackground["importNotificationsPort"] = mock<chrome.runtime.Port>({
+        postMessage: jest.fn(),
+      });
+      jest
+        .spyOn(filelessImporterBackground["importService"], "getImporter")
+        .mockReturnValue(importer);
+      jest
+        .spyOn(filelessImporterBackground["importService"], "import")
+        .mockResolvedValue(mock<ImportResult>({ success: true }));
+
+      await filelessImporterBackground["triggerLpImport"](data);
+
+      expect(filelessImporterBackground["syncService"].fullSync).toHaveBeenCalledWith(true);
+    });
+
+    it("sends a `filelessImportFailed` message if the importer has an error", () => {
+      const data = "test";
+      const importer = mock<Importer>();
+      filelessImporterBackground["importNotificationsPort"] = mock<chrome.runtime.Port>({
+        postMessage: jest.fn(),
+      });
+      jest
+        .spyOn(filelessImporterBackground["importService"], "getImporter")
+        .mockReturnValue(importer);
+      jest.spyOn(filelessImporterBackground["importService"], "import").mockImplementation(() => {
+        throw "test";
+      });
+
+      filelessImporterBackground["triggerLpImport"](data);
+
+      expect(
+        filelessImporterBackground["importNotificationsPort"].postMessage
+      ).toHaveBeenCalledWith({
+        command: "filelessImportFailed",
+        importErrorMessage: "test",
+      });
     });
   });
 

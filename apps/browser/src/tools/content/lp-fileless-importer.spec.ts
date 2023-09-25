@@ -227,6 +227,29 @@ describe("LpFilelessImporter", () => {
     });
   });
 
+  describe("startLpImport", () => {
+    it("returns early if the export data is not present", () => {
+      const postPortMessage = jest.spyOn(lpFilelessImporter as any, "postPortMessage");
+      lpFilelessImporter["exportData"] = undefined;
+
+      lpFilelessImporter["startLpImport"]();
+
+      expect(postPortMessage).not.toHaveBeenCalled();
+    });
+
+    it("posts a message to the background script with the export data that initializes the import process", () => {
+      const postPortMessage = jest.spyOn(lpFilelessImporter as any, "postPortMessage");
+      lpFilelessImporter["exportData"] = "test";
+
+      lpFilelessImporter["startLpImport"]();
+
+      expect(postPortMessage).toHaveBeenCalledWith({
+        command: "startLpImport",
+        data: "test",
+      });
+    });
+  });
+
   describe("postPortMessage", () => {
     it("will post a message to the background script", () => {
       const postMessage = jest.spyOn(lpFilelessImporter["messagePort"], "postMessage");

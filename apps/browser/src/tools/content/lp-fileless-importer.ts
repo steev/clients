@@ -147,6 +147,19 @@ class LpFilelessImporter implements LpFilelessImporterInterface {
   }
 
   /**
+   * If the export data is present, sends a message to the background with
+   * the export data to start the import process.
+   */
+  private startLpImport() {
+    if (!this.exportData) {
+      return;
+    }
+
+    this.postPortMessage({ command: "startLpImport", data: this.exportData });
+    this.messagePort?.disconnect();
+  }
+
+  /**
    * Posts a message to the background script.
    *
    * @param message - The message to post.
@@ -162,15 +175,6 @@ class LpFilelessImporter implements LpFilelessImporterInterface {
    */
   private postWindowMessage(message: any) {
     globalThis.postMessage(message, "https://lastpass.com");
-  }
-
-  private startLpImport() {
-    if (!this.exportData) {
-      return;
-    }
-
-    this.postPortMessage({ command: "startLpImport", data: this.exportData });
-    this.messagePort?.disconnect();
   }
 
   /**

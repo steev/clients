@@ -2432,7 +2432,7 @@
     "description": "Notification message for when an import has completed successfully."
   },
   "dataImportFailed": {
-    "message": "Import completed with errors.",
+    "message": "Error importing. Check console for details.",
     "description": "Notification message for when an import has failed."
   }
 }

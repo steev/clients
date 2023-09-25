@@ -25,7 +25,7 @@ class FilelessImporterBackground {
   private readonly lpImporterPortMessageHandlers: LpImporterMessageHandlers = {
     displayLpImportNotification: ({ port }) =>
       this.displayFilelessImportNotification(port.sender.tab, FilelessImportType.LP),
-    startLpImport: ({ message, port }) => this.startLpImport(message.data, port.sender),
+    startLpImport: ({ message }) => this.triggerLpImport(message.data),
   };
 
   constructor(
@@ -85,7 +85,14 @@ class FilelessImporterBackground {
     this.lpImporterPort?.disconnect();
   }
 
-  private async startLpImport(data: string, sender: chrome.runtime.MessageSender) {
+  /**
+   * Completes the import process for the LP importer. This is triggered when the
+   * user opts to save the export to Bitwarden within the notification bar.
+   *
+   * @param data - The export data to import.
+   * @param sender - The sender of the message.
+   */
+  private async triggerLpImport(data: string) {
     if (!data) {
       return;
     }
@@ -100,12 +107,12 @@ class FilelessImporterBackground {
     try {
       const result = await this.importService.import(importer, data, null, null, false);
       if (result.success) {
-        this.importNotificationsPort?.postMessage({ command: "lpImportCompleted" });
+        this.importNotificationsPort?.postMessage({ command: "filelessImportCompleted" });
         await this.syncService.fullSync(true);
       }
     } catch (error) {
       this.importNotificationsPort?.postMessage({
-        command: "lpImportFailed",
+        command: "filelessImportFailed",
         importErrorMessage: error,
       });
     }

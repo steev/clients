@@ -151,6 +151,12 @@ button {
   }
 }
 
+.error-message {
+  @include themify($themes) {
+    color: themed("errorColor");
+  }
+}
+
 @media screen and (max-width: 768px) {
   #select-folder {
     display: none;

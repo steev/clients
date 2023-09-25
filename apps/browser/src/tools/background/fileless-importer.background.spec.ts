@@ -6,6 +6,8 @@ import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/services/config/config.service";
 
 import NotificationBackground from "../../autofill/background/notification.background";
+import { BrowserApi } from "../../platform/browser/browser-api";
+import { FilelessImportPortNames, FilelessImportType } from "../enums/fileless-import.enums";
 
 import FilelessImporterBackground from "./fileless-importer.background";
 
@@ -25,6 +27,42 @@ describe("FilelessImporterBackground", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe("cancelFilelessImport", () => {
+    const sender = mock<chrome.runtime.MessageSender>();
+    const tab = mock<chrome.tabs.Tab>();
+    sender.tab = tab;
+
+    it("sends a `closeNotificationBar` message to the sender tab", () => {
+      jest.spyOn(BrowserApi, "tabSendMessageData");
+
+      filelessImporterBackground["cancelFilelessImport"]("test", sender);
+
+      expect(BrowserApi.tabSendMessageData).toHaveBeenCalledWith(tab, "closeNotificationBar");
+    });
+
+    it("triggers the lp importer to download the CSV", () => {
+      jest.spyOn(filelessImporterBackground as any, "triggerLpImporterCsvDownload");
+
+      filelessImporterBackground["cancelFilelessImport"](FilelessImportType.LP, sender);
+
+      expect(filelessImporterBackground["triggerLpImporterCsvDownload"]).toHaveBeenCalled();
+    });
+  });
+
+  describe("displayFilelessImportNotification", () => {
+    it("injects a `requestFilelessImport` notification into passed tab", () => {
+      jest.spyOn(filelessImporterBackground["notificationBackground"], "requestFilelessImport");
+
+      const tab = mock<chrome.tabs.Tab>();
+
+      filelessImporterBackground["displayFilelessImportNotification"](tab, FilelessImportType.LP);
+
+      expect(
+        filelessImporterBackground["notificationBackground"].requestFilelessImport
+      ).toHaveBeenCalledWith(tab, FilelessImportType.LP);
+    });
   });
 
   describe("triggerLpImporterCsvDownload", () => {
@@ -127,6 +165,20 @@ describe("FilelessImporterBackground", () => {
       expect(port.onDisconnect.addListener).toHaveBeenCalledWith(
         filelessImporterBackground["handleImporterPortDisconnect"]
       );
+    });
+
+    it("stores the importNotificationsPort", async () => {
+      jest
+        .spyOn(filelessImporterBackground["authService"], "getAuthStatus")
+        .mockResolvedValue(AuthenticationStatus.Unlocked);
+      jest
+        .spyOn(filelessImporterBackground["configService"], "getFeatureFlag")
+        .mockResolvedValue(true);
+      port.name = FilelessImportPortNames.NotificationBar;
+
+      await filelessImporterBackground["handlePortOnConnect"](port);
+
+      expect(filelessImporterBackground["importNotificationsPort"]).toEqual(port);
     });
   });
 

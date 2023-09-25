@@ -33,12 +33,25 @@ class FilelessImporterBackground {
     this.setupExtensionMessageListeners();
   }
 
+  /**
+   * Starts an import of the export data pulled from the tab.
+   *
+   * @param importType - The type of import to start. Identifies the used content script.
+   */
   private startFilelessImport(importType: string) {
     if (importType === FilelessImportType.LP) {
       // Start import
     }
   }
 
+  /**
+   * Cancels an import of the export data pulled from the tab. This closes any
+   * existing notifications that are present in the tab, and triggers importer
+   * specific behavior based on the import type.
+   *
+   * @param importType - The type of import to cancel. Identifies the used content script.
+   * @param sender - The sender of the message.
+   */
   private async cancelFilelessImport(importType: string, sender: chrome.runtime.MessageSender) {
     if (importType === FilelessImportType.LP) {
       this.triggerLpImporterCsvDownload();
@@ -47,6 +60,13 @@ class FilelessImporterBackground {
     await BrowserApi.tabSendMessageData(sender.tab, "closeNotificationBar");
   }
 
+  /**
+   * Injects the notification bar into the passed tab.
+   *
+   * @param tab
+   * @param importType
+   * @private
+   */
   private async displayFilelessImportNotification(tab: chrome.tabs.Tab, importType: string) {
     await this.notificationBackground.requestFilelessImport(tab, importType);
   }

@@ -141,6 +141,7 @@ import { LocalBackedSessionStorageService } from "../platform/services/local-bac
 import { BrowserSendService } from "../services/browser-send.service";
 import { BrowserSettingsService } from "../services/browser-settings.service";
 import VaultTimeoutService from "../services/vault-timeout/vault-timeout.service";
+import FilelessImporterBackground from "../tools/background/fileless-importer.background";
 import { BrowserFolderService } from "../vault/services/browser-folder.service";
 import { VaultFilterService } from "../vault/services/vault-filter.service";
 
@@ -225,6 +226,7 @@ export default class MainBackground {
   private commandsBackground: CommandsBackground;
   private contextMenusBackground: ContextMenusBackground;
   private idleBackground: IdleBackground;
+  private filelessImporterBackground: FilelessImporterBackground;
   private notificationBackground: NotificationBackground;
   private runtimeBackground: RuntimeBackground;
   private tabsBackground: TabsBackground;
@@ -617,6 +619,7 @@ export default class MainBackground {
       this.vaultTimeoutService,
       this.authService
     );
+    this.filelessImporterBackground = new FilelessImporterBackground(this.configService);
     this.notificationBackground = new NotificationBackground(
       this.autofillService,
       this.cipherService,
@@ -628,6 +631,7 @@ export default class MainBackground {
     );
 
     this.tabsBackground = new TabsBackground(this, this.notificationBackground);
+
     if (!this.popupOnlyContext) {
       const contextMenuClickedHandler = new ContextMenuClickedHandler(
         (options) => this.platformUtilsService.copyToClipboard(options.text, { window: self }),

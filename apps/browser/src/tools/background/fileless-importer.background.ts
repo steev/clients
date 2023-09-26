@@ -32,7 +32,9 @@ class FilelessImporterBackground {
   }
 
   /**
-   * Handles connections that are made from fileless importer content scripts.
+   * Handles connections from content scripts that affect the fileless importer behavior.
+   * Is used to facilitate the passing of data and user actions to enact the import
+   * of web content to the Bitwarden vault.
    */
   private handlePortOnConnect = async (port: chrome.runtime.Port) => {
     if (!this.filelessImporterPortNames.has(port.name)) {

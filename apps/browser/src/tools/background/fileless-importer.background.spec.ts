@@ -1,5 +1,6 @@
 import { mock } from "jest-mock-extended";
 
+import { PolicyService } from "@bitwarden/common/admin-console/services/policy/policy.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
@@ -23,9 +24,14 @@ describe("FilelessImporterBackground", () => {
   let filelessImporterBackground: FilelessImporterBackground;
   const configService = mock<ConfigService>();
   const authService = mock<AuthService>();
+  const policyService = mock<PolicyService>();
 
   beforeEach(() => {
-    filelessImporterBackground = new FilelessImporterBackground(configService, authService);
+    filelessImporterBackground = new FilelessImporterBackground(
+      configService,
+      authService,
+      policyService
+    );
   });
 
   afterEach(() => {
@@ -76,14 +82,17 @@ describe("FilelessImporterBackground", () => {
       expect(port.disconnect).not.toHaveBeenCalled();
     });
 
-    it("returns early if the user auth status is not unlocked", async () => {
+    it("returns early if the feature flag is not set to true", async () => {
       const port = createPortMock("lp-fileless-importer");
       jest
         .spyOn(filelessImporterBackground["authService"], "getAuthStatus")
-        .mockResolvedValue(AuthenticationStatus.Locked);
+        .mockResolvedValue(AuthenticationStatus.Unlocked);
       jest
         .spyOn(filelessImporterBackground["configService"], "getFeatureFlag")
-        .mockResolvedValue(true);
+        .mockResolvedValue(false);
+      jest
+        .spyOn(filelessImporterBackground as any, "removeIndividualVault")
+        .mockResolvedValue(false);
 
       await filelessImporterBackground["handlePortOnConnect"](port);
 
@@ -99,14 +108,43 @@ describe("FilelessImporterBackground", () => {
       expect(port.onDisconnect.addListener).not.toHaveBeenCalled();
     });
 
-    it("returns early if the feature flag is not set to true", async () => {
+    it("returns early if the user auth status is not unlocked", async () => {
+      const port = createPortMock("lp-fileless-importer");
+      jest
+        .spyOn(filelessImporterBackground["authService"], "getAuthStatus")
+        .mockResolvedValue(AuthenticationStatus.Locked);
+      jest
+        .spyOn(filelessImporterBackground["configService"], "getFeatureFlag")
+        .mockResolvedValue(true);
+      jest
+        .spyOn(filelessImporterBackground as any, "removeIndividualVault")
+        .mockResolvedValue(false);
+
+      await filelessImporterBackground["handlePortOnConnect"](port);
+
+      expect(filelessImporterBackground["authService"].getAuthStatus).toHaveBeenCalled();
+      expect(filelessImporterBackground["configService"].getFeatureFlag).toHaveBeenCalledWith(
+        FeatureFlag.BrowserFilelessImport
+      );
+      expect(port.postMessage).toHaveBeenCalledWith({
+        command: "verifyFeatureFlag",
+        filelessImportEnabled: false,
+      });
+      expect(port.onMessage.addListener).not.toHaveBeenCalled();
+      expect(port.onDisconnect.addListener).not.toHaveBeenCalled();
+    });
+
+    it("returns early if the remove individual policy vault is active", async () => {
       const port = createPortMock("lp-fileless-importer");
       jest
         .spyOn(filelessImporterBackground["authService"], "getAuthStatus")
         .mockResolvedValue(AuthenticationStatus.Unlocked);
       jest
         .spyOn(filelessImporterBackground["configService"], "getFeatureFlag")
-        .mockResolvedValue(false);
+        .mockResolvedValue(true);
+      jest
+        .spyOn(filelessImporterBackground as any, "removeIndividualVault")
+        .mockResolvedValue(true);
 
       await filelessImporterBackground["handlePortOnConnect"](port);
 
@@ -130,6 +168,9 @@ describe("FilelessImporterBackground", () => {
       jest
         .spyOn(filelessImporterBackground["configService"], "getFeatureFlag")
         .mockResolvedValue(true);
+      jest
+        .spyOn(filelessImporterBackground as any, "removeIndividualVault")
+        .mockResolvedValue(false);
 
       await filelessImporterBackground["handlePortOnConnect"](port);
 

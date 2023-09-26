@@ -1,3 +1,7 @@
+import { firstValueFrom } from "rxjs";
+
+import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
+import { PolicyType } from "@bitwarden/common/admin-console/enums";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
@@ -11,7 +15,11 @@ class FilelessImporterBackground {
     (message: any, port: chrome.runtime.Port) => void
   > = {};
 
-  constructor(private configService: ConfigServiceAbstraction, private authService: AuthService) {
+  constructor(
+    private configService: ConfigServiceAbstraction,
+    private authService: AuthService,
+    private policyService: PolicyService
+  ) {
     this.setupExtensionMessageListeners();
   }
 
@@ -22,6 +30,15 @@ class FilelessImporterBackground {
   private triggerLpImporterCsvDownload() {
     this.lpImporterPort?.postMessage({ command: "triggerCsvDownload" });
     this.lpImporterPort?.disconnect();
+  }
+
+  /**
+   * Identifies if the user account has a policy that disables personal ownership.
+   */
+  private async removeIndividualVault(): Promise<boolean> {
+    return await firstValueFrom(
+      this.policyService.policyAppliesToActiveUser$(PolicyType.PersonalOwnership)
+    );
   }
 
   /**
@@ -42,12 +59,15 @@ class FilelessImporterBackground {
       return;
     }
 
-    const userAuthStatus = await this.authService.getAuthStatus();
     const filelessImportFeatureFlagEnabled = await this.configService.getFeatureFlag<boolean>(
       FeatureFlag.BrowserFilelessImport
     );
+    const userAuthStatus = await this.authService.getAuthStatus();
+    const removeIndividualVault = await this.removeIndividualVault();
     const filelessImportEnabled =
-      filelessImportFeatureFlagEnabled && userAuthStatus === AuthenticationStatus.Unlocked;
+      filelessImportFeatureFlagEnabled &&
+      userAuthStatus === AuthenticationStatus.Unlocked &&
+      !removeIndividualVault;
     port.postMessage({ command: "verifyFeatureFlag", filelessImportEnabled });
 
     if (!filelessImportEnabled) {

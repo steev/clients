@@ -106,7 +106,7 @@ describe("FilelessImporterBackground", () => {
       expect(port.onDisconnect.addListener).not.toHaveBeenCalled();
     });
 
-    it("returns early if the user auth status is not unlocked", async () => {
+    it("only sets up the port listeners when the user auth status is unlocked", async () => {
       const port = createPortMock("lp-fileless-importer");
       jest
         .spyOn(filelessImporterBackground["authService"], "getAuthStatus")
@@ -132,7 +132,7 @@ describe("FilelessImporterBackground", () => {
       expect(port.onDisconnect.addListener).not.toHaveBeenCalled();
     });
 
-    it("returns early if the remove individual policy vault is active", async () => {
+    it("only sets up the port listeners when the remove individual policy vault is active", async () => {
       const port = createPortMock("lp-fileless-importer");
       jest
         .spyOn(filelessImporterBackground["authService"], "getAuthStatus")

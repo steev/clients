@@ -34,7 +34,8 @@ class FilelessImporterBackground {
   /**
    * Handles connections from content scripts that affect the fileless importer behavior.
    * Is used to facilitate the passing of data and user actions to enact the import
-   * of web content to the Bitwarden vault.
+   * of web content to the Bitwarden vault. Along with this, a check is made to ensure
+   * that the feature flag is enabled and the user is authenticated.
    */
   private handlePortOnConnect = async (port: chrome.runtime.Port) => {
     if (!this.filelessImporterPortNames.has(port.name)) {

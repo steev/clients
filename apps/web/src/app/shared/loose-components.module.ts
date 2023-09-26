@@ -86,7 +86,6 @@ import { PurgeVaultComponent } from "../settings/purge-vault.component";
 import { SecurityKeysComponent } from "../settings/security-keys.component";
 import { SecurityComponent } from "../settings/security.component";
 import { SettingsComponent } from "../settings/settings.component";
-import { UpdateKeyComponent } from "../settings/update-key.component";
 import { UpdateLicenseComponent } from "../settings/update-license.component";
 import { VaultTimeoutInputComponent } from "../settings/vault-timeout-input.component";
 import { GeneratorComponent } from "../tools/generator.component";
@@ -214,7 +213,6 @@ import { SharedModule } from "./shared.module";
     TwoFactorVerifyComponent,
     TwoFactorWebAuthnComponent,
     TwoFactorYubiKeyComponent,
-    UpdateKeyComponent,
     UpdateLicenseComponent,
     UpdatePasswordComponent,
     UpdateTempPasswordComponent,
@@ -316,7 +314,6 @@ import { SharedModule } from "./shared.module";
     TwoFactorVerifyComponent,
     TwoFactorWebAuthnComponent,
     TwoFactorYubiKeyComponent,
-    UpdateKeyComponent,
     UpdateLicenseComponent,
     UpdatePasswordComponent,
     UpdateTempPasswordComponent,

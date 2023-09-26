@@ -5,7 +5,6 @@ import * as JSZip from "jszip";
 import { concat, Observable, Subject, lastValueFrom, combineLatest } from "rxjs";
 import { map, takeUntil } from "rxjs/operators";
 
-import { ModalService } from "@bitwarden/angular/services/modal.service";
 import {
   canAccessImportExport,
   OrganizationService,
@@ -76,7 +75,6 @@ export class ImportComponent implements OnInit, OnDestroy {
     protected platformUtilsService: PlatformUtilsService,
     protected policyService: PolicyService,
     private logService: LogService,
-    protected modalService: ModalService,
     protected syncService: SyncService,
     protected dialogService: DialogService,
     protected folderService: FolderService,
@@ -309,7 +307,7 @@ export class ImportComponent implements OnInit, OnDestroy {
   }
 
   private getFileContents(file: File): Promise<string> {
-    if (this.format === "1password1pux") {
+    if (this.format === "1password1pux" && file.name.endsWith(".1pux")) {
       return this.extractZipContent(file, "export.data");
     }
     if (

@@ -631,6 +631,7 @@ export default class MainBackground {
     this.filelessImporterBackground = new FilelessImporterBackground(
       this.configService,
       this.authService,
+      this.policyService,
       this.notificationBackground,
       this.importService,
       this.syncService

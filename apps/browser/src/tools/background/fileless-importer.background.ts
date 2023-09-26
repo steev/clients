@@ -8,7 +8,7 @@ import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
 
 class FilelessImporterBackground {
-  private readonly filelessImporterPortNames = new Set(["lp-fileless-importer"]);
+  private static readonly filelessImporterPortNames = new Set(["lp-fileless-importer"]);
   private lpImporterPort: chrome.runtime.Port;
   private readonly lpImporterPortMessageHandlers: Record<
     string,
@@ -55,7 +55,7 @@ class FilelessImporterBackground {
    * that the feature flag is enabled and the user is authenticated.
    */
   private handlePortOnConnect = async (port: chrome.runtime.Port) => {
-    if (!this.filelessImporterPortNames.has(port.name)) {
+    if (!FilelessImporterBackground.filelessImporterPortNames.has(port.name)) {
       return;
     }
 

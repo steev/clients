@@ -550,7 +550,7 @@ export default class NotificationBackground {
     await BrowserApi.tabSendMessageData(tab, responseCommand, responseData);
   }
 
-  async removeIndividualVault(): Promise<boolean> {
+  private async removeIndividualVault(): Promise<boolean> {
     return await firstValueFrom(
       this.policyService.policyAppliesToActiveUser$(PolicyType.PersonalOwnership)
     );

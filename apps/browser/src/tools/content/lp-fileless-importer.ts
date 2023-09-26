@@ -23,7 +23,7 @@ class LpFilelessImporter {
    * @param message - The port message, contains the feature flag indicator.
    */
   private handleFeatureFlagVerification(message: any) {
-    if (!message.filelessImportFeatureFlagEnabled) {
+    if (!message.filelessImportEnabled) {
       this.messagePort?.disconnect();
       return;
     }

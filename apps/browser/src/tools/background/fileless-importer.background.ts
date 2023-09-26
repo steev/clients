@@ -4,6 +4,7 @@ import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
 
 class FilelessImporterBackground {
+  private readonly filelessImporterPortNames = new Set(["lp-fileless-importer"]);
   private lpImporterPort: chrome.runtime.Port;
   private readonly lpImporterPortMessageHandlers: Record<
     string,
@@ -34,19 +35,19 @@ class FilelessImporterBackground {
    * Handles connections that are made from fileless importer content scripts.
    */
   private handlePortOnConnect = async (port: chrome.runtime.Port) => {
+    if (!this.filelessImporterPortNames.has(port.name)) {
+      return;
+    }
+
     const userAuthStatus = await this.authService.getAuthStatus();
-    const filelessImportFeatureFlag = await this.configService.getFeatureFlag<boolean>(
+    const filelessImportFeatureFlagEnabled = await this.configService.getFeatureFlag<boolean>(
       FeatureFlag.BrowserFilelessImport
     );
-    const filelessImportFeatureFlagEnabled =
-      filelessImportFeatureFlag && userAuthStatus === AuthenticationStatus.Unlocked;
-    port.postMessage({
-      command: "verifyFeatureFlag",
-      filelessImportFeatureFlagEnabled: filelessImportFeatureFlagEnabled,
-    });
+    const filelessImportEnabled =
+      filelessImportFeatureFlagEnabled && userAuthStatus === AuthenticationStatus.Unlocked;
+    port.postMessage({ command: "verifyFeatureFlag", filelessImportEnabled });
 
-    if (!filelessImportFeatureFlagEnabled) {
-      port.disconnect();
+    if (!filelessImportEnabled) {
       return;
     }
 

@@ -14,7 +14,7 @@ describe("LpFilelessImporter", () => {
   });
 
   describe("init", () => {
-    it("should ", () => {
+    it("sets up the port connection with the background script", () => {
       jest.spyOn(lpFilelessImporter as any, "setupMessagePort");
 
       lpFilelessImporter.init();
@@ -24,10 +24,10 @@ describe("LpFilelessImporter", () => {
   });
 
   describe("handleFeatureFlagVerification", () => {
-    it("will disconnect the port and return early if the feature flag is not set", () => {
+    it("disconnects the port and return early if the feature flag is not set", () => {
       const message = {
         command: "verifyFeatureFlag",
-        filelessImportFeatureFlagEnabled: false,
+        filelessImportEnabled: false,
       };
 
       lpFilelessImporter["handleFeatureFlagVerification"](message);
@@ -35,10 +35,10 @@ describe("LpFilelessImporter", () => {
       expect(lpFilelessImporter["messagePort"].disconnect).toHaveBeenCalled();
     });
 
-    it("will suppress the download if the feature flag is set", () => {
+    it("suppresses the csv download if the feature flag is set", () => {
       const message = {
         command: "verifyFeatureFlag",
-        filelessImportFeatureFlagEnabled: true,
+        filelessImportEnabled: true,
       };
       const suppressDownload = jest
         .spyOn(lpFilelessImporter as any, "suppressDownload")
@@ -51,7 +51,7 @@ describe("LpFilelessImporter", () => {
   });
 
   describe("suppressDownload", () => {
-    it("will append a script element to the document element that facilitates suppressing the download of the csv export", () => {
+    it("appends a script element to the document element that facilitates suppressing the download of the csv export", () => {
       const script = document.createElement("script");
       const appendChild = jest.spyOn(document.documentElement, "appendChild");
       const createElement = jest.spyOn(document, "createElement").mockReturnValue(script as any);
@@ -67,7 +67,7 @@ describe("LpFilelessImporter", () => {
   });
 
   describe("postWindowMessage", () => {
-    it("will post a message to the window", () => {
+    it("posts a message to the window", () => {
       const postMessage = jest.spyOn(window, "postMessage");
 
       lpFilelessImporter["postWindowMessage"]({ command: "command" });
@@ -77,7 +77,7 @@ describe("LpFilelessImporter", () => {
   });
 
   describe("setupMessagePort", () => {
-    it("will set up the long lived port between the content script and background script", () => {
+    it("sets up the long lived port between the content script and background script", () => {
       lpFilelessImporter["setupMessagePort"]();
 
       expect(chrome.runtime.connect).toHaveBeenCalledWith({ name: "lp-fileless-importer" });
@@ -88,7 +88,7 @@ describe("LpFilelessImporter", () => {
   });
 
   describe("handlePortMessage", () => {
-    it("will not trigger the handler if it does not exist on the port message handlers", () => {
+    it("skips triggering the handler if it does not exist on the port message handlers", () => {
       const message = { command: "test" };
       const port = mock<chrome.runtime.Port>();
 
@@ -97,7 +97,7 @@ describe("LpFilelessImporter", () => {
       expect(lpFilelessImporter["portMessageHandlers"]["test"]).toBeUndefined();
     });
 
-    it("will trigger the handler if it exists on the port message handlers", () => {
+    it("triggers the handler if it exists on the port message handlers", () => {
       const message = { command: "test" };
       const port = mock<chrome.runtime.Port>();
       lpFilelessImporter["portMessageHandlers"]["test"] = jest.fn();

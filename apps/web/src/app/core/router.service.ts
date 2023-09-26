@@ -66,25 +66,18 @@ export class RouterService {
    * Save URL to Global State. This service is used during the login process
    * @param url URL being saved to the Global State
    */
-  async persistPreLoginUrl(url: string): Promise<void> {
-    await this.stateService.setPreLoginDeepLinkUrl(url);
+  async persistLoginRedirectUrl(url: string): Promise<void> {
+    await this.stateService.setLoginRedirectUrl(url);
   }
 
   /**
-   * Set GlobalState.preLoginDeepLinkUrl to null
+   * Fetch and clear persisted LoginRedirectUrl if present in state
    */
-  async clearPersistedPreLoginDeepLinkUrl(): Promise<void> {
-    await this.stateService.setPreLoginDeepLinkUrl(null);
-  }
-
-  /**
-   * Fetch and clear persisted preLoginDeepLinkUrl URL if present in state
-   */
-  async getAndClearPersistedPreLoginDeepLinkUrl(): Promise<string> | undefined {
-    const persistedPreLoginUrl = await this.stateService.getPreLoginDeepLinkUrl();
+  async getAndClearLoginRedirectUrl(): Promise<string> | undefined {
+    const persistedPreLoginUrl = await this.stateService.getLoginRedirectUrl();
 
     if (!Utils.isNullOrEmpty(persistedPreLoginUrl)) {
-      await this.clearPersistedPreLoginDeepLinkUrl();
+      await this.persistLoginRedirectUrl(null);
       return persistedPreLoginUrl;
     }
 

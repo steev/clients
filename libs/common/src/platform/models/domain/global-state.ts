@@ -35,5 +35,5 @@ export class GlobalState {
   enableBrowserIntegrationFingerprint?: boolean;
   enableDuckDuckGoBrowserIntegration?: boolean;
   region?: string;
-  preLoginDeepLinkUrl?: string;
+  loginRedirectUrl?: string;
 }

@@ -11,16 +11,25 @@ import { RouterService } from "../router.service";
  * Guard to persist deep-linking URL to state while user continues the login flow
  * @returns returns true, if user is not Unlocked will store URL to State
  */
-export function preLoginDeepLinkGuard(): CanActivateFn {
+export function preLoginRedirectGuard(): CanActivateFn {
   return async (route, routerState) => {
     const authService = inject(AuthService);
     const routerService = inject(RouterService);
     const authStatus = await authService.getAuthStatus();
 
     const currentUrl = routerState.url;
-
-    if (authStatus !== AuthenticationStatus.Unlocked && !Utils.isNullOrEmpty(currentUrl)) {
-      await routerService.persistPreLoginUrl(currentUrl);
+    const transientPreviousUrl = routerService.getPreviousUrl();
+    if (
+      authStatus === AuthenticationStatus.Locked &&
+      transientPreviousUrl?.indexOf("lock") === -1
+    ) {
+      await routerService.persistLoginRedirectUrl(transientPreviousUrl);
+    } else if (
+      authStatus !== AuthenticationStatus.Unlocked &&
+      !Utils.isNullOrEmpty(currentUrl) &&
+      currentUrl?.indexOf("lock") === -1
+    ) {
+      await routerService.persistLoginRedirectUrl(currentUrl);
     }
 
     return true;

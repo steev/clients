@@ -9,12 +9,12 @@ import { RouterService } from "../router.service";
  * Guard to track deep-linking after a user successfully logs into the vault.
  * @returns If there is no deep link URL present in state returns true, else navigates to deep link
  */
-export function postLoginDeepLinkRedirectGuard(): CanActivateFn {
+export function postLoginRedirectGuard(): CanActivateFn {
   return async () => {
     const router = inject(Router);
     const routerService = inject(RouterService);
 
-    const persistedPreLoginUrl = await routerService.getAndClearPersistedPreLoginDeepLinkUrl();
+    const persistedPreLoginUrl = await routerService.getAndClearLoginRedirectUrl();
     if (!Utils.isNullOrEmpty(persistedPreLoginUrl)) {
       return router.navigateByUrl(persistedPreLoginUrl);
     }

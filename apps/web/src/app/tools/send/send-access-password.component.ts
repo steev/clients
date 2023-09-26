@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
+import { Subject, takeUntil } from "rxjs";
 
 import { SharedModule } from "../../shared";
 
@@ -10,6 +11,7 @@ import { SharedModule } from "../../shared";
   standalone: true,
 })
 export class SendAccessPasswordComponent {
+  private destroy$ = new Subject<void>();
   protected formGroup = this.formBuilder.group({
     password: ["", [Validators.required]],
   });
@@ -19,7 +21,16 @@ export class SendAccessPasswordComponent {
 
   constructor(private formBuilder: FormBuilder) {}
 
-  protected setPassword(value: string) {
-    this.setPasswordEvent.emit(value);
+  async ngOnInit() {
+    this.formGroup.controls.password.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((val) => {
+        this.setPasswordEvent.emit(val);
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

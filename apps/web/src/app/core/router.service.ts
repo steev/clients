@@ -67,14 +67,14 @@ export class RouterService {
    * @param url URL being saved to the Global State
    */
   async persistLoginRedirectUrl(url: string): Promise<void> {
-    await this.stateService.setLoginRedirectUrl(url);
+    await this.stateService.setDeepLinkRedirectUrl(url);
   }
 
   /**
    * Fetch and clear persisted LoginRedirectUrl if present in state
    */
   async getAndClearLoginRedirectUrl(): Promise<string> | undefined {
-    const persistedPreLoginUrl = await this.stateService.getLoginRedirectUrl();
+    const persistedPreLoginUrl = await this.stateService.getDeepLinkRedirectUrl();
 
     if (!Utils.isNullOrEmpty(persistedPreLoginUrl)) {
       await this.persistLoginRedirectUrl(null);

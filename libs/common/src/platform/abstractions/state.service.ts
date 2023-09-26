@@ -533,12 +533,12 @@ export abstract class StateService<T extends Account = Account> {
    * @param options Defines the storage options for the URL; Defaults to session Storage.
    * @returns route called prior to successful login.
    */
-  getLoginRedirectUrl: (options?: StorageOptions) => Promise<string>;
+  getDeepLinkRedirectUrl: (options?: StorageOptions) => Promise<string>;
   /**
    * Store URL in session storage by default, but can be configured. Developed to handle
    * unauthN interrupted navigation.
    * @param url URL of route
    * @param options Defines the storage options for the URL; Defaults to session Storage.
    */
-  setLoginRedirectUrl: (url: string, options?: StorageOptions) => Promise<void>;
+  setDeepLinkRedirectUrl: (url: string, options?: StorageOptions) => Promise<void>;
 }

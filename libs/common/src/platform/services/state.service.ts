@@ -2807,17 +2807,17 @@ export class StateService<
     );
   }
 
-  async getLoginRedirectUrl(options?: StorageOptions): Promise<string> {
+  async getDeepLinkRedirectUrl(options?: StorageOptions): Promise<string> {
     return (
       await this.getGlobals(this.reconcileOptions(options, await this.defaultOnDiskOptions()))
-    )?.loginRedirectUrl;
+    )?.deepLinkRedirectUrl;
   }
 
-  async setLoginRedirectUrl(url: string, options?: StorageOptions): Promise<void> {
+  async setDeepLinkRedirectUrl(url: string, options?: StorageOptions): Promise<void> {
     const globals = await this.getGlobals(
       this.reconcileOptions(options, await this.defaultOnDiskOptions())
     );
-    globals.loginRedirectUrl = url;
+    globals.deepLinkRedirectUrl = url;
     await this.saveGlobals(
       globals,
       this.reconcileOptions(options, await this.defaultOnDiskOptions())

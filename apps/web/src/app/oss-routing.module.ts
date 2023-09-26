@@ -38,7 +38,7 @@ import { UpdatePasswordComponent } from "./auth/update-password.component";
 import { UpdateTempPasswordComponent } from "./auth/update-temp-password.component";
 import { VerifyEmailTokenComponent } from "./auth/verify-email-token.component";
 import { VerifyRecoverDeleteComponent } from "./auth/verify-recover-delete.component";
-import { preLoginRedirectGuard } from "./core/guards/pre-login-redirect.guard";
+import { deepLinkCacheGuard } from "./core/guards/deep-link-cache.guard";
 import { FrontendLayoutComponent } from "./layouts/frontend-layout.component";
 import { UserLayoutComponent } from "./layouts/user-layout.component";
 import { ReportsModule } from "./reports";
@@ -116,25 +116,25 @@ const routes: Routes = [
       {
         path: "lock",
         component: LockComponent,
-        canActivate: [preLoginRedirectGuard(), lockGuard()],
+        canActivate: [deepLinkCacheGuard(), lockGuard()],
       },
       { path: "verify-email", component: VerifyEmailTokenComponent },
       {
         path: "accept-organization",
         component: AcceptOrganizationComponent,
-        canActivate: [preLoginRedirectGuard()],
+        canActivate: [deepLinkCacheGuard()],
         data: { titleId: "joinOrganization", doNotSaveUrl: false },
       },
       {
         path: "accept-emergency",
         component: AcceptEmergencyComponent,
-        canActivate: [preLoginRedirectGuard()],
+        canActivate: [deepLinkCacheGuard()],
         data: { titleId: "acceptEmergency", doNotSaveUrl: false },
       },
       {
         path: "accept-families-for-enterprise",
         component: AcceptFamilySponsorshipComponent,
-        canActivate: [preLoginRedirectGuard()],
+        canActivate: [deepLinkCacheGuard()],
         data: { titleId: "acceptFamilySponsorship", doNotSaveUrl: false },
       },
       { path: "recover", pathMatch: "full", redirectTo: "recover-2fa" },
@@ -191,7 +191,7 @@ const routes: Routes = [
   {
     path: "",
     component: UserLayoutComponent,
-    canActivate: [preLoginRedirectGuard(), AuthGuard],
+    canActivate: [deepLinkCacheGuard(), AuthGuard],
     children: [
       {
         path: "vault",

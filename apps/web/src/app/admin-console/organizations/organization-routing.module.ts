@@ -16,14 +16,14 @@ import { OrganizationPermissionsGuard } from "../../admin-console/organizations/
 import { OrganizationRedirectGuard } from "../../admin-console/organizations/guards/org-redirect.guard";
 import { OrganizationLayoutComponent } from "../../admin-console/organizations/layouts/organization-layout.component";
 import { GroupsComponent } from "../../admin-console/organizations/manage/groups.component";
-import { preLoginRedirectGuard } from "../../core/guards/pre-login-redirect.guard";
+import { deepLinkCacheGuard } from "../../core/guards/deep-link-cache.guard";
 import { VaultModule } from "../../vault/org-vault/vault.module";
 
 const routes: Routes = [
   {
     path: ":organizationId",
     component: OrganizationLayoutComponent,
-    canActivate: [preLoginRedirectGuard(), AuthGuard, OrganizationPermissionsGuard],
+    canActivate: [deepLinkCacheGuard(), AuthGuard, OrganizationPermissionsGuard],
     data: {
       organizationPermissions: canAccessOrgAdmin,
     },

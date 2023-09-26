@@ -11,7 +11,7 @@ import { RouterService } from "../router.service";
  * Guard to persist deep-linking URL to state while user continues the login flow
  * @returns returns true, if user is not Unlocked will store URL to State
  */
-export function preLoginRedirectGuard(): CanActivateFn {
+export function deepLinkCacheGuard(): CanActivateFn {
   return async (route, routerState) => {
     const authService = inject(AuthService);
     const routerService = inject(RouterService);

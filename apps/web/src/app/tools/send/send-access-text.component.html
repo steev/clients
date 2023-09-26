@@ -1,6 +1,6 @@
 <bit-callout *ngIf="send.text.hidden" type="info">{{ "sendHiddenByDefault" | i18n }}</bit-callout>
-<bit-form-field>
-  <textarea id="text" bitInput rows="8" name="Text" [ngModel]="sendText" readonly></textarea>
+<bit-form-field [formGroup]="formGroup">
+  <textarea id="text" bitInput rows="8" name="Text" formControlName="sendText" readonly></textarea>
 </bit-form-field>
 <div class="tw-mb-3">
   <button

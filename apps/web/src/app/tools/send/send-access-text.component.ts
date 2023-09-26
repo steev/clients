@@ -1,4 +1,5 @@
 import { Component, Input } from "@angular/core";
+import { FormBuilder } from "@angular/forms";
 
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -16,9 +17,14 @@ export class SendAccessTextComponent {
   private _send: SendAccessView = null;
   protected showText = false;
 
+  protected formGroup = this.formBuilder.group({
+    sendText: [""],
+  });
+
   constructor(
     private i18nService: I18nService,
-    private platformUtilsService: PlatformUtilsService
+    private platformUtilsService: PlatformUtilsService,
+    private formBuilder: FormBuilder
   ) {}
 
   get send(): SendAccessView {
@@ -28,13 +34,14 @@ export class SendAccessTextComponent {
   @Input() set send(value: SendAccessView) {
     this._send = value;
     this.showText = this.send.text != null ? !this.send.text.hidden : true;
-  }
 
-  protected get sendText() {
     if (this.send == null || this.send.text == null) {
-      return null;
+      return;
     }
-    return this.showText ? this.send.text.text : this.send.text.maskedText;
+
+    this.formGroup.controls.sendText.patchValue(
+      this.showText ? this.send.text.text : this.send.text.maskedText
+    );
   }
 
   protected copyText() {

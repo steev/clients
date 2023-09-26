@@ -12,16 +12,16 @@ import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folde
 import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 
-import AddRequestFilelessImportQueueMessage from "../../background/models/add-request-fileless-import-queue-message";
-import AddUnlockVaultQueueMessage from "../../background/models/add-unlock-vault-queue-message";
-import AddChangePasswordQueueMessage from "../../background/models/addChangePasswordQueueMessage";
-import AddLoginQueueMessage from "../../background/models/addLoginQueueMessage";
-import AddLoginRuntimeMessage from "../../background/models/addLoginRuntimeMessage";
-import ChangePasswordRuntimeMessage from "../../background/models/changePasswordRuntimeMessage";
 import LockedVaultPendingNotificationsItem from "../../background/models/lockedVaultPendingNotificationsItem";
-import { NotificationQueueMessageType } from "../../background/models/notificationQueueMessageType";
 import { BrowserApi } from "../../platform/browser/browser-api";
 import { BrowserStateService } from "../../platform/services/abstractions/browser-state.service";
+import AddChangePasswordQueueMessage from "../models/notifications/add-change-password-queue-message";
+import AddLoginQueueMessage from "../models/notifications/add-login-queue-message";
+import AddLoginRuntimeMessage from "../models/notifications/add-login-runtime-message";
+import AddRequestFilelessImportQueueMessage from "../models/notifications/add-request-fileless-import-queue-message";
+import AddUnlockVaultQueueMessage from "../models/notifications/add-unlock-vault-queue-message";
+import ChangePasswordRuntimeMessage from "../models/notifications/change-password-runtime-message";
+import { NotificationQueueMessageType } from "../models/notifications/notification-queue-message-type";
 import { AutofillService } from "../services/abstractions/autofill.service";
 
 export default class NotificationBackground {

@@ -17,7 +17,7 @@ import {
 } from "./abstractions/fileless-importer.background";
 
 class FilelessImporterBackground {
-  private readonly filelessImporterPortNames: Set<string> = new Set([
+  private static readonly filelessImporterPortNames: Set<string> = new Set([
     FilelessImportPortNames.LpImport,
     FilelessImportPortNames.NotificationBar,
   ]);
@@ -112,7 +112,7 @@ class FilelessImporterBackground {
    * that the feature flag is enabled and the user is authenticated.
    */
   private handlePortOnConnect = async (port: chrome.runtime.Port) => {
-    if (!this.filelessImporterPortNames.has(port.name)) {
+    if (!FilelessImporterBackground.filelessImporterPortNames.has(port.name)) {
       return;
     }
 

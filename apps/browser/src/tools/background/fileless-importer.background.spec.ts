@@ -70,7 +70,7 @@ describe("FilelessImporterBackground ", () => {
     });
   });
 
-  describe("handlePortOnConnect", () => {
+  describe("handle ports onConnect", () => {
     beforeEach(() => {
       jest.spyOn(authService, "getAuthStatus").mockResolvedValue(AuthenticationStatus.Unlocked);
       jest.spyOn(configService, "getFeatureFlag").mockResolvedValue(true);

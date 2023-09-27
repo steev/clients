@@ -4,10 +4,12 @@ import { LpFilelessImporter } from "./abstractions/lp-fileless-importer";
 
 describe("LpFilelessImporter", () => {
   let lpFilelessImporter: LpFilelessImporter;
+  let portSpy: chrome.runtime.Port & { onMessage: { callListener: (message: any) => void } };
 
   beforeEach(() => {
     require("./lp-fileless-importer");
     lpFilelessImporter = (globalThis as any).lpFilelessImporter;
+    portSpy = (lpFilelessImporter as any)["messagePort"];
   });
 
   afterEach(() => {
@@ -27,11 +29,11 @@ describe("LpFilelessImporter", () => {
 
   describe("handleFeatureFlagVerification", () => {
     it("disconnects the message port when the fileless import feature is disabled", () => {
-      jest.spyOn((lpFilelessImporter as any)["messagePort"], "disconnect");
+      jest.spyOn(portSpy, "disconnect");
 
       lpFilelessImporter.handleFeatureFlagVerification({ filelessImportEnabled: false });
 
-      expect((lpFilelessImporter as any)["messagePort"].disconnect).toHaveBeenCalled();
+      expect(portSpy.disconnect).toHaveBeenCalled();
     });
 
     it("injects a script element that suppresses the download of the LastPass export", () => {
@@ -63,33 +65,33 @@ describe("LpFilelessImporter", () => {
   });
 
   describe("handlePortMessage", () => {
-    it("returns without triggering a handler if the port message is not registered with the portMessageHandlers", () => {
-      jest.spyOn(lpFilelessImporter as any, "handleFeatureFlagVerification");
+    it("ignores messages that are not registered with the portMessageHandlers", () => {
+      const message = { command: "unknownCommand" };
+      jest.spyOn(lpFilelessImporter, "handleFeatureFlagVerification");
+      jest.spyOn(lpFilelessImporter, "triggerCsvDownload");
 
-      (lpFilelessImporter as any)["handlePortMessage"](
-        { command: "unknownCommand" },
-        (lpFilelessImporter as any)["messagePort"]
-      );
+      portSpy.onMessage.callListener(message);
 
-      expect((lpFilelessImporter as any)["handleFeatureFlagVerification"]).not.toHaveBeenCalled();
+      expect(lpFilelessImporter.handleFeatureFlagVerification).not.toHaveBeenCalled();
+      expect(lpFilelessImporter.triggerCsvDownload).not.toHaveBeenCalled();
     });
 
-    it("handles messages that are registered with the portMessageHandlers", () => {
-      const handlerMethodPairs = {
-        triggerCsvDownload: "triggerCsvDownload",
-        verifyFeatureFlag: "handleFeatureFlagVerification",
-      };
+    it("handles the port message that verifies the fileless import feature flag", () => {
+      const message = { command: "verifyFeatureFlag", filelessImportEnabled: true };
+      jest.spyOn(lpFilelessImporter, "handleFeatureFlagVerification");
 
-      for (const [command, handler] of Object.entries(handlerMethodPairs)) {
-        jest.spyOn(lpFilelessImporter as any, handler);
+      portSpy.onMessage.callListener(message);
 
-        (lpFilelessImporter as any)["handlePortMessage"](
-          { command },
-          (lpFilelessImporter as any)["messagePort"]
-        );
+      expect(lpFilelessImporter.handleFeatureFlagVerification).toHaveBeenCalledWith(message);
+    });
 
-        expect((lpFilelessImporter as any)[handler]).toHaveBeenCalled();
-      }
+    it("handles the port message that triggers the LastPass csv download", () => {
+      const message = { command: "triggerCsvDownload" };
+      jest.spyOn(lpFilelessImporter, "triggerCsvDownload");
+
+      portSpy.onMessage.callListener(message);
+
+      expect(lpFilelessImporter.triggerCsvDownload).toHaveBeenCalled();
     });
   });
 });

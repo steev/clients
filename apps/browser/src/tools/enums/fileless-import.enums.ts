@@ -1,5 +1,5 @@
 const FilelessImportPortNames = {
-  LpImport: "lp-fileless-importer",
+  LpImporter: "lp-fileless-importer",
 } as const;
 
 export { FilelessImportPortNames };

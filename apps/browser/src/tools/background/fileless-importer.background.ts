@@ -7,29 +7,24 @@ import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authenticatio
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
 
+import { FilelessImportPortNames } from "../enums/fileless-import.enums";
+
 class FilelessImporterBackground {
-  private static readonly filelessImporterPortNames = new Set(["lp-fileless-importer"]);
-  private lpImporterPort: chrome.runtime.Port;
-  private readonly lpImporterPortMessageHandlers: Record<
-    string,
-    (message: any, port: chrome.runtime.Port) => void
-  > = {};
+  private static readonly filelessImporterPortNames: Set<string> = new Set([
+    FilelessImportPortNames.LpImporter,
+  ]);
 
   constructor(
     private configService: ConfigServiceAbstraction,
     private authService: AuthService,
     private policyService: PolicyService
-  ) {
-    this.setupExtensionMessageListeners();
-  }
+  ) {}
 
   /**
-   * Triggers the download of the CSV file from the LP importer. This is triggered
-   * when the user opts to not save the export to Bitwarden within the notification bar.
+   * Initializes the fileless importer background logic.
    */
-  private triggerLpImporterCsvDownload() {
-    this.lpImporterPort?.postMessage({ command: "triggerCsvDownload" });
-    this.lpImporterPort?.disconnect();
+  init() {
+    this.setupExtensionMessageListeners();
   }
 
   /**
@@ -69,46 +64,6 @@ class FilelessImporterBackground {
       userAuthStatus === AuthenticationStatus.Unlocked &&
       !removeIndividualVault;
     port.postMessage({ command: "verifyFeatureFlag", filelessImportEnabled });
-
-    if (!filelessImportEnabled) {
-      return;
-    }
-
-    port.onMessage.addListener(this.handleImporterPortMessage);
-    port.onDisconnect.addListener(this.handleImporterPortDisconnect);
-
-    if (port.name === "lp-fileless-importer") {
-      this.lpImporterPort = port;
-    }
-  };
-
-  /**
-   * Handles messages that are sent from fileless importer content scripts.
-   * @param message - The message that was sent.
-   * @param port - The port that the message was sent from.
-   */
-  private handleImporterPortMessage = (message: any, port: chrome.runtime.Port) => {
-    let handler: CallableFunction | undefined;
-
-    if (port.name === "lp-fileless-importer") {
-      handler = this.lpImporterPortMessageHandlers[message.command];
-    }
-
-    if (!handler) {
-      return;
-    }
-
-    handler(message, port);
-  };
-
-  /**
-   * Handles disconnections from fileless importer content scripts.
-   * @param port - The port that was disconnected.
-   */
-  private handleImporterPortDisconnect = (port: chrome.runtime.Port) => {
-    if (port.name === "lp-fileless-importer") {
-      this.lpImporterPort = null;
-    }
   };
 }
 

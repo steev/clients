@@ -20,7 +20,7 @@ describe("LpFilelessImporter", () => {
       lpFilelessImporter.init();
 
       expect(chrome.runtime.connect).toHaveBeenCalledWith({
-        name: FilelessImportPortNames.LpImport,
+        name: FilelessImportPortNames.LpImporter,
       });
     });
   });

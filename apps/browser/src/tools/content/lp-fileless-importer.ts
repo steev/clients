@@ -96,7 +96,7 @@ class LpFilelessImporter implements LpFilelessImporterInterface {
    * background script and the content script.
    */
   private setupMessagePort() {
-    this.messagePort = chrome.runtime.connect({ name: FilelessImportPortNames.LpImport });
+    this.messagePort = chrome.runtime.connect({ name: FilelessImportPortNames.LpImporter });
     this.messagePort.onMessage.addListener(this.handlePortMessage);
   }
 

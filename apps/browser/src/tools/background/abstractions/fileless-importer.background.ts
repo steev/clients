@@ -1,5 +1,5 @@
-type LpImporterMessageHandlers = {
-  [key: string]: ({ message, port }: { message: any; port: chrome.runtime.Port }) => void;
-};
+interface FilelessImporterBackground {
+  init(): void;
+}
 
-export { LpImporterMessageHandlers };
+export { FilelessImporterBackground };

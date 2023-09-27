@@ -9,7 +9,9 @@ import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstraction
 
 import { FilelessImportPortNames } from "../enums/fileless-import.enums";
 
-class FilelessImporterBackground {
+import { FilelessImporterBackground as FilelessImporterBackgroundInterface } from "./abstractions/fileless-importer.background";
+
+class FilelessImporterBackground implements FilelessImporterBackgroundInterface {
   private static readonly filelessImporterPortNames: Set<string> = new Set([
     FilelessImportPortNames.LpImporter,
   ]);
@@ -24,7 +26,7 @@ class FilelessImporterBackground {
    * Initializes the fileless importer background logic.
    */
   init() {
-    this.setupExtensionMessageListeners();
+    this.setupPortMessageListeners();
   }
 
   /**
@@ -39,7 +41,7 @@ class FilelessImporterBackground {
   /**
    * Sets up onConnect listeners for the extension.
    */
-  private setupExtensionMessageListeners() {
+  private setupPortMessageListeners() {
     chrome.runtime.onConnect.addListener(this.handlePortOnConnect);
   }
 

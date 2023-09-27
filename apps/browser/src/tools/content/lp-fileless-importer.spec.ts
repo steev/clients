@@ -1,3 +1,5 @@
+import { mock } from "jest-mock-extended";
+
 import { FilelessImportPortNames } from "../enums/fileless-import.enums";
 
 import { LpFilelessImporter } from "./abstractions/lp-fileless-importer";
@@ -54,6 +56,44 @@ describe("LpFilelessImporter", () => {
         "const defaultAppendChild = Element.prototype.appendChild;"
       );
     });
+
+    it("sets up an event listener for DOMContentLoaded that triggers the importer when the document ready state is `loading`", () => {
+      Object.defineProperty(document, "readyState", {
+        value: "loading",
+        writable: true,
+      });
+      const message = {
+        command: "verifyFeatureFlag",
+        filelessImportEnabled: true,
+      };
+      jest.spyOn(document, "addEventListener");
+
+      lpFilelessImporter.handleFeatureFlagVerification(message);
+
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        "DOMContentLoaded",
+        (lpFilelessImporter as any).loadImporter
+      );
+    });
+
+    it("sets up a mutation observer to watch the document body for injection of the export content", () => {
+      const message = {
+        command: "verifyFeatureFlag",
+        filelessImportEnabled: true,
+      };
+      jest.spyOn(document, "addEventListener");
+      jest.spyOn(window, "MutationObserver").mockImplementationOnce(() => mock<MutationObserver>());
+
+      lpFilelessImporter.handleFeatureFlagVerification(message);
+
+      expect(window.MutationObserver).toHaveBeenCalledWith(
+        (lpFilelessImporter as any).handleMutation
+      );
+      expect((lpFilelessImporter as any).mutationObserver.observe).toHaveBeenCalledWith(
+        document.body,
+        { childList: true, subtree: true }
+      );
+    });
   });
 
   describe("triggerCsvDownload", () => {
@@ -83,7 +123,7 @@ describe("LpFilelessImporter", () => {
 
     it("handles the port message that verifies the fileless import feature flag", () => {
       const message = { command: "verifyFeatureFlag", filelessImportEnabled: true };
-      jest.spyOn(lpFilelessImporter, "handleFeatureFlagVerification");
+      jest.spyOn(lpFilelessImporter, "handleFeatureFlagVerification").mockImplementation();
 
       portSpy.onMessage.callListener(message);
 

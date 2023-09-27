@@ -9,4 +9,8 @@ type LpImporterMessageHandlers = {
   displayLpImportNotification: ({ port }: { port: chrome.runtime.Port }) => void;
 };
 
-export { ImportNotificationMessageHandlers, LpImporterMessageHandlers };
+interface FilelessImporterBackground {
+  init(): void;
+}
+
+export { ImportNotificationMessageHandlers, LpImporterMessageHandlers, FilelessImporterBackground };

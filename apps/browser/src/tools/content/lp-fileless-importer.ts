@@ -11,7 +11,7 @@ class LpFilelessImporter implements LpFilelessImporterInterface {
   private mutationObserver: MutationObserver;
   private readonly portMessageHandlers: LpFilelessImporterMessageHandlers = {
     verifyFeatureFlag: ({ message }) => this.handleFeatureFlagVerification(message),
-    triggerCsvDownload: ({ message }) => this.postWindowMessage(message),
+    triggerCsvDownload: () => this.triggerCsvDownload(),
   };
 
   /**
@@ -28,7 +28,7 @@ class LpFilelessImporter implements LpFilelessImporterInterface {
    *
    * @param message - The port message, contains the feature flag indicator.
    */
-  private handleFeatureFlagVerification(message: any) {
+  handleFeatureFlagVerification(message: any) {
     if (!message.filelessImportEnabled) {
       this.messagePort?.disconnect();
       return;
@@ -41,6 +41,13 @@ class LpFilelessImporter implements LpFilelessImporterInterface {
     }
 
     this.loadImporter();
+  }
+
+  /**
+   * Posts a message to the LP importer to trigger the download of the CSV file.
+   */
+  triggerCsvDownload() {
+    this.postWindowMessage({ command: "triggerCsvDownload" });
   }
 
   /**
@@ -168,7 +175,7 @@ class LpFilelessImporter implements LpFilelessImporterInterface {
    * background script and the content script.
    */
   private setupMessagePort() {
-    this.messagePort = chrome.runtime.connect({ name: FilelessImportPortNames.LpImport });
+    this.messagePort = chrome.runtime.connect({ name: FilelessImportPortNames.LpImporter });
     this.messagePort.onMessage.addListener(this.handlePortMessage);
   }
 

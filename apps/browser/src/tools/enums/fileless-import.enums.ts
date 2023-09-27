@@ -4,7 +4,7 @@ const FilelessImportType = {
 
 const FilelessImportPortNames = {
   NotificationBar: "fileless-importer-notification-bar",
-  LpImport: "lp-fileless-importer",
+  LpImporter: "lp-fileless-importer",
 } as const;
 
 export { FilelessImportType, FilelessImportPortNames };

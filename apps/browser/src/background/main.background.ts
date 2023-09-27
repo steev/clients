@@ -712,6 +712,7 @@ export default class MainBackground {
     await (this.eventUploadService as EventUploadService).init(true);
     await this.runtimeBackground.init();
     await this.notificationBackground.init();
+    this.filelessImporterBackground.init();
     await this.commandsBackground.init();
 
     this.configService.init();

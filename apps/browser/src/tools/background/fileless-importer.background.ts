@@ -16,11 +16,12 @@ import { FilelessImportPortNames, FilelessImportType } from "../enums/fileless-i
 import {
   ImportNotificationMessageHandlers,
   LpImporterMessageHandlers,
+  FilelessImporterBackground as FilelessImporterBackgroundInterface,
 } from "./abstractions/fileless-importer.background";
 
-class FilelessImporterBackground {
+class FilelessImporterBackground implements FilelessImporterBackgroundInterface {
   private static readonly filelessImporterPortNames: Set<string> = new Set([
-    FilelessImportPortNames.LpImport,
+    FilelessImportPortNames.LpImporter,
     FilelessImportPortNames.NotificationBar,
   ]);
   private importNotificationsPort: chrome.runtime.Port;
@@ -43,9 +44,7 @@ class FilelessImporterBackground {
     private notificationBackground: NotificationBackground,
     private importService: ImportServiceAbstraction,
     private syncService: SyncService
-  ) {
-    this.setupExtensionMessageListeners();
-  }
+  ) {}
 
   /**
    * Starts an import of the export data pulled from the tab.
@@ -86,6 +85,13 @@ class FilelessImporterBackground {
   }
 
   /**
+   * Initializes the fileless importer background logic.
+   */
+  init() {
+    this.setupPortMessageListeners();
+  }
+
+  /**
    * Triggers the download of the CSV file from the LP importer. This is triggered
    * when the user opts to not save the export to Bitwarden within the notification bar.
    */
@@ -122,7 +128,9 @@ class FilelessImporterBackground {
     } catch (error) {
       this.importNotificationsPort?.postMessage({
         command: "filelessImportFailed",
-        importErrorMessage: error,
+        importErrorMessage: Object.values(error).length
+          ? error
+          : chrome.i18n.getMessage("importNetworkError"),
       });
     }
   }
@@ -139,7 +147,7 @@ class FilelessImporterBackground {
   /**
    * Sets up onConnect listeners for the extension.
    */
-  private setupExtensionMessageListeners() {
+  private setupPortMessageListeners() {
     chrome.runtime.onConnect.addListener(this.handlePortOnConnect);
   }
 
@@ -172,7 +180,7 @@ class FilelessImporterBackground {
     port.onMessage.addListener(this.handleImporterPortMessage);
     port.onDisconnect.addListener(this.handleImporterPortDisconnect);
 
-    if (port.name === FilelessImportPortNames.LpImport) {
+    if (port.name === FilelessImportPortNames.LpImporter) {
       this.lpImporterPort = port;
     }
 
@@ -189,7 +197,7 @@ class FilelessImporterBackground {
   private handleImporterPortMessage = (message: any, port: chrome.runtime.Port) => {
     let handler: CallableFunction | undefined;
 
-    if (port.name === FilelessImportPortNames.LpImport) {
+    if (port.name === FilelessImportPortNames.LpImporter) {
       handler = this.lpImporterPortMessageHandlers[message.command];
     }
 
@@ -209,8 +217,12 @@ class FilelessImporterBackground {
    * @param port - The port that was disconnected.
    */
   private handleImporterPortDisconnect = (port: chrome.runtime.Port) => {
-    if (port.name === FilelessImportPortNames.LpImport) {
+    if (port.name === FilelessImportPortNames.LpImporter) {
       this.lpImporterPort = null;
+    }
+
+    if (port.name === FilelessImportPortNames.NotificationBar) {
+      this.importNotificationsPort = null;
     }
   };
 }

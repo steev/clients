@@ -2434,5 +2434,9 @@
   "dataImportFailed": {
     "message": "Error importing. Check console for details.",
     "description": "Notification message for when an import has failed."
+  },
+  "importNetworkError": {
+    "message": "Network error encountered during import.",
+    "description": "Notification message for when an import has failed due to a network error."
   }
 }

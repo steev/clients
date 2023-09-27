@@ -1,13 +1,17 @@
 import { mock } from "jest-mock-extended";
 
+import { FilelessImportPortNames } from "../enums/fileless-import.enums";
+
 import { LpFilelessImporter } from "./abstractions/lp-fileless-importer";
 
 describe("LpFilelessImporter", () => {
-  let lpFilelessImporter: LpFilelessImporter & { [key: string]: any };
+  let lpFilelessImporter: LpFilelessImporter;
+  let portSpy: chrome.runtime.Port & { onMessage: { callListener: (message: any) => void } };
 
   beforeEach(() => {
     require("./lp-fileless-importer");
     lpFilelessImporter = (globalThis as any).lpFilelessImporter;
+    portSpy = (lpFilelessImporter as any)["messagePort"];
   });
 
   afterEach(() => {
@@ -22,283 +26,117 @@ describe("LpFilelessImporter", () => {
 
   describe("init", () => {
     it("sets up the port connection with the background script", () => {
-      jest.spyOn(lpFilelessImporter as any, "setupMessagePort");
-
       lpFilelessImporter.init();
 
-      expect(lpFilelessImporter["setupMessagePort"]).toHaveBeenCalled();
+      expect(chrome.runtime.connect).toHaveBeenCalledWith({
+        name: FilelessImportPortNames.LpImporter,
+      });
     });
   });
 
   describe("handleFeatureFlagVerification", () => {
-    it("disconnects the port and return early if the feature flag is not set", () => {
-      const message = {
-        command: "verifyFeatureFlag",
-        filelessImportEnabled: false,
-      };
+    it("disconnects the message port when the fileless import feature is disabled", () => {
+      jest.spyOn(portSpy, "disconnect");
 
-      lpFilelessImporter["handleFeatureFlagVerification"](message);
+      lpFilelessImporter.handleFeatureFlagVerification({ filelessImportEnabled: false });
 
-      expect(lpFilelessImporter["messagePort"].disconnect).toHaveBeenCalled();
+      expect(portSpy.disconnect).toHaveBeenCalled();
     });
 
-    it("suppresses the csv download if the feature flag is set", () => {
-      const message = {
-        command: "verifyFeatureFlag",
-        filelessImportEnabled: true,
-      };
-      const suppressDownload = jest
-        .spyOn(lpFilelessImporter as any, "suppressDownload")
-        .mockImplementationOnce(jest.fn());
+    it("injects a script element that suppresses the download of the LastPass export", () => {
+      const script = document.createElement("script");
+      jest.spyOn(document, "createElement").mockReturnValue(script);
+      jest.spyOn(document.documentElement, "appendChild");
 
-      lpFilelessImporter["handleFeatureFlagVerification"](message);
+      lpFilelessImporter.handleFeatureFlagVerification({ filelessImportEnabled: true });
 
-      expect(suppressDownload).toHaveBeenCalled();
+      expect(document.createElement).toHaveBeenCalledWith("script");
+      expect(document.documentElement.appendChild).toHaveBeenCalled();
+      expect(script.textContent).toContain(
+        "const defaultAppendChild = Element.prototype.appendChild;"
+      );
     });
 
-    it("will load the importer logic", () => {
-      const msg = {
-        command: "verifyFeatureFlag",
-        filelessImportEnabled: true,
-      };
-      const suppressDownload = jest
-        .spyOn(lpFilelessImporter as any, "suppressDownload")
-        .mockImplementationOnce(jest.fn());
-      const loadImporter = jest.spyOn(lpFilelessImporter as any, "loadImporter");
-
-      lpFilelessImporter["handleFeatureFlagVerification"](msg);
-
-      expect(suppressDownload).toHaveBeenCalled();
-      expect(loadImporter).toHaveBeenCalled();
-    });
-
-    it("will create a DOMContentLoaded listener used to load the importer if the document readystate is `loading`", () => {
+    it("sets up an event listener for DOMContentLoaded that triggers the importer when the document ready state is `loading`", () => {
       Object.defineProperty(document, "readyState", {
         value: "loading",
         writable: true,
       });
-      const msg = {
+      const message = {
         command: "verifyFeatureFlag",
         filelessImportEnabled: true,
       };
-      const suppressDownload = jest
-        .spyOn(lpFilelessImporter as any, "suppressDownload")
-        .mockImplementationOnce(jest.fn());
-      const loadImporter = jest.spyOn(lpFilelessImporter as any, "loadImporter");
-      const addEventListener = jest.spyOn(document, "addEventListener");
+      jest.spyOn(document, "addEventListener");
 
-      lpFilelessImporter["handleFeatureFlagVerification"](msg);
+      lpFilelessImporter.handleFeatureFlagVerification(message);
 
-      expect(suppressDownload).toHaveBeenCalled();
-      expect(loadImporter).not.toHaveBeenCalled();
-      expect(addEventListener).toHaveBeenCalledWith("DOMContentLoaded", expect.any(Function));
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        "DOMContentLoaded",
+        (lpFilelessImporter as any).loadImporter
+      );
     });
-  });
 
-  describe("suppressDownload", () => {
-    it("appends a script element to the document element that facilitates suppressing the download of the csv export", () => {
-      const script = document.createElement("script");
-      const appendChild = jest.spyOn(document.documentElement, "appendChild");
-      const createElement = jest.spyOn(document, "createElement").mockReturnValue(script as any);
+    it("sets up a mutation observer to watch the document body for injection of the export content", () => {
+      const message = {
+        command: "verifyFeatureFlag",
+        filelessImportEnabled: true,
+      };
+      jest.spyOn(document, "addEventListener");
+      jest.spyOn(window, "MutationObserver").mockImplementationOnce(() => mock<MutationObserver>());
 
-      lpFilelessImporter["suppressDownload"]();
+      lpFilelessImporter.handleFeatureFlagVerification(message);
 
-      expect(createElement).toHaveBeenCalledWith("script");
-      expect(appendChild).toHaveBeenCalledWith(script);
-      expect(script.textContent).toEqual(
-        expect.stringContaining(`const defaultAppendChild = Element.prototype.appendChild;`)
+      expect(window.MutationObserver).toHaveBeenCalledWith(
+        (lpFilelessImporter as any).handleMutation
+      );
+      expect((lpFilelessImporter as any).mutationObserver.observe).toHaveBeenCalledWith(
+        document.body,
+        { childList: true, subtree: true }
       );
     });
   });
 
-  describe("loadImporter", () => {
-    it("will set up the mutation observer and obser the document body", () => {
-      const observe = jest.spyOn(MutationObserver.prototype, "observe");
+  describe("triggerCsvDownload", () => {
+    it("posts a window message that triggers the download of the LastPass export", () => {
+      jest.spyOn(globalThis, "postMessage");
 
-      lpFilelessImporter["loadImporter"]();
+      lpFilelessImporter.triggerCsvDownload();
 
-      expect(lpFilelessImporter["mutationObserver"]).toBeDefined();
-      expect(observe).toHaveBeenCalledWith(document.body, {
-        childList: true,
-        subtree: true,
-      });
-    });
-  });
-
-  describe("handleMutation", () => {
-    it("will return early if no mutations are passed", () => {
-      lpFilelessImporter["mutationObserver"] = mock<MutationObserver>({ disconnect: jest.fn() });
-      const disconnect = jest.spyOn(lpFilelessImporter["mutationObserver"], "disconnect");
-      const displayImportNotificationSpy = jest.spyOn(
-        lpFilelessImporter as any,
-        "displayImportNotification"
-      );
-
-      lpFilelessImporter["handleMutation"]([]);
-
-      expect(displayImportNotificationSpy).not.toHaveBeenCalled();
-      expect(disconnect).not.toHaveBeenCalled();
-    });
-
-    it("will return early if no added nodes are found in the mutation", () => {
-      lpFilelessImporter["mutationObserver"] = mock<MutationObserver>({ disconnect: jest.fn() });
-      const disconnect = jest.spyOn(lpFilelessImporter["mutationObserver"], "disconnect");
-      const displayImportNotificationSpy = jest.spyOn(
-        lpFilelessImporter as any,
-        "displayImportNotification"
-      );
-
-      lpFilelessImporter["handleMutation"]([{ addedNodes: [] }]);
-
-      expect(displayImportNotificationSpy).not.toHaveBeenCalled();
-      expect(disconnect).not.toHaveBeenCalled();
-    });
-
-    it("will return early if the added node does not have a tagname of `pre`", () => {
-      lpFilelessImporter["mutationObserver"] = mock<MutationObserver>({ disconnect: jest.fn() });
-      const disconnect = jest.spyOn(lpFilelessImporter["mutationObserver"], "disconnect");
-      const displayImportNotificationSpy = jest.spyOn(
-        lpFilelessImporter as any,
-        "displayImportNotification"
-      );
-
-      lpFilelessImporter["handleMutation"]([{ addedNodes: [{ nodeName: "div" }] }]);
-
-      expect(displayImportNotificationSpy).not.toHaveBeenCalled();
-      expect(disconnect).not.toHaveBeenCalled();
-    });
-
-    it("will return early if the found `pre` element does not contain any textContent", () => {
-      lpFilelessImporter["mutationObserver"] = mock<MutationObserver>({ disconnect: jest.fn() });
-      const disconnect = jest.spyOn(lpFilelessImporter["mutationObserver"], "disconnect");
-      const displayImportNotificationSpy = jest.spyOn(
-        lpFilelessImporter as any,
-        "displayImportNotification"
-      );
-
-      lpFilelessImporter["handleMutation"]([{ addedNodes: [{ nodeName: "pre" }] }]);
-
-      expect(displayImportNotificationSpy).not.toHaveBeenCalled();
-      expect(disconnect).not.toHaveBeenCalled();
-    });
-
-    it("will store the export data, display the import notification, and disconnect the mutation observer when the export data is appended", () => {
-      lpFilelessImporter["mutationObserver"] = mock<MutationObserver>({ disconnect: jest.fn() });
-      const disconnect = jest.spyOn(lpFilelessImporter["mutationObserver"], "disconnect");
-      const displayImportNotificationSpy = jest.spyOn(
-        lpFilelessImporter as any,
-        "displayImportNotification"
-      );
-
-      lpFilelessImporter["handleMutation"]([
-        {
-          addedNodes: [
-            {
-              nodeName: "pre",
-              textContent: "test",
-            },
-          ],
-        },
-      ]);
-
-      expect(lpFilelessImporter["exportData"]).toEqual("test");
-      expect(displayImportNotificationSpy).toHaveBeenCalled();
-      expect(disconnect).toHaveBeenCalled();
-    });
-  });
-
-  describe("displayImportNotification", () => {
-    it("will not post a message to display the notification bar if the exportData is not present", () => {
-      const postPortMessage = jest.spyOn(lpFilelessImporter as any, "postPortMessage");
-      lpFilelessImporter["exportData"] = undefined;
-
-      lpFilelessImporter["displayImportNotification"]();
-
-      expect(postPortMessage).not.toHaveBeenCalled();
-    });
-
-    it("will post a message to display the import notification", () => {
-      const postPortMessage = jest.spyOn(lpFilelessImporter as any, "postPortMessage");
-      lpFilelessImporter["exportData"] = "test";
-
-      lpFilelessImporter["displayImportNotification"]();
-
-      expect(postPortMessage).toHaveBeenCalledWith({ command: "displayLpImportNotification" });
-    });
-  });
-
-  describe("startLpImport", () => {
-    it("returns early if the export data is not present", () => {
-      const postPortMessage = jest.spyOn(lpFilelessImporter as any, "postPortMessage");
-      lpFilelessImporter["exportData"] = undefined;
-
-      lpFilelessImporter["startLpImport"]();
-
-      expect(postPortMessage).not.toHaveBeenCalled();
-    });
-
-    it("posts a message to the background script with the export data that initializes the import process", () => {
-      const postPortMessage = jest.spyOn(lpFilelessImporter as any, "postPortMessage");
-      lpFilelessImporter["exportData"] = "test";
-
-      lpFilelessImporter["startLpImport"]();
-
-      expect(postPortMessage).toHaveBeenCalledWith({
-        command: "startLpImport",
-        data: "test",
-      });
-    });
-  });
-
-  describe("postPortMessage", () => {
-    it("will post a message to the background script", () => {
-      const postMessage = jest.spyOn(lpFilelessImporter["messagePort"], "postMessage");
-
-      lpFilelessImporter["postPortMessage"]({ command: "command" });
-
-      expect(postMessage).toHaveBeenCalledWith({ command: "command" });
-    });
-  });
-
-  describe("postWindowMessage", () => {
-    it("posts a message to the window", () => {
-      const postMessage = jest.spyOn(window, "postMessage");
-
-      lpFilelessImporter["postWindowMessage"]({ command: "command" });
-
-      expect(postMessage).toHaveBeenCalledWith({ command: "command" }, "https://lastpass.com");
-    });
-  });
-
-  describe("setupMessagePort", () => {
-    it("sets up the long lived port between the content script and background script", () => {
-      lpFilelessImporter["setupMessagePort"]();
-
-      expect(chrome.runtime.connect).toHaveBeenCalledWith({ name: "lp-fileless-importer" });
-      expect(lpFilelessImporter["messagePort"].onMessage.addListener).toHaveBeenCalledWith(
-        lpFilelessImporter["handlePortMessage"]
+      expect(globalThis.postMessage).toHaveBeenCalledWith(
+        { command: "triggerCsvDownload" },
+        "https://lastpass.com"
       );
     });
   });
 
   describe("handlePortMessage", () => {
-    it("skips triggering the handler if it does not exist on the port message handlers", () => {
-      const message = { command: "test" };
-      const port = mock<chrome.runtime.Port>();
+    it("ignores messages that are not registered with the portMessageHandlers", () => {
+      const message = { command: "unknownCommand" };
+      jest.spyOn(lpFilelessImporter, "handleFeatureFlagVerification");
+      jest.spyOn(lpFilelessImporter, "triggerCsvDownload");
 
-      lpFilelessImporter["handlePortMessage"](message, port);
+      portSpy.onMessage.callListener(message);
 
-      expect(lpFilelessImporter["portMessageHandlers"]["test"]).toBeUndefined();
+      expect(lpFilelessImporter.handleFeatureFlagVerification).not.toHaveBeenCalled();
+      expect(lpFilelessImporter.triggerCsvDownload).not.toHaveBeenCalled();
     });
 
-    it("triggers the handler if it exists on the port message handlers", () => {
-      const message = { command: "test" };
-      const port = mock<chrome.runtime.Port>();
-      lpFilelessImporter["portMessageHandlers"]["test"] = jest.fn();
+    it("handles the port message that verifies the fileless import feature flag", () => {
+      const message = { command: "verifyFeatureFlag", filelessImportEnabled: true };
+      jest.spyOn(lpFilelessImporter, "handleFeatureFlagVerification").mockImplementation();
 
-      lpFilelessImporter["handlePortMessage"](message, port);
+      portSpy.onMessage.callListener(message);
 
-      expect(lpFilelessImporter["portMessageHandlers"]["test"]).toHaveBeenCalled();
+      expect(lpFilelessImporter.handleFeatureFlagVerification).toHaveBeenCalledWith(message);
+    });
+
+    it("handles the port message that triggers the LastPass csv download", () => {
+      const message = { command: "triggerCsvDownload" };
+      jest.spyOn(lpFilelessImporter, "triggerCsvDownload");
+
+      portSpy.onMessage.callListener(message);
+
+      expect(lpFilelessImporter.triggerCsvDownload).toHaveBeenCalled();
     });
   });
 });

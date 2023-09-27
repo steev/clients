@@ -10,4 +10,8 @@ type LpImporterMessageHandlers = {
   startLpImport: ({ message }: { message: any }) => void;
 };
 
-export { ImportNotificationMessageHandlers, LpImporterMessageHandlers };
+interface FilelessImporterBackground {
+  init(): void;
+}
+
+export { ImportNotificationMessageHandlers, LpImporterMessageHandlers, FilelessImporterBackground };

@@ -259,7 +259,7 @@ function handleTypeFilelessImport() {
       chrome.i18n.getMessage("dataImportFailed");
     document.getElementById("fileless-import-buttons").classList.add("error-message");
     // eslint-disable-next-line no-console
-    console.error(msg.importErrorMessage);
+    console.error("Error: ", msg.importErrorMessage);
   };
   port.onMessage.addListener(handlePortMessage);
 }

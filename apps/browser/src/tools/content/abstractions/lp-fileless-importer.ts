@@ -6,6 +6,8 @@ type LpFilelessImporterMessageHandlers = {
 
 interface LpFilelessImporter {
   init(): void;
+  handleFeatureFlagVerification(message: any): void;
+  triggerCsvDownload(): void;
 }
 
 export { LpFilelessImporterMessageHandlers, LpFilelessImporter };

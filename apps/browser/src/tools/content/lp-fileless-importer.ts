@@ -1,11 +1,15 @@
-class LpFilelessImporter {
+import { FilelessImportPortNames } from "../enums/fileless-import.enums";
+
+import {
+  LpFilelessImporter as LpFilelessImporterInterface,
+  LpFilelessImporterMessageHandlers,
+} from "./abstractions/lp-fileless-importer";
+
+class LpFilelessImporter implements LpFilelessImporterInterface {
   private messagePort: chrome.runtime.Port;
-  private readonly portMessageHandlers: Record<
-    string,
-    (message: any, port: chrome.runtime.Port) => void
-  > = {
-    verifyFeatureFlag: (message, port) => this.handleFeatureFlagVerification(message),
-    triggerCsvDownload: (message) => this.postWindowMessage(message),
+  private readonly portMessageHandlers: LpFilelessImporterMessageHandlers = {
+    verifyFeatureFlag: ({ message }) => this.handleFeatureFlagVerification(message),
+    triggerCsvDownload: () => this.triggerCsvDownload(),
   };
 
   /**
@@ -22,13 +26,20 @@ class LpFilelessImporter {
    *
    * @param message - The port message, contains the feature flag indicator.
    */
-  private handleFeatureFlagVerification(message: any) {
+  handleFeatureFlagVerification(message: any) {
     if (!message.filelessImportEnabled) {
       this.messagePort?.disconnect();
       return;
     }
 
     this.suppressDownload();
+  }
+
+  /**
+   * Posts a message to the LP importer to trigger the download of the CSV file.
+   */
+  triggerCsvDownload() {
+    this.postWindowMessage({ command: "triggerCsvDownload" });
   }
 
   /**
@@ -85,7 +96,7 @@ class LpFilelessImporter {
    * background script and the content script.
    */
   private setupMessagePort() {
-    this.messagePort = chrome.runtime.connect({ name: "lp-fileless-importer" });
+    this.messagePort = chrome.runtime.connect({ name: FilelessImportPortNames.LpImport });
     this.messagePort.onMessage.addListener(this.handlePortMessage);
   }
 
@@ -101,7 +112,7 @@ class LpFilelessImporter {
       return;
     }
 
-    handler(message, port);
+    handler({ message, port });
   };
 }
 

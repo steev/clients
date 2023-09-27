@@ -26,13 +26,14 @@ const runtime = {
   onConnect: {
     addListener: jest.fn(),
   },
-  connect: jest.fn().mockReturnValue({
+  connect: jest.fn((connectInfo: chrome.runtime.ConnectInfo) => ({
+    name: connectInfo.name,
     onMessage: {
       addListener: jest.fn(),
     },
     postMessage: jest.fn(),
     disconnect: jest.fn(),
-  }),
+  })),
 };
 
 const contextMenus = {

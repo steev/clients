@@ -1,4 +1,6 @@
-import { mock } from "jest-mock-extended";
+import { FilelessImportPortNames } from "../enums/fileless-import.enums";
+
+import { LpFilelessImporter } from "./abstractions/lp-fileless-importer";
 
 describe("LpFilelessImporter", () => {
   let lpFilelessImporter: LpFilelessImporter;
@@ -15,96 +17,79 @@ describe("LpFilelessImporter", () => {
 
   describe("init", () => {
     it("sets up the port connection with the background script", () => {
-      jest.spyOn(lpFilelessImporter as any, "setupMessagePort");
-
       lpFilelessImporter.init();
 
-      expect(lpFilelessImporter["setupMessagePort"]).toHaveBeenCalled();
+      expect(chrome.runtime.connect).toHaveBeenCalledWith({
+        name: FilelessImportPortNames.LpImport,
+      });
     });
   });
 
   describe("handleFeatureFlagVerification", () => {
-    it("disconnects the port and return early if the feature flag is not set", () => {
-      const message = {
-        command: "verifyFeatureFlag",
-        filelessImportEnabled: false,
-      };
+    it("disconnects the message port when the fileless import feature is disabled", () => {
+      jest.spyOn((lpFilelessImporter as any)["messagePort"], "disconnect");
 
-      lpFilelessImporter["handleFeatureFlagVerification"](message);
+      lpFilelessImporter.handleFeatureFlagVerification({ filelessImportEnabled: false });
 
-      expect(lpFilelessImporter["messagePort"].disconnect).toHaveBeenCalled();
+      expect((lpFilelessImporter as any)["messagePort"].disconnect).toHaveBeenCalled();
     });
 
-    it("suppresses the csv download if the feature flag is set", () => {
-      const message = {
-        command: "verifyFeatureFlag",
-        filelessImportEnabled: true,
-      };
-      const suppressDownload = jest
-        .spyOn(lpFilelessImporter as any, "suppressDownload")
-        .mockImplementationOnce(jest.fn());
-
-      lpFilelessImporter["handleFeatureFlagVerification"](message);
-
-      expect(suppressDownload).toHaveBeenCalled();
-    });
-  });
-
-  describe("suppressDownload", () => {
-    it("appends a script element to the document element that facilitates suppressing the download of the csv export", () => {
+    it("injects a script element that suppresses the download of the LastPass export", () => {
       const script = document.createElement("script");
-      const appendChild = jest.spyOn(document.documentElement, "appendChild");
-      const createElement = jest.spyOn(document, "createElement").mockReturnValue(script as any);
+      jest.spyOn(document, "createElement").mockReturnValue(script);
+      jest.spyOn(document.documentElement, "appendChild");
 
-      lpFilelessImporter["suppressDownload"]();
+      lpFilelessImporter.handleFeatureFlagVerification({ filelessImportEnabled: true });
 
-      expect(createElement).toHaveBeenCalledWith("script");
-      expect(appendChild).toHaveBeenCalledWith(script);
-      expect(script.textContent).toEqual(
-        expect.stringContaining(`const defaultAppendChild = Element.prototype.appendChild;`)
+      expect(document.createElement).toHaveBeenCalledWith("script");
+      expect(document.documentElement.appendChild).toHaveBeenCalled();
+      expect(script.textContent).toContain(
+        "const defaultAppendChild = Element.prototype.appendChild;"
       );
     });
   });
 
-  describe("postWindowMessage", () => {
-    it("posts a message to the window", () => {
-      const postMessage = jest.spyOn(window, "postMessage");
+  describe("triggerCsvDownload", () => {
+    it("posts a window message that triggers the download of the LastPass export", () => {
+      jest.spyOn(globalThis, "postMessage");
 
-      lpFilelessImporter["postWindowMessage"]({ command: "command" });
+      lpFilelessImporter.triggerCsvDownload();
 
-      expect(postMessage).toHaveBeenCalledWith({ command: "command" }, "https://lastpass.com");
-    });
-  });
-
-  describe("setupMessagePort", () => {
-    it("sets up the long lived port between the content script and background script", () => {
-      lpFilelessImporter["setupMessagePort"]();
-
-      expect(chrome.runtime.connect).toHaveBeenCalledWith({ name: "lp-fileless-importer" });
-      expect(lpFilelessImporter["messagePort"].onMessage.addListener).toHaveBeenCalledWith(
-        lpFilelessImporter["handlePortMessage"]
+      expect(globalThis.postMessage).toHaveBeenCalledWith(
+        { command: "triggerCsvDownload" },
+        "https://lastpass.com"
       );
     });
   });
 
   describe("handlePortMessage", () => {
-    it("skips triggering the handler if it does not exist on the port message handlers", () => {
-      const message = { command: "test" };
-      const port = mock<chrome.runtime.Port>();
+    it("returns without triggering a handler if the port message is not registered with the portMessageHandlers", () => {
+      jest.spyOn(lpFilelessImporter as any, "handleFeatureFlagVerification");
 
-      lpFilelessImporter["handlePortMessage"](message, port);
+      (lpFilelessImporter as any)["handlePortMessage"](
+        { command: "unknownCommand" },
+        (lpFilelessImporter as any)["messagePort"]
+      );
 
-      expect(lpFilelessImporter["portMessageHandlers"]["test"]).toBeUndefined();
+      expect((lpFilelessImporter as any)["handleFeatureFlagVerification"]).not.toHaveBeenCalled();
     });
 
-    it("triggers the handler if it exists on the port message handlers", () => {
-      const message = { command: "test" };
-      const port = mock<chrome.runtime.Port>();
-      lpFilelessImporter["portMessageHandlers"]["test"] = jest.fn();
+    it("handles messages that are registered with the portMessageHandlers", () => {
+      const handlerMethodPairs = {
+        triggerCsvDownload: "triggerCsvDownload",
+        verifyFeatureFlag: "handleFeatureFlagVerification",
+      };
 
-      lpFilelessImporter["handlePortMessage"](message, port);
+      for (const [command, handler] of Object.entries(handlerMethodPairs)) {
+        jest.spyOn(lpFilelessImporter as any, handler);
 
-      expect(lpFilelessImporter["portMessageHandlers"]["test"]).toHaveBeenCalled();
+        (lpFilelessImporter as any)["handlePortMessage"](
+          { command },
+          (lpFilelessImporter as any)["messagePort"]
+        );
+
+        expect((lpFilelessImporter as any)[handler]).toHaveBeenCalled();
+      }
     });
   });
 });

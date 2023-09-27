@@ -6,6 +6,8 @@ import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authenticatio
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigService } from "@bitwarden/common/platform/services/config/config.service";
 
+import { FilelessImportPortNames } from "../enums/fileless-import.enums";
+
 import FilelessImporterBackground from "./fileless-importer.background";
 
 function createPortMock(name: string): chrome.runtime.Port {
@@ -81,7 +83,7 @@ describe("FilelessImporterBackground", () => {
     });
 
     it("returns early if the feature flag is not set to true", async () => {
-      const port = createPortMock("lp-fileless-importer");
+      const port = createPortMock(FilelessImportPortNames.LpImport);
       jest
         .spyOn(filelessImporterBackground["authService"], "getAuthStatus")
         .mockResolvedValue(AuthenticationStatus.Unlocked);
@@ -107,7 +109,7 @@ describe("FilelessImporterBackground", () => {
     });
 
     it("only sets up the port listeners when the user auth status is unlocked", async () => {
-      const port = createPortMock("lp-fileless-importer");
+      const port = createPortMock(FilelessImportPortNames.LpImport);
       jest
         .spyOn(filelessImporterBackground["authService"], "getAuthStatus")
         .mockResolvedValue(AuthenticationStatus.Locked);
@@ -133,7 +135,7 @@ describe("FilelessImporterBackground", () => {
     });
 
     it("only sets up the port listeners when the remove individual policy vault is active", async () => {
-      const port = createPortMock("lp-fileless-importer");
+      const port = createPortMock(FilelessImportPortNames.LpImport);
       jest
         .spyOn(filelessImporterBackground["authService"], "getAuthStatus")
         .mockResolvedValue(AuthenticationStatus.Unlocked);
@@ -159,7 +161,7 @@ describe("FilelessImporterBackground", () => {
     });
 
     it("sets up the port's onMessage and onDisconnect listeners", async () => {
-      const port = createPortMock("lp-fileless-importer");
+      const port = createPortMock(FilelessImportPortNames.LpImport);
       jest
         .spyOn(filelessImporterBackground["authService"], "getAuthStatus")
         .mockResolvedValue(AuthenticationStatus.Unlocked);
@@ -188,7 +190,7 @@ describe("FilelessImporterBackground", () => {
   describe("handleImporterPortMessage", () => {
     it("returns without triggering a handler if the command does not exist", () => {
       const port = mock<chrome.runtime.Port>({
-        name: "lp-fileless-importer",
+        name: FilelessImportPortNames.LpImport,
       });
       const message = { command: "test" };
 
@@ -199,7 +201,7 @@ describe("FilelessImporterBackground", () => {
 
     it("triggers a handler if the command exists", () => {
       const port = mock<chrome.runtime.Port>({
-        name: "lp-fileless-importer",
+        name: FilelessImportPortNames.LpImport,
       });
       const message = { command: "test" };
       filelessImporterBackground["lpImporterPortMessageHandlers"]["test"] = jest.fn();
@@ -215,7 +217,7 @@ describe("FilelessImporterBackground", () => {
   describe("handleImporterPortDisconnect", () => {
     it("sets the port reference to null", () => {
       const port = mock<chrome.runtime.Port>({
-        name: "lp-fileless-importer",
+        name: FilelessImportPortNames.LpImport,
       });
       filelessImporterBackground["lpImporterPort"] = port;
 

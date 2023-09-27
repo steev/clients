@@ -5,7 +5,7 @@ import { FilelessImportPortNames } from "../enums/fileless-import.enums";
 import { LpFilelessImporter } from "./abstractions/lp-fileless-importer";
 
 describe("LpFilelessImporter", () => {
-  let lpFilelessImporter: LpFilelessImporter;
+  let lpFilelessImporter: LpFilelessImporter & { [key: string]: any };
   let portSpy: chrome.runtime.Port & { onMessage: { callListener: (message: any) => void } };
 
   beforeEach(() => {
@@ -106,6 +106,60 @@ describe("LpFilelessImporter", () => {
         { command: "triggerCsvDownload" },
         "https://lastpass.com"
       );
+    });
+  });
+
+  describe("handleMutation", () => {
+    beforeEach(() => {
+      lpFilelessImporter["mutationObserver"] = mock<MutationObserver>({ disconnect: jest.fn() });
+      jest.spyOn(portSpy, "postMessage");
+    });
+
+    it("ignores mutations that contain empty records", () => {
+      lpFilelessImporter["handleMutation"]([]);
+
+      expect(portSpy.postMessage).not.toHaveBeenCalled();
+    });
+
+    it("ignores mutations that have no added nodes in the mutation", () => {
+      lpFilelessImporter["handleMutation"]([{ addedNodes: [] }]);
+
+      expect(portSpy.postMessage).not.toHaveBeenCalled();
+    });
+
+    it("ignores mutations that have no added nodes with a tagname of `pre`", () => {
+      lpFilelessImporter["handleMutation"]([{ addedNodes: [{ nodeName: "div" }] }]);
+
+      expect(portSpy.postMessage).not.toHaveBeenCalled();
+    });
+
+    it("ignores mutations where the found `pre` element does not contain any textContent", () => {
+      lpFilelessImporter["handleMutation"]([{ addedNodes: [{ nodeName: "pre" }] }]);
+
+      expect(portSpy.postMessage).not.toHaveBeenCalled();
+    });
+
+    it("ignores mutations where the found `pre` element does not contain the expected header content", () => {
+      lpFilelessImporter["handleMutation"]([
+        { addedNodes: [{ nodeName: "pre", textContent: "some other content" }] },
+      ]);
+
+      expect(portSpy.postMessage).not.toHaveBeenCalled();
+    });
+
+    it("will store the export data, display the import notification, and disconnect the mutation observer when the export data is appended", () => {
+      const observerDisconnectSpy = jest.spyOn(
+        lpFilelessImporter["mutationObserver"],
+        "disconnect"
+      );
+
+      lpFilelessImporter["handleMutation"]([
+        { addedNodes: [{ nodeName: "pre", textContent: "url,username,password" }] },
+      ]);
+
+      expect(lpFilelessImporter["exportData"]).toEqual("url,username,password");
+      expect(portSpy.postMessage).toHaveBeenCalledWith({ command: "displayLpImportNotification" });
+      expect(observerDisconnectSpy).toHaveBeenCalled();
     });
   });
 

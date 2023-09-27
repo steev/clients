@@ -14,6 +14,7 @@ import {
   GroupProjectAccessPolicyView,
   GroupServiceAccountAccessPolicyView,
   ProjectAccessPoliciesView,
+  ProjectPeopleAccessPoliciesView,
   ServiceAccountAccessPoliciesView,
   ServiceAccountProjectAccessPolicyView,
   UserProjectAccessPolicyView,
@@ -21,9 +22,16 @@ import {
 } from "../../models/view/access-policy.view";
 import { PotentialGranteeView } from "../../models/view/potential-grantee.view";
 import { AccessPoliciesCreateRequest } from "../../shared/access-policies/models/requests/access-policies-create.request";
+import { PeopleAccessPoliciesRequest } from "../../shared/access-policies/models/requests/people-access-policies.request";
+import { PeopleAccessPoliciesResponse } from "../../shared/access-policies/models/responses/people-access-policies.response";
 import { ProjectAccessPoliciesResponse } from "../../shared/access-policies/models/responses/project-access-policies.response";
 import { ServiceAccountAccessPoliciesResponse } from "../../shared/access-policies/models/responses/service-accounts-access-policies.response";
 
+import {
+  AccessPolicyItemType,
+  AccessPolicyItemValue,
+  AccessPolicyPermission,
+} from "./access-policy-selector/access-policy-selector.models";
 import { AccessSelectorRowView } from "./access-selector.component";
 import { AccessPolicyUpdateRequest } from "./models/requests/access-policy-update.request";
 import { AccessPolicyRequest } from "./models/requests/access-policy.request";
@@ -133,6 +141,37 @@ export class AccessPolicyService {
     return await this.createProjectAccessPoliciesView(organizationId, results);
   }
 
+  async getProjectPeopleAccessPolicies(
+    projectId: string
+  ): Promise<ProjectPeopleAccessPoliciesView> {
+    const r = await this.apiService.send(
+      "GET",
+      "/projects/" + projectId + "/access-policies/people",
+      null,
+      true,
+      true
+    );
+
+    const results = new PeopleAccessPoliciesResponse(r);
+    return this.createProjectPeopleAccessPoliciesView(results);
+  }
+
+  async putProjectPeopleAccessPolicies(
+    projectId: string,
+    peoplePoliciesView: ProjectPeopleAccessPoliciesView
+  ) {
+    const request = this.getPeopleAccessPoliciesRequest(peoplePoliciesView);
+    const r = await this.apiService.send(
+      "PUT",
+      "/projects/" + projectId + "/access-policies/people",
+      request,
+      true,
+      true
+    );
+    const results = new PeopleAccessPoliciesResponse(r);
+    return this.createProjectPeopleAccessPoliciesView(results);
+  }
+
   async getServiceAccountAccessPolicies(
     serviceAccountId: string
   ): Promise<ServiceAccountAccessPoliciesView> {
@@ -207,6 +246,40 @@ export class AccessPolicyService {
     );
   }
 
+  async showAccessRemovalWarning(
+    organizationId: string,
+    selectedPoliciesValues: AccessPolicyItemValue[]
+  ): Promise<boolean> {
+    const organization = this.organizationService.get(organizationId);
+    if (organization.isOwner || organization.isAdmin) {
+      return false;
+    }
+
+    const selectedUserReadWritePolicy = selectedPoliciesValues.find(
+      (s) =>
+        s.type === AccessPolicyItemType.User &&
+        s.currentUser &&
+        s.permission === AccessPolicyPermission.CanReadWrite
+    );
+
+    const selectedGroupReadWritePolicies = selectedPoliciesValues.filter(
+      (s) =>
+        s.type === AccessPolicyItemType.Group &&
+        s.permission == AccessPolicyPermission.CanReadWrite &&
+        s.currentUserInGroup
+    );
+
+    if (selectedGroupReadWritePolicies == null || selectedGroupReadWritePolicies.length == 0) {
+      if (selectedUserReadWritePolicy == null) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
   async needToShowAccessRemovalWarning(
     organizationId: string,
     policy: AccessSelectorRowView,
@@ -258,6 +331,20 @@ export class AccessPolicyService {
     return view;
   }
 
+  private createProjectPeopleAccessPoliciesView(
+    peopleAccessPoliciesResponse: PeopleAccessPoliciesResponse
+  ): ProjectAccessPoliciesView {
+    const view = new ProjectAccessPoliciesView();
+
+    view.userAccessPolicies = peopleAccessPoliciesResponse.userAccessPolicies.map((ap) => {
+      return this.createUserProjectAccessPolicyView(ap);
+    });
+    view.groupAccessPolicies = peopleAccessPoliciesResponse.groupAccessPolicies.map((ap) => {
+      return this.createGroupProjectAccessPolicyView(ap);
+    });
+    return view;
+  }
+
   private getAccessPoliciesCreateRequest(
     projectAccessPoliciesView: ProjectAccessPoliciesView
   ): AccessPoliciesCreateRequest {
@@ -286,6 +373,30 @@ export class AccessPolicyService {
         });
     }
     return createRequest;
+  }
+
+  private getPeopleAccessPoliciesRequest(
+    projectPeopleAccessPoliciesView: ProjectPeopleAccessPoliciesView
+  ): PeopleAccessPoliciesRequest {
+    const request = new PeopleAccessPoliciesRequest();
+
+    if (projectPeopleAccessPoliciesView.userAccessPolicies?.length > 0) {
+      request.userAccessPolicyRequests = projectPeopleAccessPoliciesView.userAccessPolicies.map(
+        (ap) => {
+          return this.getAccessPolicyRequest(ap.organizationUserId, ap);
+        }
+      );
+    }
+
+    if (projectPeopleAccessPoliciesView.groupAccessPolicies?.length > 0) {
+      request.groupAccessPolicyRequests = projectPeopleAccessPoliciesView.groupAccessPolicies.map(
+        (ap) => {
+          return this.getAccessPolicyRequest(ap.groupId, ap);
+        }
+      );
+    }
+
+    return request;
   }
 
   private createUserProjectAccessPolicyView(
@@ -478,6 +589,8 @@ export class AccessPolicyService {
         view.id = r.id;
         view.type = r.type;
         view.email = r.email;
+        view.currentUser = r.currentUser;
+        view.currentUserInGroup = r.currentUserInGroup;
 
         if (r.type === "serviceAccount" || r.type === "project") {
           view.name = await this.encryptService.decryptToUtf8(new EncString(r.name), orgKey);

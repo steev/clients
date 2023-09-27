@@ -1,149 +1,98 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
+import { FormControl, FormGroup } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
-import { map, Observable, share, startWith, Subject, switchMap, takeUntil } from "rxjs";
+import { combineLatest, Subject, switchMap, takeUntil } from "rxjs";
 
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
-import { DialogService, SelectItemView } from "@bitwarden/components";
+import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { DialogService } from "@bitwarden/components";
 
 import {
   GroupProjectAccessPolicyView,
-  ProjectAccessPoliciesView,
+  ProjectPeopleAccessPoliciesView,
   UserProjectAccessPolicyView,
 } from "../../models/view/access-policy.view";
+import {
+  AccessPolicyItemType,
+  AccessPolicyItemValue,
+  AccessPolicyItemView,
+  convertToAccessPolicyItemViews,
+  toRead,
+  toWrite,
+} from "../../shared/access-policies/access-policy-selector/access-policy-selector.models";
 import { AccessPolicyService } from "../../shared/access-policies/access-policy.service";
-import {
-  AccessSelectorComponent,
-  AccessSelectorRowView,
-} from "../../shared/access-policies/access-selector.component";
-import {
-  AccessRemovalDetails,
-  AccessRemovalDialogComponent,
-} from "../../shared/access-policies/dialogs/access-removal-dialog.component";
+import { AccessSelectorComponent } from "../../shared/access-policies/access-selector.component";
 
 @Component({
   selector: "sm-project-people",
   templateUrl: "./project-people.component.html",
 })
 export class ProjectPeopleComponent implements OnInit, OnDestroy {
+  private currentAccessPolicies: AccessPolicyItemView[];
   private destroy$ = new Subject<void>();
   private organizationId: string;
   private projectId: string;
-  private rows: AccessSelectorRowView[];
 
-  protected rows$: Observable<AccessSelectorRowView[]> =
-    this.accessPolicyService.projectAccessPolicyChanges$.pipe(
-      startWith(null),
-      switchMap(() =>
-        this.accessPolicyService.getProjectAccessPolicies(this.organizationId, this.projectId)
-      ),
-      map((policies) => {
-        const rows: AccessSelectorRowView[] = [];
-        policies.userAccessPolicies.forEach((policy) => {
-          rows.push({
-            type: "user",
-            name: policy.organizationUserName,
-            id: policy.organizationUserId,
-            accessPolicyId: policy.id,
-            read: policy.read,
-            write: policy.write,
-            userId: policy.userId,
-            icon: AccessSelectorComponent.userIcon,
-          });
-        });
+  private currentAccessPolicies$ = combineLatest([this.route.params]).pipe(
+    switchMap(([params]) =>
+      this.accessPolicyService.getProjectPeopleAccessPolicies(params.projectId).then((policies) => {
+        return convertToAccessPolicyItemViews(policies);
+      })
+    )
+  );
 
-        policies.groupAccessPolicies.forEach((policy) => {
-          rows.push({
-            type: "group",
-            name: policy.groupName,
-            id: policy.groupId,
-            accessPolicyId: policy.id,
-            read: policy.read,
-            write: policy.write,
-            currentUserInGroup: policy.currentUserInGroup,
-            icon: AccessSelectorComponent.groupIcon,
-          });
-        });
-        return rows;
-      }),
-      share()
-    );
-
-  protected handleCreateAccessPolicies(selected: SelectItemView[]) {
-    const projectAccessPoliciesView = new ProjectAccessPoliciesView();
-    projectAccessPoliciesView.userAccessPolicies = selected
-      .filter((selection) => AccessSelectorComponent.getAccessItemType(selection) === "user")
-      .map((filtered) => {
-        const view = new UserProjectAccessPolicyView();
-        view.grantedProjectId = this.projectId;
-        view.organizationUserId = filtered.id;
-        view.read = true;
-        view.write = false;
-        return view;
-      });
-
-    projectAccessPoliciesView.groupAccessPolicies = selected
-      .filter((selection) => AccessSelectorComponent.getAccessItemType(selection) === "group")
-      .map((filtered) => {
-        const view = new GroupProjectAccessPolicyView();
-        view.grantedProjectId = this.projectId;
-        view.groupId = filtered.id;
-        view.read = true;
-        view.write = false;
-        return view;
-      });
-
-    return this.accessPolicyService.createProjectAccessPolicies(
-      this.organizationId,
-      this.projectId,
-      projectAccessPoliciesView
-    );
-  }
-
-  protected async handleDeleteAccessPolicy(policy: AccessSelectorRowView) {
-    if (
-      await this.accessPolicyService.needToShowAccessRemovalWarning(
-        this.organizationId,
-        policy,
-        this.rows
+  private potentialGrantees$ = combineLatest([this.route.params]).pipe(
+    switchMap(([params]) =>
+      this.accessPolicyService.getPeoplePotentialGrantees(params.organizationId).then((grantees) =>
+        grantees.map((granteeView) => {
+          let icon: string;
+          let type: AccessPolicyItemType;
+          let listName = granteeView.name;
+          let labelName = granteeView.name;
+          if (granteeView.type === "user") {
+            icon = AccessSelectorComponent.userIcon;
+            type = AccessPolicyItemType.User;
+            if (Utils.isNullOrWhitespace(granteeView.name)) {
+              listName = granteeView.email;
+              labelName = granteeView.email;
+            } else {
+              listName = `${granteeView.name} (${granteeView.email})`;
+            }
+          } else if (granteeView.type === "group") {
+            icon = AccessSelectorComponent.groupIcon;
+            type = AccessPolicyItemType.Group;
+          } else if (granteeView.type === "serviceAccount") {
+            icon = AccessSelectorComponent.serviceAccountIcon;
+            type = AccessPolicyItemType.ServiceAccount;
+          } else if (granteeView.type === "project") {
+            icon = AccessSelectorComponent.projectIcon;
+            type = AccessPolicyItemType.Project;
+          }
+          return {
+            icon: icon,
+            type: type,
+            id: granteeView.id,
+            labelName: labelName,
+            listName: listName,
+            currentUserInGroup: granteeView.currentUserInGroup,
+            currentUser: granteeView.currentUser,
+          };
+        })
       )
-    ) {
-      this.launchDeleteWarningDialog(policy);
-      return;
-    }
+    )
+  );
 
-    try {
-      await this.accessPolicyService.deleteAccessPolicy(policy.accessPolicyId);
-    } catch (e) {
-      this.validationService.showError(e);
-    }
-  }
+  protected formGroup = new FormGroup({
+    accessPolicies: new FormControl([] as AccessPolicyItemValue[]),
+  });
 
-  protected async handleUpdateAccessPolicy(policy: AccessSelectorRowView) {
-    if (
-      policy.read === true &&
-      policy.write === false &&
-      (await this.accessPolicyService.needToShowAccessRemovalWarning(
-        this.organizationId,
-        policy,
-        this.rows
-      ))
-    ) {
-      this.launchUpdateWarningDialog(policy);
-      return;
-    }
-
-    try {
-      return await this.accessPolicyService.updateAccessPolicy(
-        AccessSelectorComponent.getBaseAccessPolicyView(policy)
-      );
-    } catch (e) {
-      this.validationService.showError(e);
-    }
-  }
+  protected loading = true;
+  protected potentialGrantees: AccessPolicyItemView[];
 
   constructor(
     private route: ActivatedRoute,
     private dialogService: DialogService,
+    private changeDetectorRef: ChangeDetectorRef,
     private validationService: ValidationService,
     private accessPolicyService: AccessPolicyService
   ) {}
@@ -154,9 +103,12 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
       this.projectId = params.projectId;
     });
 
-    this.rows$.pipe(takeUntil(this.destroy$)).subscribe((rows) => {
-      this.rows = rows;
-    });
+    combineLatest([this.potentialGrantees$, this.currentAccessPolicies$])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(([potentialGrantees, currentAccessPolicies]) => {
+        this.potentialGrantees = potentialGrantees;
+        this.setSelected(currentAccessPolicies);
+      });
   }
 
   ngOnDestroy(): void {
@@ -164,29 +116,90 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private async launchDeleteWarningDialog(policy: AccessSelectorRowView) {
-    this.dialogService.open<unknown, AccessRemovalDetails>(AccessRemovalDialogComponent, {
-      data: {
-        title: "smAccessRemovalWarningProjectTitle",
-        message: "smAccessRemovalWarningProjectMessage",
-        operation: "delete",
-        type: "project",
-        returnRoute: ["sm", this.organizationId, "projects"],
-        policy,
-      },
-    });
+  submit = async () => {
+    this.formGroup.markAllAsTouched();
+
+    if (this.formGroup.invalid) {
+      return;
+    }
+
+    if (
+      await this.accessPolicyService.showAccessRemovalWarning(
+        this.organizationId,
+        this.formGroup.value.accessPolicies
+      )
+    ) {
+      const confirmed = await this.dialogService.openSimpleDialog({
+        title: { key: "smAccessRemovalWarningProjectTitle" },
+        content: { key: "smAccessRemovalWarningProjectMessage" },
+        acceptButtonText: { key: "removeAccess" },
+        cancelButtonText: { key: "cancel" },
+        type: "warning",
+      });
+      if (!confirmed) {
+        this.setSelected(this.currentAccessPolicies);
+        return;
+      }
+    }
+
+    try {
+      const projectPeopleView = this.toProjectPeopleAccessPoliciesView(
+        this.formGroup.value.accessPolicies
+      );
+      const peoplePoliciesViews = await this.accessPolicyService.putProjectPeopleAccessPolicies(
+        this.projectId,
+        projectPeopleView
+      );
+      this.currentAccessPolicies = convertToAccessPolicyItemViews(peoplePoliciesViews);
+    } catch (e) {
+      this.validationService.showError(e);
+      this.setSelected(this.currentAccessPolicies);
+    }
+  };
+
+  private setSelected(policiesToSelect: AccessPolicyItemView[]) {
+    this.currentAccessPolicies = policiesToSelect;
+    this.loading = true;
+    if (policiesToSelect != undefined) {
+      // Must detect changes so that AccessSelector @Inputs() are aware of the latest
+      // potentialGrantees, otherwise no selected values will be patched below
+      this.changeDetectorRef.detectChanges();
+      this.formGroup.patchValue({
+        accessPolicies: policiesToSelect.map((m) => ({
+          type: m.type,
+          id: m.id,
+          permission: m.permission,
+        })),
+      });
+    }
+    this.loading = false;
   }
 
-  private launchUpdateWarningDialog(policy: AccessSelectorRowView) {
-    this.dialogService.open<unknown, AccessRemovalDetails>(AccessRemovalDialogComponent, {
-      data: {
-        title: "smAccessRemovalWarningProjectTitle",
-        message: "smAccessRemovalWarningProjectMessage",
-        operation: "update",
-        type: "project",
-        returnRoute: ["sm", this.organizationId, "projects"],
-        policy,
-      },
-    });
+  private toProjectPeopleAccessPoliciesView(
+    selectedPolicyValues: AccessPolicyItemValue[]
+  ): ProjectPeopleAccessPoliciesView {
+    const view = new ProjectPeopleAccessPoliciesView();
+    view.userAccessPolicies = selectedPolicyValues
+      .filter((x) => x.type == AccessPolicyItemType.User)
+      .map((filtered) => {
+        const policyView = new UserProjectAccessPolicyView();
+        policyView.grantedProjectId = this.projectId;
+        policyView.organizationUserId = filtered.id;
+        policyView.read = toRead(filtered.permission);
+        policyView.write = toWrite(filtered.permission);
+        return policyView;
+      });
+
+    view.groupAccessPolicies = selectedPolicyValues
+      .filter((x) => x.type == AccessPolicyItemType.Group)
+      .map((filtered) => {
+        const policyView = new GroupProjectAccessPolicyView();
+        policyView.grantedProjectId = this.projectId;
+        policyView.groupId = filtered.id;
+        policyView.read = toRead(filtered.permission);
+        policyView.write = toWrite(filtered.permission);
+        return policyView;
+      });
+    return view;
   }
 }

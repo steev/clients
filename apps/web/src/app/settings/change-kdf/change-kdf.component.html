@@ -94,7 +94,7 @@
     <div class="col-12">
       <ng-container *ngIf="kdf == kdfType.PBKDF2_SHA256">
         <p class="small form-text text-muted">
-          {{ "kdfIterationsDesc" | i18n : (PBKDF2_ITERATIONS.def | number) }}
+          {{ "kdfIterationsDesc" | i18n : (PBKDF2_ITERATIONS.defaultValue | number) }}
         </p>
         <bit-callout type="warning">
           {{ "kdfIterationsWarning" | i18n : (100000 | number) }}

@@ -15,18 +15,20 @@ import {
 import { AccessPolicyService } from "./access-policy.service";
 
 describe("AccessPolicyService", () => {
+  let cryptoService: MockProxy<CryptoService>;
   let organizationService: MockProxy<OrganizationService>;
+  let apiService: MockProxy<ApiService>;
+  let encryptService: MockProxy<EncryptService>;
 
   let sut: AccessPolicyService;
 
   beforeEach(() => {
+    cryptoService = mock<CryptoService>();
     organizationService = mock<OrganizationService>();
-    sut = new AccessPolicyService(
-      mock<CryptoService>,
-      organizationService,
-      mock<ApiService>,
-      mock<EncryptService>
-    );
+    apiService = mock<ApiService>();
+    encryptService = mock<EncryptService>();
+
+    sut = new AccessPolicyService(cryptoService, organizationService, apiService, encryptService);
   });
 
   afterEach(() => jest.resetAllMocks());

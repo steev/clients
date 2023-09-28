@@ -5,11 +5,23 @@ export enum KdfType {
   Argon2id = 1,
 }
 
-export const DEFAULT_ARGON2_MEMORY = 64;
-export const DEFAULT_ARGON2_PARALLELISM = 4;
-export const DEFAULT_ARGON2_ITERATIONS = 3;
+class RangeConstant {
+  constructor(readonly min: number, readonly max: number, readonly def: number) {
+    if (this.inRange(def) === false) {
+      throw new Error("Default value is not in range.");
+    }
+  }
+
+  inRange(value: number): boolean {
+    return value >= this.min && value <= this.max;
+  }
+}
+
+export const ARGON2_MEMORY = new RangeConstant(16, 1024, 64);
+export const ARGON2_PARALLELISM = new RangeConstant(1, 16, 4);
+export const ARGON2_ITERATIONS = new RangeConstant(1, 10, 3);
 
 export const DEFAULT_KDF_TYPE = KdfType.PBKDF2_SHA256;
-export const DEFAULT_PBKDF2_ITERATIONS = 600000;
-export const DEFAULT_KDF_CONFIG = new KdfConfig(DEFAULT_PBKDF2_ITERATIONS);
+export const PBKDF2_ITERATIONS = new RangeConstant(100_000, 2_000_000, 600_000);
+export const DEFAULT_KDF_CONFIG = new KdfConfig(PBKDF2_ITERATIONS.def);
 export const SEND_KDF_ITERATIONS = 100000;

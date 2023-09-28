@@ -10,10 +10,11 @@ import {
   KeySuffixOptions,
   HashPurpose,
   KdfType,
-  DEFAULT_ARGON2_ITERATIONS,
-  DEFAULT_ARGON2_MEMORY,
-  DEFAULT_ARGON2_PARALLELISM,
+  ARGON2_ITERATIONS,
+  ARGON2_MEMORY,
+  ARGON2_PARALLELISM,
   EncryptionType,
+  PBKDF2_ITERATIONS,
 } from "../../enums";
 import { Utils } from "../../platform/misc/utils";
 import { CryptoFunctionService } from "../abstractions/crypto-function.service";
@@ -900,30 +901,37 @@ export class CryptoService implements CryptoServiceAbstraction {
     let key: Uint8Array = null;
     if (kdf == null || kdf === KdfType.PBKDF2_SHA256) {
       if (kdfConfig.iterations == null) {
-        kdfConfig.iterations = 5000;
-      } else if (kdfConfig.iterations < 5000) {
-        throw new Error("PBKDF2 iteration minimum is 5000.");
+        kdfConfig.iterations = PBKDF2_ITERATIONS.def;
+      } else if (!PBKDF2_ITERATIONS.inRange(kdfConfig.iterations)) {
+        throw new Error(
+          `PBKDF2 iterations must be between ${PBKDF2_ITERATIONS.min} and ${PBKDF2_ITERATIONS.max}`
+        );
       }
+
       key = await this.cryptoFunctionService.pbkdf2(password, salt, "sha256", kdfConfig.iterations);
     } else if (kdf == KdfType.Argon2id) {
       if (kdfConfig.iterations == null) {
-        kdfConfig.iterations = DEFAULT_ARGON2_ITERATIONS;
-      } else if (kdfConfig.iterations < 2) {
-        throw new Error("Argon2 iteration minimum is 2.");
+        kdfConfig.iterations = ARGON2_ITERATIONS.def;
+      } else if (!ARGON2_ITERATIONS.inRange(kdfConfig.iterations)) {
+        throw new Error(
+          `Argon2 iterations must be between ${ARGON2_ITERATIONS.min} and ${ARGON2_ITERATIONS.max}`
+        );
       }
 
       if (kdfConfig.memory == null) {
-        kdfConfig.memory = DEFAULT_ARGON2_MEMORY;
-      } else if (kdfConfig.memory < 16) {
-        throw new Error("Argon2 memory minimum is 16 MB");
-      } else if (kdfConfig.memory > 1024) {
-        throw new Error("Argon2 memory maximum is 1024 MB");
+        kdfConfig.memory = ARGON2_MEMORY.def;
+      } else if (!ARGON2_MEMORY.inRange(kdfConfig.memory)) {
+        throw new Error(
+          `Argon2 memory must be between ${ARGON2_MEMORY.min}mb and ${ARGON2_MEMORY.max}mb`
+        );
       }
 
       if (kdfConfig.parallelism == null) {
-        kdfConfig.parallelism = DEFAULT_ARGON2_PARALLELISM;
-      } else if (kdfConfig.parallelism < 1) {
-        throw new Error("Argon2 parallelism minimum is 1.");
+        kdfConfig.parallelism = ARGON2_PARALLELISM.def;
+      } else if (!ARGON2_PARALLELISM.inRange(kdfConfig.parallelism)) {
+        throw new Error(
+          `Argon2 parallelism must be between ${ARGON2_PARALLELISM.min} and ${ARGON2_PARALLELISM.max}.`
+        );
       }
 
       const saltHash = await this.cryptoFunctionService.hash(salt, "sha256");

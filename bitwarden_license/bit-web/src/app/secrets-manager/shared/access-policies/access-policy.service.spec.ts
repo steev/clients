@@ -58,10 +58,8 @@ describe("AccessPolicyService", () => {
     });
 
     it("returns true when current user isn't owner/admin and all policies are removed", async () => {
-      const userId = "testUserId";
-      const org = orgFactory({ userId: userId });
+      const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
-      org.type = OrganizationUserType.User;
 
       const selectedPolicyValues: AccessPolicyItemValue[] = [];
 
@@ -71,10 +69,8 @@ describe("AccessPolicyService", () => {
     });
 
     it("returns true when current user isn't owner/admin and user policy is set to canRead", async () => {
-      const userId = "testUserId";
-      const org = orgFactory({ userId: userId });
+      const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
-      org.type = OrganizationUserType.User;
 
       const selectedPolicyValues: AccessPolicyItemValue[] = [];
       selectedPolicyValues.push(
@@ -90,18 +86,33 @@ describe("AccessPolicyService", () => {
     });
 
     it("returns false when current user isn't owner/admin and user policy is set to canReadWrite", async () => {
-      const userId = "testUserId";
-      const org = orgFactory({ userId: userId });
+      const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
-      org.type = OrganizationUserType.User;
 
-      const selectedPolicyValues: AccessPolicyItemValue[] = [];
-      selectedPolicyValues.push(
+      const selectedPolicyValues: AccessPolicyItemValue[] = [
         createAccessPolicyItemValue({
           permission: AccessPolicyPermission.CanReadWrite,
           currentUser: true,
-        })
-      );
+        }),
+      ];
+
+      const result = await sut.showAccessRemovalWarning(org.id, selectedPolicyValues);
+
+      expect(result).toBe(true);
+    });
+
+    it("returns true when current user isn't owner/admin and a group Read policy is submitted that the user is a member of", async () => {
+      const org = setupUserOrg();
+      organizationService.get.calledWith(org.id).mockReturnValue(org);
+
+      const selectedPolicyValues: AccessPolicyItemValue[] = [
+        createAccessPolicyItemValue({
+          id: "groupId",
+          type: AccessPolicyItemType.Group,
+          permission: AccessPolicyPermission.CanRead,
+          currentUserInGroup: true,
+        }),
+      ];
 
       const result = await sut.showAccessRemovalWarning(org.id, selectedPolicyValues);
 
@@ -109,10 +120,8 @@ describe("AccessPolicyService", () => {
     });
 
     it("returns false when current user isn't owner/admin and a group ReadWrite policy is submitted that the user is a member of", async () => {
-      const userId = "testUserId";
-      const org = orgFactory({ userId: userId });
+      const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
-      org.type = OrganizationUserType.User;
 
       const selectedPolicyValues: AccessPolicyItemValue[] = [
         createAccessPolicyItemValue({
@@ -129,10 +138,8 @@ describe("AccessPolicyService", () => {
     });
 
     it("returns true when current user isn't owner/admin and a group ReadWrite policy is submitted that the user is not a member of", async () => {
-      const userId = "testUserId";
-      const org = orgFactory({ userId: userId });
+      const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
-      org.type = OrganizationUserType.User;
 
       const selectedPolicyValues: AccessPolicyItemValue[] = [
         createAccessPolicyItemValue({
@@ -149,10 +156,8 @@ describe("AccessPolicyService", () => {
     });
 
     it("returns false when current user isn't owner/admin, user policy is set to CanRead, and user is in read write group", async () => {
-      const userId = "testUserId";
-      const org = orgFactory({ userId: userId });
+      const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
-      org.type = OrganizationUserType.User;
 
       const selectedPolicyValues: AccessPolicyItemValue[] = [
         createAccessPolicyItemValue({
@@ -173,10 +178,8 @@ describe("AccessPolicyService", () => {
     });
 
     it("returns true when current user isn't owner/admin, user policy is set to CanRead, and user is not in ReadWrite group", async () => {
-      const userId = "testUserId";
-      const org = orgFactory({ userId: userId });
+      const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
-      org.type = OrganizationUserType.User;
 
       const selectedPolicyValues: AccessPolicyItemValue[] = [
         createAccessPolicyItemValue({
@@ -197,10 +200,8 @@ describe("AccessPolicyService", () => {
     });
 
     it("returns true when current user isn't owner/admin, user policy is set to CanRead, and user is in Read group", async () => {
-      const userId = "testUserId";
-      const org = orgFactory({ userId: userId });
+      const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
-      org.type = OrganizationUserType.User;
 
       const selectedPolicyValues: AccessPolicyItemValue[] = [
         createAccessPolicyItemValue({
@@ -240,4 +241,11 @@ function createAccessPolicyItemValue(options: Partial<AccessPolicyItemValue> = {
     permission: options?.permission ?? AccessPolicyPermission.CanRead,
     currentUserInGroup: options?.currentUserInGroup ?? false,
   };
+}
+
+function setupUserOrg() {
+  const userId = "testUserId";
+  const org = orgFactory({ userId: userId });
+  org.type = OrganizationUserType.User;
+  return org;
 }

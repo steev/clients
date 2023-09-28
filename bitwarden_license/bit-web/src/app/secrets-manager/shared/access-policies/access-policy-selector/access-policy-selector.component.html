@@ -35,11 +35,19 @@
         </td>
         <td bitCell class="tw-max-w-sm tw-truncate">{{ item.labelName }}</td>
         <td bitCell class="tw-mb-auto tw-inline-block tw-w-auto">
-          <select bitInput formControlName="permission" (blur)="handleBlur()">
+          <select
+            *ngIf="!staticPermission; else static"
+            bitInput
+            formControlName="permission"
+            (blur)="handleBlur()"
+          >
             <option *ngFor="let p of permissionList" [value]="p.perm">
               {{ p.labelId | i18n }}
             </option>
           </select>
+          <ng-template #static>
+            <span>{{ staticPermission | i18n }}</span>
+          </ng-template>
         </td>
         <td bitCell class="tw-w-0">
           <button

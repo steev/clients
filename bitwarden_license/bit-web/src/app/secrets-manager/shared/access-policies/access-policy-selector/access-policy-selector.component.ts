@@ -37,12 +37,6 @@ export class AccessPolicySelectorComponent implements ControlValueAccessor, OnIn
   private notifyOnTouch: () => void;
   private pauseChangeNotification: boolean;
 
-  protected permissionList = [
-    { perm: AccessPolicyPermission.CanRead, labelId: "canRead" },
-    { perm: AccessPolicyPermission.CanReadWrite, labelId: "canReadWrite" },
-  ];
-  private initialPermission = AccessPolicyPermission.CanRead;
-
   /**
    * The internal selection list that tracks the value of this form control / component.
    * It's responsible for keeping items sorted and synced with the rendered form controls
@@ -50,7 +44,9 @@ export class AccessPolicySelectorComponent implements ControlValueAccessor, OnIn
    */
   protected selectionList = new FormSelectionList<AccessPolicyItemView, AccessPolicyItemValue>(
     (item) => {
-      const permissionControl = this.formBuilder.control(this.initialPermission);
+      const initPermission = this.staticPermission ?? this.initialPermission;
+
+      const permissionControl = this.formBuilder.control(initPermission);
       let currentUserInGroup = false;
       let currentUser = false;
       if (item.type == AccessPolicyItemType.Group) {
@@ -66,7 +62,6 @@ export class AccessPolicySelectorComponent implements ControlValueAccessor, OnIn
         currentUserInGroup: new FormControl(currentUserInGroup),
         currentUser: new FormControl(currentUser),
       });
-
       return fg;
     },
     this._itemComparator.bind(this)
@@ -92,6 +87,16 @@ export class AccessPolicySelectorComponent implements ControlValueAccessor, OnIn
   @Input() hint: string;
   @Input() columnTitle: string;
   @Input() emptyMessage: string;
+
+  @Input() permissionList = [
+    { perm: AccessPolicyPermission.CanRead, labelId: "canRead" },
+    { perm: AccessPolicyPermission.CanReadWrite, labelId: "canReadWrite" },
+  ];
+  @Input() initialPermission = AccessPolicyPermission.CanRead;
+
+  // Pass in a static permission that wil be the only option for a given selector instance.
+  // Will ignore permissionList and initialPermission.
+  @Input() staticPermission: AccessPolicyPermission;
 
   @Input()
   get items(): AccessPolicyItemView[] {

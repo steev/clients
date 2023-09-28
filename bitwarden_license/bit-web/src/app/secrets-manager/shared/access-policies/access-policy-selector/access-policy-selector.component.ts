@@ -13,12 +13,10 @@ import { FormSelectionList } from "@bitwarden/angular/utils/form-selection-list"
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { SelectItemView } from "@bitwarden/components";
 
-import {
-  AccessPolicyItemView,
-  AccessPolicyItemValue,
-  AccessPolicyPermission,
-  AccessPolicyItemType,
-} from "./access-policy-selector.models";
+import { AccessPolicyItemValue } from "./models/access-policy-item-value";
+import { AccessPolicyItemView } from "./models/access-policy-item.view";
+import { ApItemTypeUtil, AccessPolicyItemType } from "./models/enums/access-policy-item-type";
+import { AccessPolicyPermission } from "./models/enums/access-policy-permission";
 
 @Component({
   selector: "sm-access-policy-selector",
@@ -108,7 +106,7 @@ export class AccessPolicySelectorComponent implements ControlValueAccessor, OnIn
       const selected = this.selectionList.formArray.getRawValue() ?? [];
       this.selectionList.populateItems(
         val.map((m) => {
-          m.icon = m.icon ?? this.itemIcon(m);
+          m.icon = m.icon ?? ApItemTypeUtil.itemIcon(m.type);
           return m;
         }),
         selected
@@ -215,19 +213,6 @@ export class AccessPolicySelectorComponent implements ControlValueAccessor, OnIn
   protected addButton() {
     this.selectItems(this.multiSelectFormGroup.value.multiSelect);
     this.multiSelectFormGroup.reset();
-  }
-
-  private itemIcon(item: AccessPolicyItemView) {
-    switch (item.type) {
-      case AccessPolicyItemType.User:
-        return "bwi-user";
-      case AccessPolicyItemType.Group:
-        return "bwi-family";
-      case AccessPolicyItemType.ServiceAccount:
-        return "bwi-wrench";
-      case AccessPolicyItemType.Project:
-        return "bwi-collection";
-    }
   }
 
   private _itemComparator(a: AccessPolicyItemView, b: AccessPolicyItemView) {

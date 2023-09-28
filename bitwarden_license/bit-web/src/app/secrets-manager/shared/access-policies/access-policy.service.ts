@@ -27,11 +27,6 @@ import { PeopleAccessPoliciesResponse } from "../../shared/access-policies/model
 import { ProjectAccessPoliciesResponse } from "../../shared/access-policies/models/responses/project-access-policies.response";
 import { ServiceAccountAccessPoliciesResponse } from "../../shared/access-policies/models/responses/service-accounts-access-policies.response";
 
-import {
-  AccessPolicyItemType,
-  AccessPolicyItemValue,
-  AccessPolicyPermission,
-} from "./access-policy-selector/access-policy-selector.models";
 import { AccessSelectorRowView } from "./access-selector.component";
 import { AccessPolicyUpdateRequest } from "./models/requests/access-policy-update.request";
 import { AccessPolicyRequest } from "./models/requests/access-policy.request";
@@ -244,40 +239,6 @@ export class AccessPolicyService {
       true,
       true
     );
-  }
-
-  async showAccessRemovalWarning(
-    organizationId: string,
-    selectedPoliciesValues: AccessPolicyItemValue[]
-  ): Promise<boolean> {
-    const organization = this.organizationService.get(organizationId);
-    if (organization.isOwner || organization.isAdmin) {
-      return false;
-    }
-
-    const selectedUserReadWritePolicy = selectedPoliciesValues.find(
-      (s) =>
-        s.type === AccessPolicyItemType.User &&
-        s.currentUser &&
-        s.permission === AccessPolicyPermission.CanReadWrite
-    );
-
-    const selectedGroupReadWritePolicies = selectedPoliciesValues.filter(
-      (s) =>
-        s.type === AccessPolicyItemType.Group &&
-        s.permission == AccessPolicyPermission.CanReadWrite &&
-        s.currentUserInGroup
-    );
-
-    if (selectedGroupReadWritePolicies == null || selectedGroupReadWritePolicies.length == 0) {
-      if (selectedUserReadWritePolicy == null) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-
-    return false;
   }
 
   async needToShowAccessRemovalWarning(

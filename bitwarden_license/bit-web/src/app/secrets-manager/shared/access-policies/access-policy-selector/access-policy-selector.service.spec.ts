@@ -1,34 +1,23 @@
 import { mock, MockProxy } from "jest-mock-extended";
 
-import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
-import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 
-import {
-  AccessPolicyItemType,
-  AccessPolicyItemValue,
-  AccessPolicyPermission,
-} from "./access-policy-selector/access-policy-selector.models";
-import { AccessPolicyService } from "./access-policy.service";
+import { AccessPolicySelectorService } from "./access-policy-selector.service";
+import { AccessPolicyItemValue } from "./models/access-policy-item-value";
+import { AccessPolicyItemType } from "./models/enums/access-policy-item-type";
+import { AccessPolicyPermission } from "./models/enums/access-policy-permission";
 
-describe("AccessPolicyService", () => {
-  let cryptoService: MockProxy<CryptoService>;
+describe("AccessPolicySelectorService", () => {
   let organizationService: MockProxy<OrganizationService>;
-  let apiService: MockProxy<ApiService>;
-  let encryptService: MockProxy<EncryptService>;
 
-  let sut: AccessPolicyService;
+  let sut: AccessPolicySelectorService;
 
   beforeEach(() => {
-    cryptoService = mock<CryptoService>();
     organizationService = mock<OrganizationService>();
-    apiService = mock<ApiService>();
-    encryptService = mock<EncryptService>();
 
-    sut = new AccessPolicyService(cryptoService, organizationService, apiService, encryptService);
+    sut = new AccessPolicySelectorService(organizationService);
   });
 
   afterEach(() => jest.resetAllMocks());

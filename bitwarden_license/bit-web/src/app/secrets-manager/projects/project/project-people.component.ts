@@ -7,19 +7,16 @@ import { ValidationService } from "@bitwarden/common/platform/abstractions/valid
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { DialogService } from "@bitwarden/components";
 
+import { AccessPolicySelectorService } from "../../shared/access-policies/access-policy-selector/access-policy-selector.service";
 import {
-  GroupProjectAccessPolicyView,
-  ProjectPeopleAccessPoliciesView,
-  UserProjectAccessPolicyView,
-} from "../../models/view/access-policy.view";
-import {
-  AccessPolicyItemType,
   AccessPolicyItemValue,
+  convertToProjectPeopleAccessPoliciesView,
+} from "../../shared/access-policies/access-policy-selector/models/access-policy-item-value";
+import {
   AccessPolicyItemView,
   convertToAccessPolicyItemViews,
-  toRead,
-  toWrite,
-} from "../../shared/access-policies/access-policy-selector/access-policy-selector.models";
+} from "../../shared/access-policies/access-policy-selector/models/access-policy-item.view";
+import { AccessPolicyItemType } from "../../shared/access-policies/access-policy-selector/models/enums/access-policy-item-type";
 import { AccessPolicyService } from "../../shared/access-policies/access-policy.service";
 import { AccessSelectorComponent } from "../../shared/access-policies/access-selector.component";
 
@@ -94,7 +91,8 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
     private dialogService: DialogService,
     private changeDetectorRef: ChangeDetectorRef,
     private validationService: ValidationService,
-    private accessPolicyService: AccessPolicyService
+    private accessPolicyService: AccessPolicyService,
+    private accessPolicySelectorService: AccessPolicySelectorService
   ) {}
 
   ngOnInit(): void {
@@ -124,7 +122,7 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
     }
 
     if (
-      await this.accessPolicyService.showAccessRemovalWarning(
+      await this.accessPolicySelectorService.showAccessRemovalWarning(
         this.organizationId,
         this.formGroup.value.accessPolicies
       )
@@ -143,7 +141,8 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const projectPeopleView = this.toProjectPeopleAccessPoliciesView(
+      const projectPeopleView = convertToProjectPeopleAccessPoliciesView(
+        this.projectId,
         this.formGroup.value.accessPolicies
       );
       const peoplePoliciesViews = await this.accessPolicyService.putProjectPeopleAccessPolicies(
@@ -173,33 +172,5 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
       });
     }
     this.loading = false;
-  }
-
-  private toProjectPeopleAccessPoliciesView(
-    selectedPolicyValues: AccessPolicyItemValue[]
-  ): ProjectPeopleAccessPoliciesView {
-    const view = new ProjectPeopleAccessPoliciesView();
-    view.userAccessPolicies = selectedPolicyValues
-      .filter((x) => x.type == AccessPolicyItemType.User)
-      .map((filtered) => {
-        const policyView = new UserProjectAccessPolicyView();
-        policyView.grantedProjectId = this.projectId;
-        policyView.organizationUserId = filtered.id;
-        policyView.read = toRead(filtered.permission);
-        policyView.write = toWrite(filtered.permission);
-        return policyView;
-      });
-
-    view.groupAccessPolicies = selectedPolicyValues
-      .filter((x) => x.type == AccessPolicyItemType.Group)
-      .map((filtered) => {
-        const policyView = new GroupProjectAccessPolicyView();
-        policyView.grantedProjectId = this.projectId;
-        policyView.groupId = filtered.id;
-        policyView.read = toRead(filtered.permission);
-        policyView.write = toWrite(filtered.permission);
-        return policyView;
-      });
-    return view;
   }
 }

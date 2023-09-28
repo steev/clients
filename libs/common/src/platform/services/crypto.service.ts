@@ -901,7 +901,7 @@ export class CryptoService implements CryptoServiceAbstraction {
     let key: Uint8Array = null;
     if (kdf == null || kdf === KdfType.PBKDF2_SHA256) {
       if (kdfConfig.iterations == null) {
-        kdfConfig.iterations = PBKDF2_ITERATIONS.def;
+        kdfConfig.iterations = PBKDF2_ITERATIONS.defaultValue;
       } else if (!PBKDF2_ITERATIONS.inRange(kdfConfig.iterations)) {
         throw new Error(
           `PBKDF2 iterations must be between ${PBKDF2_ITERATIONS.min} and ${PBKDF2_ITERATIONS.max}`
@@ -911,7 +911,7 @@ export class CryptoService implements CryptoServiceAbstraction {
       key = await this.cryptoFunctionService.pbkdf2(password, salt, "sha256", kdfConfig.iterations);
     } else if (kdf == KdfType.Argon2id) {
       if (kdfConfig.iterations == null) {
-        kdfConfig.iterations = ARGON2_ITERATIONS.def;
+        kdfConfig.iterations = ARGON2_ITERATIONS.defaultValue;
       } else if (!ARGON2_ITERATIONS.inRange(kdfConfig.iterations)) {
         throw new Error(
           `Argon2 iterations must be between ${ARGON2_ITERATIONS.min} and ${ARGON2_ITERATIONS.max}`
@@ -919,7 +919,7 @@ export class CryptoService implements CryptoServiceAbstraction {
       }
 
       if (kdfConfig.memory == null) {
-        kdfConfig.memory = ARGON2_MEMORY.def;
+        kdfConfig.memory = ARGON2_MEMORY.defaultValue;
       } else if (!ARGON2_MEMORY.inRange(kdfConfig.memory)) {
         throw new Error(
           `Argon2 memory must be between ${ARGON2_MEMORY.min}mb and ${ARGON2_MEMORY.max}mb`
@@ -927,7 +927,7 @@ export class CryptoService implements CryptoServiceAbstraction {
       }
 
       if (kdfConfig.parallelism == null) {
-        kdfConfig.parallelism = ARGON2_PARALLELISM.def;
+        kdfConfig.parallelism = ARGON2_PARALLELISM.defaultValue;
       } else if (!ARGON2_PARALLELISM.inRange(kdfConfig.parallelism)) {
         throw new Error(
           `Argon2 parallelism must be between ${ARGON2_PARALLELISM.min} and ${ARGON2_PARALLELISM.max}.`

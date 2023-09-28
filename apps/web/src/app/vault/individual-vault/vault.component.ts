@@ -859,7 +859,9 @@ export class VaultComponent implements OnInit, OnDestroy {
   async isLowKdfIteration() {
     const kdfType = await this.stateService.getKdfType();
     const kdfOptions = await this.stateService.getKdfConfig();
-    return kdfType === KdfType.PBKDF2_SHA256 && kdfOptions.iterations < PBKDF2_ITERATIONS.def;
+    return (
+      kdfType === KdfType.PBKDF2_SHA256 && kdfOptions.iterations < PBKDF2_ITERATIONS.defaultValue
+    );
   }
 
   protected async repromptCipher(ciphers: CipherView[]) {

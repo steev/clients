@@ -44,12 +44,12 @@ export class ChangeKdfComponent implements OnInit {
 
   async onChangeKdf(newValue: KdfType) {
     if (newValue === KdfType.PBKDF2_SHA256) {
-      this.kdfConfig = new KdfConfig(PBKDF2_ITERATIONS.def);
+      this.kdfConfig = new KdfConfig(PBKDF2_ITERATIONS.defaultValue);
     } else if (newValue === KdfType.Argon2id) {
       this.kdfConfig = new KdfConfig(
-        ARGON2_ITERATIONS.def,
-        ARGON2_MEMORY.def,
-        ARGON2_PARALLELISM.def
+        ARGON2_ITERATIONS.defaultValue,
+        ARGON2_MEMORY.defaultValue,
+        ARGON2_PARALLELISM.defaultValue
       );
     } else {
       throw new Error("Unknown KDF type.");

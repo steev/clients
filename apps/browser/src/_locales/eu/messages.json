@@ -771,8 +771,8 @@
   "featureUnavailable": {
     "message": "Ezaugarria ez dago erabilgarri"
   },
-  "updateKey": {
-    "message": "Ezin duzu ezaugarri hau erabili zifratze-gakoa eguneratu arte."
+  "encryptionKeyMigrationRequired": {
+    "message": "Encryption key migration required. Please login through the web vault to update your encryption key."
   },
   "premiumMembership": {
     "message": "Premium bazkidea"
@@ -1991,8 +1991,8 @@
   "exportingPersonalVaultTitle": {
     "message": "Kutxa gotor pertsonala esportatzen"
   },
-  "exportingPersonalVaultDescription": {
-    "message": "$EMAIL$-ekin lotutako kutxa gotor pertsonaleko elementuak bakarrik esportatuko dira. Erakundeko kutxa gotorraren elementuak ez dira sartuko.",
+  "exportingIndividualVaultDescription": {
+    "message": "Only the individual vault items associated with $EMAIL$ will be exported. Organization vault items will not be included. Only vault item information will be exported and will not include associated attachments.",
     "placeholders": {
       "email": {
         "content": "$1",
@@ -2406,5 +2406,20 @@
   "toggleCollapse": {
     "message": "Toggle collapse",
     "description": "Toggling an expand/collapse state."
+  },
+  "aliasDomain": {
+    "message": "Alias domain"
+  },
+  "passwordRepromptDisabledAutofillOnPageLoad": {
+    "message": "Items with master password re-prompt cannot be auto-filled on page load. Auto-fill on page load turned off.",
+    "description": "Toast message for describing that master password re-prompt cannot be auto-filled on page load."
+  },
+  "autofillOnPageLoadSetToDefault": {
+    "message": "Auto-fill on page load set to use default setting.",
+    "description": "Toast message for informing the user that auto-fill on page load has been set to the default setting."
+  },
+  "turnOffMasterPasswordPromptToEditField": {
+    "message": "Turn off master password re-prompt to edit this field",
+    "description": "Message appearing below the autofill on load message when master password reprompt is set for a vault item."
   }
 }

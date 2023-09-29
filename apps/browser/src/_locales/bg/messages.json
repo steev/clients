@@ -771,8 +771,8 @@
   "featureUnavailable": {
     "message": "Функцията е недостъпна"
   },
-  "updateKey": {
-    "message": "Трябва да обновите шифриращия си ключ, за да използвате тази възможност."
+  "encryptionKeyMigrationRequired": {
+    "message": "Необходима е промяна на шифриращия ключ. Впишете се в трезора си по уеб, за да обновите своя шифриращ ключ."
   },
   "premiumMembership": {
     "message": "Платен абонамент"
@@ -1991,8 +1991,8 @@
   "exportingPersonalVaultTitle": {
     "message": "Изнасяне на личния трезор"
   },
-  "exportingPersonalVaultDescription": {
-    "message": "Ще бъдат изнесени само записите от личния трезор свързан с $EMAIL$. Записите в трезора на организацията няма да бъдат включени.",
+  "exportingIndividualVaultDescription": {
+    "message": "Ще бъдат изнесени само отделните записи в трезора, които са свързани с $EMAIL$. Записите от трезора на организацията няма да бъдат включени. Ще бъде изнесена само информацията за записите от трезора, а свързаните прикачени елементи няма да бъдат включени.",
     "placeholders": {
       "email": {
         "content": "$1",
@@ -2093,7 +2093,7 @@
     "message": "Версия на сървъра"
   },
   "selfHostedServer": {
-    "message": "self-hosted"
+    "message": "собствен хостинг"
   },
   "thirdParty": {
     "message": "Third-party"
@@ -2406,5 +2406,20 @@
   "toggleCollapse": {
     "message": "Превключване на свиването",
     "description": "Toggling an expand/collapse state."
+  },
+  "aliasDomain": {
+    "message": "Псевдонимен домейн"
+  },
+  "passwordRepromptDisabledAutofillOnPageLoad": {
+    "message": "Записите с включено изискване за повторно въвеждане на главната парола не могат да бъдат попълвани автоматично при зареждане на страницата. Автоматичното попълване при зареждане на страницата е изключено.",
+    "description": "Toast message for describing that master password re-prompt cannot be auto-filled on page load."
+  },
+  "autofillOnPageLoadSetToDefault": {
+    "message": "Автоматичното попълване при зареждане на страницата използва настройката си по подразбиране.",
+    "description": "Toast message for informing the user that auto-fill on page load has been set to the default setting."
+  },
+  "turnOffMasterPasswordPromptToEditField": {
+    "message": "Изключете повторното въвеждане на главната парола, за да редактирате това поле",
+    "description": "Message appearing below the autofill on load message when master password reprompt is set for a vault item."
   }
 }

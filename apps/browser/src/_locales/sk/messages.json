@@ -771,8 +771,8 @@
   "featureUnavailable": {
     "message": "Funkcia nie je k dispozícii"
   },
-  "updateKey": {
-    "message": "Túto funkciu nemožno použiť, pokým neaktualizujete svoj šifrovací kľúč."
+  "encryptionKeyMigrationRequired": {
+    "message": "Vyžaduje sa migrácia šifrovacieho kľúča. Na aktualizáciu šifrovacieho kľúča sa prihláste cez webový trezor."
   },
   "premiumMembership": {
     "message": "Prémiové členstvo"
@@ -1991,8 +1991,8 @@
   "exportingPersonalVaultTitle": {
     "message": "Exportovanie osobného trezora"
   },
-  "exportingPersonalVaultDescription": {
-    "message": "Exportované budú iba položy osobného trezora spojené s $EMAIL$. Položky trezora organizácie nebudú zahrnuté.",
+  "exportingIndividualVaultDescription": {
+    "message": "Exportované budú iba položky súvisiace s $EMAIL$. Položky z trezora organizácie nebudú zahrnuté v exporte. Export bude obsahovať iba informácie z položiek v trezore, súvisiace prílohy nebudú súčasťou exportu.",
     "placeholders": {
       "email": {
         "content": "$1",
@@ -2093,7 +2093,7 @@
     "message": "Verzia servera"
   },
   "selfHostedServer": {
-    "message": "self-hosted"
+    "message": "vlastný hosting"
   },
   "thirdParty": {
     "message": "Tretia strana"
@@ -2406,5 +2406,20 @@
   "toggleCollapse": {
     "message": "Prepnúť zbalenie",
     "description": "Toggling an expand/collapse state."
+  },
+  "aliasDomain": {
+    "message": "Alias doména"
+  },
+  "passwordRepromptDisabledAutofillOnPageLoad": {
+    "message": "Položky, ktoré vyžadujú opätovné zadanie hlavného hesla sa nedajú automaticky vyplniť pri načítaní stránky. Automatické vypĺňanie pri načítaní stránky je vypnuté.",
+    "description": "Toast message for describing that master password re-prompt cannot be auto-filled on page load."
+  },
+  "autofillOnPageLoadSetToDefault": {
+    "message": "Automatické vypĺňanie pri načítaní stránky nastavené na pôvodnú predvoľbu.",
+    "description": "Toast message for informing the user that auto-fill on page load has been set to the default setting."
+  },
+  "turnOffMasterPasswordPromptToEditField": {
+    "message": "Vypnite výzvu na opätovné zadanie hlavného hesla na úpravu tohto poľa",
+    "description": "Message appearing below the autofill on load message when master password reprompt is set for a vault item."
   }
 }

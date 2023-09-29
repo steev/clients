@@ -771,8 +771,8 @@
   "featureUnavailable": {
     "message": "Ominaisuus ei ole käytettävissä"
   },
-  "updateKey": {
-    "message": "Et voi käyttää tätä toimintoa ennen kuin päivität salausavaimesi."
+  "encryptionKeyMigrationRequired": {
+    "message": "Salausavaimen siirto vaaditaan. Päivitä salausavaimesi kirjautumalla verkkoholviin."
   },
   "premiumMembership": {
     "message": "Premium-jäsenyys"
@@ -1991,8 +1991,8 @@
   "exportingPersonalVaultTitle": {
     "message": "Henkilökohtaisen holvin vienti"
   },
-  "exportingPersonalVaultDescription": {
-    "message": "Vain tunnukseen $EMAIL$ liitetyt henkilökohtaisen holvin kohteet viedään. Organisaation kohteet eivät sisälly tähän.",
+  "exportingIndividualVaultDescription": {
+    "message": "Vain tunnukseen $EMAIL$ liitetyt yksityisen holvin kohteet viedään. Organisaation holvin kohteita ei sisällytetä. Vain holvin kohteiden tiedot viedään ilman niiden sisältämiä liitteitä.",
     "placeholders": {
       "email": {
         "content": "$1",
@@ -2093,7 +2093,7 @@
     "message": "Palvelimen versio"
   },
   "selfHostedServer": {
-    "message": "self-hosted"
+    "message": "itse ylläpidetty"
   },
   "thirdParty": {
     "message": "Ulkopuolinen taho"
@@ -2406,5 +2406,20 @@
   "toggleCollapse": {
     "message": "Laajenna tai supista",
     "description": "Toggling an expand/collapse state."
+  },
+  "aliasDomain": {
+    "message": "Aliasverkkotunnus"
+  },
+  "passwordRepromptDisabledAutofillOnPageLoad": {
+    "message": "Kohteita, joille pääsalasanan uudelleenkysely on käytössä, ei voida täyttää automaattisesti sivujen avautuessa. Automaattinen täyttö sivujen avautuessa poistettiin käytöstä.",
+    "description": "Toast message for describing that master password re-prompt cannot be auto-filled on page load."
+  },
+  "autofillOnPageLoadSetToDefault": {
+    "message": "Automaattinen täyttö sivun avautuessa käyttää oletusasetusta.",
+    "description": "Toast message for informing the user that auto-fill on page load has been set to the default setting."
+  },
+  "turnOffMasterPasswordPromptToEditField": {
+    "message": "Poista pääsalasanan uudelleenkysely käytöstä muokataksesi kenttää",
+    "description": "Message appearing below the autofill on load message when master password reprompt is set for a vault item."
   }
 }

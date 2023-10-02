@@ -62,7 +62,7 @@ describe("Deep Link Cache Guard", () => {
   });
 
   // Story: User's vault times out
-  it('should persist routerService.previousUrl when user state is locked and routerService.previousUrl does not contain "lock"', async () => {
+  it('should persist routerService.previousUrl when routerService.previousUrl does not contain "lock"', async () => {
     // Arrange
     authService.getAuthStatus.mockResolvedValue(AuthenticationStatus.Locked);
     routerService.getPreviousUrl.mockReturnValue("/previous-url");
@@ -75,7 +75,7 @@ describe("Deep Link Cache Guard", () => {
   });
 
   // Story: User's vault times out and previousUrl contains "lock"
-  it('should not persist routerService.previousUrl when user state is locked and routerService.previousUrl contains "lock"', async () => {
+  it('should not persist routerService.previousUrl when routerService.previousUrl contains "lock"', async () => {
     // Arrange
     authService.getAuthStatus.mockResolvedValue(AuthenticationStatus.Locked);
     routerService.getPreviousUrl.mockReturnValue("/lock");
@@ -88,7 +88,7 @@ describe("Deep Link Cache Guard", () => {
   });
 
   // Story: User's vault times out and previousUrl is undefined
-  it("should not persist routerService.previousUrl when user state is locked and routerService.previousUrl is undefined", async () => {
+  it("should not persist routerService.previousUrl when routerService.previousUrl is undefined", async () => {
     // Arrange
     authService.getAuthStatus.mockResolvedValue(AuthenticationStatus.Locked);
     routerService.getPreviousUrl.mockReturnValue(undefined);
@@ -101,7 +101,7 @@ describe("Deep Link Cache Guard", () => {
   });
 
   // Story: User tries to deep link to a guarded route and is logged out
-  it('should persist currentUrl when user is logged out and currentUrl does not contain "lock"', async () => {
+  it('should persist currentUrl when currentUrl does not contain "lock"', async () => {
     // Arrange
     authService.getAuthStatus.mockResolvedValue(AuthenticationStatus.LoggedOut);
 
@@ -125,7 +125,7 @@ describe("Deep Link Cache Guard", () => {
   });
 
   // Story: User tries to deep link to a guarded route from the lock page
-  it('should not persist currentUrl if the currentUrl contains "lock"', async () => {
+  it("should persist currentUrl over previousUrl", async () => {
     // Arrange
     authService.getAuthStatus.mockResolvedValue(AuthenticationStatus.Locked);
     routerService.getPreviousUrl.mockReturnValue("/previous-url");

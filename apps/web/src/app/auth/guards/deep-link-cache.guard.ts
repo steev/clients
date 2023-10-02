@@ -29,7 +29,7 @@ export function deepLinkCacheGuard(): CanActivateFn {
       return true;
     }
     /**
-     * At this point the user is either `locked` or `loggedout`, it doesn't matter.
+     * At this point the user is either `locked` or `loggedOut`, it doesn't matter.
      * We opt to persist the currentUrl over the transient previousUrl. This supports
      * the case where a user is locked out of their vault and they deep link from
      * the "lock" page.
@@ -37,14 +37,15 @@ export function deepLinkCacheGuard(): CanActivateFn {
      * When the user is locked out of their vault the currentUrl contains "lock" so it will
      * not be persisted, the previousUrl will be persisted instead.
      */
-    if (!Utils.isNullOrEmpty(currentUrl) && currentUrl?.indexOf("lock") === -1) {
+    if (isValidUrl(currentUrl)) {
       await routerService.persistLoginRedirectUrl(currentUrl);
-    } else if (
-      !Utils.isNullOrEmpty(transientPreviousUrl) &&
-      transientPreviousUrl?.indexOf("lock") === -1
-    ) {
+    } else if (isValidUrl(transientPreviousUrl)) {
       await routerService.persistLoginRedirectUrl(transientPreviousUrl);
     }
     return true;
   };
+
+  function isValidUrl(url: string | null | undefined): boolean {
+    return !Utils.isNullOrEmpty(url) && !url?.toLocaleLowerCase().includes("lock");
+  }
 }

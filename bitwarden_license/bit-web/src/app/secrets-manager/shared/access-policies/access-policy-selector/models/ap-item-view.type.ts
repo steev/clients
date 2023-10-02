@@ -2,58 +2,58 @@ import { SelectItemView } from "@bitwarden/components";
 
 import { ProjectPeopleAccessPoliciesView } from "../../../../models/view/access-policy.view";
 
-import { AccessPolicyItemType, ApItemTypeUtil } from "./enums/access-policy-item-type";
-import { AccessPolicyPermission, ApPermissionUtil } from "./enums/access-policy-permission";
+import { ApItemEnum, ApItemEnumUtil } from "./enums/ap-item.enum";
+import { ApPermissionEnum, ApPermissionEnumUtil } from "./enums/ap-permission.enum";
 
-export type AccessPolicyItemView =
+export type ApItemViewType =
   | SelectItemView & {
       accessPolicyId?: string;
-      permission?: AccessPolicyPermission;
+      permission?: ApPermissionEnum;
     } & (
         | {
-            type: AccessPolicyItemType.User;
+            type: ApItemEnum.User;
             userId?: string;
             currentUser?: boolean;
           }
         | {
-            type: AccessPolicyItemType.Group;
+            type: ApItemEnum.Group;
             currentUserInGroup?: boolean;
           }
         | {
-            type: AccessPolicyItemType.ServiceAccount;
+            type: ApItemEnum.ServiceAccount;
           }
         | {
-            type: AccessPolicyItemType.Project;
+            type: ApItemEnum.Project;
           }
       );
 
 export function convertToAccessPolicyItemViews(
   value: ProjectPeopleAccessPoliciesView
-): AccessPolicyItemView[] {
-  const accessPolicies: AccessPolicyItemView[] = [];
+): ApItemViewType[] {
+  const accessPolicies: ApItemViewType[] = [];
 
   value.userAccessPolicies.forEach((policy) => {
     accessPolicies.push({
-      type: AccessPolicyItemType.User,
-      icon: ApItemTypeUtil.itemIcon(AccessPolicyItemType.User),
+      type: ApItemEnum.User,
+      icon: ApItemEnumUtil.itemIcon(ApItemEnum.User),
       id: policy.organizationUserId,
       accessPolicyId: policy.id,
       labelName: policy.organizationUserName,
       listName: policy.organizationUserName,
-      permission: ApPermissionUtil.toAccessPolicyPermission(policy.read, policy.write),
+      permission: ApPermissionEnumUtil.toApPermissionEnum(policy.read, policy.write),
       userId: policy.userId,
     });
   });
 
   value.groupAccessPolicies.forEach((policy) => {
     accessPolicies.push({
-      type: AccessPolicyItemType.Group,
-      icon: ApItemTypeUtil.itemIcon(AccessPolicyItemType.Group),
+      type: ApItemEnum.Group,
+      icon: ApItemEnumUtil.itemIcon(ApItemEnum.Group),
       id: policy.groupId,
       accessPolicyId: policy.id,
       labelName: policy.groupName,
       listName: policy.groupName,
-      permission: ApPermissionUtil.toAccessPolicyPermission(policy.read, policy.write),
+      permission: ApPermissionEnumUtil.toApPermissionEnum(policy.read, policy.write),
       currentUserInGroup: policy.currentUserInGroup,
     });
   });

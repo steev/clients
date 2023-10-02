@@ -5,9 +5,9 @@ import { OrganizationUserType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 
 import { AccessPolicySelectorService } from "./access-policy-selector.service";
-import { AccessPolicyItemValue } from "./models/access-policy-item-value";
-import { AccessPolicyItemType } from "./models/enums/access-policy-item-type";
-import { AccessPolicyPermission } from "./models/enums/access-policy-permission";
+import { ApItemValueType } from "./models/ap-item-value.type";
+import { ApItemEnum } from "./models/enums/ap-item.enum";
+import { ApPermissionEnum } from "./models/enums/ap-permission.enum";
 
 describe("AccessPolicySelectorService", () => {
   let organizationService: MockProxy<OrganizationService>;
@@ -27,7 +27,7 @@ describe("AccessPolicySelectorService", () => {
       const org = orgFactory();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
 
-      const selectedPolicyValues: AccessPolicyItemValue[] = [];
+      const selectedPolicyValues: ApItemValueType[] = [];
 
       const result = await sut.showAccessRemovalWarning(org.id, selectedPolicyValues);
 
@@ -39,7 +39,7 @@ describe("AccessPolicySelectorService", () => {
       org.type = OrganizationUserType.Owner;
       organizationService.get.calledWith(org.id).mockReturnValue(org);
 
-      const selectedPolicyValues: AccessPolicyItemValue[] = [];
+      const selectedPolicyValues: ApItemValueType[] = [];
 
       const result = await sut.showAccessRemovalWarning(org.id, selectedPolicyValues);
 
@@ -50,7 +50,7 @@ describe("AccessPolicySelectorService", () => {
       const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
 
-      const selectedPolicyValues: AccessPolicyItemValue[] = [];
+      const selectedPolicyValues: ApItemValueType[] = [];
 
       const result = await sut.showAccessRemovalWarning(org.id, selectedPolicyValues);
 
@@ -61,10 +61,10 @@ describe("AccessPolicySelectorService", () => {
       const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
 
-      const selectedPolicyValues: AccessPolicyItemValue[] = [];
+      const selectedPolicyValues: ApItemValueType[] = [];
       selectedPolicyValues.push(
-        createAccessPolicyItemValue({
-          permission: AccessPolicyPermission.CanRead,
+        createApItemValueType({
+          permission: ApPermissionEnum.CanRead,
           currentUser: true,
         })
       );
@@ -78,9 +78,9 @@ describe("AccessPolicySelectorService", () => {
       const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
 
-      const selectedPolicyValues: AccessPolicyItemValue[] = [
-        createAccessPolicyItemValue({
-          permission: AccessPolicyPermission.CanReadWrite,
+      const selectedPolicyValues: ApItemValueType[] = [
+        createApItemValueType({
+          permission: ApPermissionEnum.CanReadWrite,
           currentUser: true,
         }),
       ];
@@ -94,11 +94,11 @@ describe("AccessPolicySelectorService", () => {
       const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
 
-      const selectedPolicyValues: AccessPolicyItemValue[] = [
-        createAccessPolicyItemValue({
+      const selectedPolicyValues: ApItemValueType[] = [
+        createApItemValueType({
           id: "groupId",
-          type: AccessPolicyItemType.Group,
-          permission: AccessPolicyPermission.CanRead,
+          type: ApItemEnum.Group,
+          permission: ApPermissionEnum.CanRead,
           currentUserInGroup: true,
         }),
       ];
@@ -112,11 +112,11 @@ describe("AccessPolicySelectorService", () => {
       const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
 
-      const selectedPolicyValues: AccessPolicyItemValue[] = [
-        createAccessPolicyItemValue({
+      const selectedPolicyValues: ApItemValueType[] = [
+        createApItemValueType({
           id: "groupId",
-          type: AccessPolicyItemType.Group,
-          permission: AccessPolicyPermission.CanReadWrite,
+          type: ApItemEnum.Group,
+          permission: ApPermissionEnum.CanReadWrite,
           currentUserInGroup: true,
         }),
       ];
@@ -130,11 +130,11 @@ describe("AccessPolicySelectorService", () => {
       const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
 
-      const selectedPolicyValues: AccessPolicyItemValue[] = [
-        createAccessPolicyItemValue({
+      const selectedPolicyValues: ApItemValueType[] = [
+        createApItemValueType({
           id: "groupId",
-          type: AccessPolicyItemType.Group,
-          permission: AccessPolicyPermission.CanReadWrite,
+          type: ApItemEnum.Group,
+          permission: ApPermissionEnum.CanReadWrite,
           currentUserInGroup: false,
         }),
       ];
@@ -148,15 +148,15 @@ describe("AccessPolicySelectorService", () => {
       const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
 
-      const selectedPolicyValues: AccessPolicyItemValue[] = [
-        createAccessPolicyItemValue({
-          permission: AccessPolicyPermission.CanRead,
+      const selectedPolicyValues: ApItemValueType[] = [
+        createApItemValueType({
+          permission: ApPermissionEnum.CanRead,
           currentUser: true,
         }),
-        createAccessPolicyItemValue({
+        createApItemValueType({
           id: "groupId",
-          type: AccessPolicyItemType.Group,
-          permission: AccessPolicyPermission.CanReadWrite,
+          type: ApItemEnum.Group,
+          permission: ApPermissionEnum.CanReadWrite,
           currentUserInGroup: true,
         }),
       ];
@@ -170,15 +170,15 @@ describe("AccessPolicySelectorService", () => {
       const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
 
-      const selectedPolicyValues: AccessPolicyItemValue[] = [
-        createAccessPolicyItemValue({
-          permission: AccessPolicyPermission.CanRead,
+      const selectedPolicyValues: ApItemValueType[] = [
+        createApItemValueType({
+          permission: ApPermissionEnum.CanRead,
           currentUser: true,
         }),
-        createAccessPolicyItemValue({
+        createApItemValueType({
           id: "groupId",
-          type: AccessPolicyItemType.Group,
-          permission: AccessPolicyPermission.CanReadWrite,
+          type: ApItemEnum.Group,
+          permission: ApPermissionEnum.CanReadWrite,
           currentUserInGroup: false,
         }),
       ];
@@ -192,15 +192,15 @@ describe("AccessPolicySelectorService", () => {
       const org = setupUserOrg();
       organizationService.get.calledWith(org.id).mockReturnValue(org);
 
-      const selectedPolicyValues: AccessPolicyItemValue[] = [
-        createAccessPolicyItemValue({
-          permission: AccessPolicyPermission.CanRead,
+      const selectedPolicyValues: ApItemValueType[] = [
+        createApItemValueType({
+          permission: ApPermissionEnum.CanRead,
           currentUser: true,
         }),
-        createAccessPolicyItemValue({
+        createApItemValueType({
           id: "groupId",
-          type: AccessPolicyItemType.Group,
-          permission: AccessPolicyPermission.CanRead,
+          type: ApItemEnum.Group,
+          permission: ApPermissionEnum.CanRead,
           currentUserInGroup: true,
         }),
       ];
@@ -223,11 +223,11 @@ const orgFactory = (props: Partial<Organization> = {}) =>
     props
   );
 
-function createAccessPolicyItemValue(options: Partial<AccessPolicyItemValue> = {}) {
+function createApItemValueType(options: Partial<ApItemValueType> = {}) {
   return {
     id: options?.id ?? "test",
-    type: options?.type ?? AccessPolicyItemType.User,
-    permission: options?.permission ?? AccessPolicyPermission.CanRead,
+    type: options?.type ?? ApItemEnum.User,
+    permission: options?.permission ?? ApPermissionEnum.CanRead,
     currentUserInGroup: options?.currentUserInGroup ?? false,
   };
 }

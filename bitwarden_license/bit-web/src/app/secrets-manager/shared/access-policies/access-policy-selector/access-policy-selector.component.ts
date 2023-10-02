@@ -13,10 +13,10 @@ import { FormSelectionList } from "@bitwarden/angular/utils/form-selection-list"
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { SelectItemView } from "@bitwarden/components";
 
-import { AccessPolicyItemValue } from "./models/access-policy-item-value";
-import { AccessPolicyItemView } from "./models/access-policy-item.view";
-import { ApItemTypeUtil, AccessPolicyItemType } from "./models/enums/access-policy-item-type";
-import { AccessPolicyPermission } from "./models/enums/access-policy-permission";
+import { ApItemValueType } from "./models/ap-item-value.type";
+import { ApItemViewType } from "./models/ap-item-view.type";
+import { ApItemEnumUtil, ApItemEnum } from "./models/enums/ap-item.enum";
+import { ApPermissionEnum } from "./models/enums/ap-permission.enum";
 
 @Component({
   selector: "sm-access-policy-selector",
@@ -40,30 +40,27 @@ export class AccessPolicySelectorComponent implements ControlValueAccessor, OnIn
    * It's responsible for keeping items sorted and synced with the rendered form controls
    * @protected
    */
-  protected selectionList = new FormSelectionList<AccessPolicyItemView, AccessPolicyItemValue>(
-    (item) => {
-      const initPermission = this.staticPermission ?? this.initialPermission;
+  protected selectionList = new FormSelectionList<ApItemViewType, ApItemValueType>((item) => {
+    const initPermission = this.staticPermission ?? this.initialPermission;
 
-      const permissionControl = this.formBuilder.control(initPermission);
-      let currentUserInGroup = false;
-      let currentUser = false;
-      if (item.type == AccessPolicyItemType.Group) {
-        currentUserInGroup = item.currentUserInGroup;
-      }
-      if (item.type == AccessPolicyItemType.User) {
-        currentUser = item.currentUser;
-      }
-      const fg = this.formBuilder.group<ControlsOf<AccessPolicyItemValue>>({
-        id: new FormControl(item.id),
-        type: new FormControl(item.type),
-        permission: permissionControl,
-        currentUserInGroup: new FormControl(currentUserInGroup),
-        currentUser: new FormControl(currentUser),
-      });
-      return fg;
-    },
-    this._itemComparator.bind(this)
-  );
+    const permissionControl = this.formBuilder.control(initPermission);
+    let currentUserInGroup = false;
+    let currentUser = false;
+    if (item.type == ApItemEnum.Group) {
+      currentUserInGroup = item.currentUserInGroup;
+    }
+    if (item.type == ApItemEnum.User) {
+      currentUser = item.currentUser;
+    }
+    const fg = this.formBuilder.group<ControlsOf<ApItemValueType>>({
+      id: new FormControl(item.id),
+      type: new FormControl(item.type),
+      permission: permissionControl,
+      currentUserInGroup: new FormControl(currentUserInGroup),
+      currentUser: new FormControl(currentUser),
+    });
+    return fg;
+  }, this._itemComparator.bind(this));
 
   /**
    * Internal form group for this component.
@@ -87,26 +84,26 @@ export class AccessPolicySelectorComponent implements ControlValueAccessor, OnIn
   @Input() emptyMessage: string;
 
   @Input() permissionList = [
-    { perm: AccessPolicyPermission.CanRead, labelId: "canRead" },
-    { perm: AccessPolicyPermission.CanReadWrite, labelId: "canReadWrite" },
+    { perm: ApPermissionEnum.CanRead, labelId: "canRead" },
+    { perm: ApPermissionEnum.CanReadWrite, labelId: "canReadWrite" },
   ];
-  @Input() initialPermission = AccessPolicyPermission.CanRead;
+  @Input() initialPermission = ApPermissionEnum.CanRead;
 
   // Pass in a static permission that wil be the only option for a given selector instance.
   // Will ignore permissionList and initialPermission.
-  @Input() staticPermission: AccessPolicyPermission;
+  @Input() staticPermission: ApPermissionEnum;
 
   @Input()
-  get items(): AccessPolicyItemView[] {
+  get items(): ApItemViewType[] {
     return this.selectionList.allItems;
   }
 
-  set items(val: AccessPolicyItemView[]) {
+  set items(val: ApItemViewType[]) {
     if (val != null) {
       const selected = this.selectionList.formArray.getRawValue() ?? [];
       this.selectionList.populateItems(
         val.map((m) => {
-          m.icon = m.icon ?? ApItemTypeUtil.itemIcon(m.type);
+          m.icon = m.icon ?? ApItemEnumUtil.itemIcon(m.type);
           return m;
         }),
         selected
@@ -144,7 +141,7 @@ export class AccessPolicySelectorComponent implements ControlValueAccessor, OnIn
   }
 
   /** Required for NG_VALUE_ACCESSOR */
-  writeValue(selectedItems: AccessPolicyItemValue[]): void {
+  writeValue(selectedItems: ApItemValueType[]): void {
     // Modifying the selection list, mistakenly fires valueChanges in the
     // internal form array, so we need to know to pause external notification
     this.pauseChangeNotification = true;
@@ -215,7 +212,7 @@ export class AccessPolicySelectorComponent implements ControlValueAccessor, OnIn
     this.multiSelectFormGroup.reset();
   }
 
-  private _itemComparator(a: AccessPolicyItemView, b: AccessPolicyItemView) {
+  private _itemComparator(a: ApItemViewType, b: ApItemViewType) {
     return (
       a.type - b.type ||
       this.i18nService.collator.compare(a.listName, b.listName) ||

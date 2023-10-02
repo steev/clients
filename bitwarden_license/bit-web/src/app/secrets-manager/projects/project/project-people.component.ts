@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { FormControl, FormGroup } from "@angular/forms";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { combineLatest, Subject, switchMap, takeUntil } from "rxjs";
 
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
@@ -9,14 +9,14 @@ import { DialogService } from "@bitwarden/components";
 
 import { AccessPolicySelectorService } from "../../shared/access-policies/access-policy-selector/access-policy-selector.service";
 import {
-  AccessPolicyItemValue,
+  ApItemValueType,
   convertToProjectPeopleAccessPoliciesView,
-} from "../../shared/access-policies/access-policy-selector/models/access-policy-item-value";
+} from "../../shared/access-policies/access-policy-selector/models/ap-item-value.type";
 import {
-  AccessPolicyItemView,
+  ApItemViewType,
   convertToAccessPolicyItemViews,
-} from "../../shared/access-policies/access-policy-selector/models/access-policy-item.view";
-import { AccessPolicyItemType } from "../../shared/access-policies/access-policy-selector/models/enums/access-policy-item-type";
+} from "../../shared/access-policies/access-policy-selector/models/ap-item-view.type";
+import { ApItemEnum } from "../../shared/access-policies/access-policy-selector/models/enums/ap-item.enum";
 import { AccessPolicyService } from "../../shared/access-policies/access-policy.service";
 import { AccessSelectorComponent } from "../../shared/access-policies/access-selector.component";
 
@@ -25,7 +25,7 @@ import { AccessSelectorComponent } from "../../shared/access-policies/access-sel
   templateUrl: "./project-people.component.html",
 })
 export class ProjectPeopleComponent implements OnInit, OnDestroy {
-  private currentAccessPolicies: AccessPolicyItemView[];
+  private currentAccessPolicies: ApItemViewType[];
   private destroy$ = new Subject<void>();
   private organizationId: string;
   private projectId: string;
@@ -43,12 +43,12 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
       this.accessPolicyService.getPeoplePotentialGrantees(params.organizationId).then((grantees) =>
         grantees.map((granteeView) => {
           let icon: string;
-          let type: AccessPolicyItemType;
+          let type: ApItemEnum;
           let listName = granteeView.name;
           let labelName = granteeView.name;
           if (granteeView.type === "user") {
             icon = AccessSelectorComponent.userIcon;
-            type = AccessPolicyItemType.User;
+            type = ApItemEnum.User;
             if (Utils.isNullOrWhitespace(granteeView.name)) {
               listName = granteeView.email;
               labelName = granteeView.email;
@@ -57,13 +57,13 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
             }
           } else if (granteeView.type === "group") {
             icon = AccessSelectorComponent.groupIcon;
-            type = AccessPolicyItemType.Group;
+            type = ApItemEnum.Group;
           } else if (granteeView.type === "serviceAccount") {
             icon = AccessSelectorComponent.serviceAccountIcon;
-            type = AccessPolicyItemType.ServiceAccount;
+            type = ApItemEnum.ServiceAccount;
           } else if (granteeView.type === "project") {
             icon = AccessSelectorComponent.projectIcon;
-            type = AccessPolicyItemType.Project;
+            type = ApItemEnum.Project;
           }
           return {
             icon: icon,
@@ -80,11 +80,11 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
   );
 
   protected formGroup = new FormGroup({
-    accessPolicies: new FormControl([] as AccessPolicyItemValue[]),
+    accessPolicies: new FormControl([] as ApItemValueType[]),
   });
 
   protected loading = true;
-  protected potentialGrantees: AccessPolicyItemView[];
+  protected potentialGrantees: ApItemViewType[];
 
   constructor(
     private route: ActivatedRoute,
@@ -92,6 +92,7 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
     private changeDetectorRef: ChangeDetectorRef,
     private validationService: ValidationService,
     private accessPolicyService: AccessPolicyService,
+    private router: Router,
     private accessPolicySelectorService: AccessPolicySelectorService
   ) {}
 
@@ -121,19 +122,14 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (
+    const showAccessRemovalWarning =
       await this.accessPolicySelectorService.showAccessRemovalWarning(
         this.organizationId,
         this.formGroup.value.accessPolicies
-      )
-    ) {
-      const confirmed = await this.dialogService.openSimpleDialog({
-        title: { key: "smAccessRemovalWarningProjectTitle" },
-        content: { key: "smAccessRemovalWarningProjectMessage" },
-        acceptButtonText: { key: "removeAccess" },
-        cancelButtonText: { key: "cancel" },
-        type: "warning",
-      });
+      );
+
+    if (showAccessRemovalWarning) {
+      const confirmed = await this.showWarning();
       if (!confirmed) {
         this.setSelected(this.currentAccessPolicies);
         return;
@@ -150,15 +146,19 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
         projectPeopleView
       );
       this.currentAccessPolicies = convertToAccessPolicyItemViews(peoplePoliciesViews);
+
+      if (showAccessRemovalWarning) {
+        this.router.navigate(["sm", this.organizationId, "projects"]);
+      }
     } catch (e) {
       this.validationService.showError(e);
       this.setSelected(this.currentAccessPolicies);
     }
   };
 
-  private setSelected(policiesToSelect: AccessPolicyItemView[]) {
-    this.currentAccessPolicies = policiesToSelect;
+  private setSelected(policiesToSelect: ApItemViewType[]) {
     this.loading = true;
+    this.currentAccessPolicies = policiesToSelect;
     if (policiesToSelect != undefined) {
       // Must detect changes so that AccessSelector @Inputs() are aware of the latest
       // potentialGrantees, otherwise no selected values will be patched below
@@ -172,5 +172,16 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
       });
     }
     this.loading = false;
+  }
+
+  private async showWarning(): Promise<boolean> {
+    const confirmed = await this.dialogService.openSimpleDialog({
+      title: { key: "smAccessRemovalWarningProjectTitle" },
+      content: { key: "smAccessRemovalWarningProjectMessage" },
+      acceptButtonText: { key: "removeAccess" },
+      cancelButtonText: { key: "cancel" },
+      type: "warning",
+    });
+    return confirmed;
   }
 }

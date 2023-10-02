@@ -1,7 +1,7 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 
-import { deepLinkRedirectGuard } from "../../core/guards/deep-link-redirect.guard";
+import { deepLinkRedirectGuard } from "../../auth/guards/deep-link-redirect.guard";
 
 import { VaultComponent } from "./vault.component";
 const routes: Routes = [

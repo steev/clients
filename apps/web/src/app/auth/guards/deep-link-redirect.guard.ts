@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from "@angular/router";
 
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 
-import { RouterService } from "../router.service";
+import { RouterService } from "../../core/router.service";
 
 /**
  * Guard to track deep-linking after a user successfully logs into the vault.

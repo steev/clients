@@ -4,7 +4,7 @@ import { Router, provideRouter } from "@angular/router";
 import { RouterTestingHarness } from "@angular/router/testing";
 import { MockProxy, mock } from "jest-mock-extended";
 
-import { RouterService } from "../router.service";
+import { RouterService } from "../../core/router.service";
 
 import { deepLinkRedirectGuard } from "./deep-link-redirect.guard";
 
@@ -19,7 +19,11 @@ export class GuardedRouteTestComponent {}
 export class RedirectTestComponent {}
 
 /**
- * We are assuming the guard is always being called. We are creating routes
+ * We are assuming the guard is always being called. We are creating routes using the
+ * RouterTestingHarness.
+ *
+ * We are testing the activatedComponent because we are testing that the guard redirects
+ * to the URL stored in globalState.deepLinkRedirectUrl.
  */
 describe("Deep Link Cache Guard", () => {
   let routerService: MockProxy<RouterService>;
@@ -53,10 +57,11 @@ describe("Deep Link Cache Guard", () => {
     routerService.getAndClearLoginRedirectUrl.mockResolvedValue("/redirect-route");
 
     // Act
-    await routerHarness.navigateByUrl("/guarded-route");
+    const activatedComponent = await routerHarness.navigateByUrl("/guarded-route");
 
     // Assert
     expect(TestBed.inject(Router).url).toEqual("/redirect-route");
+    expect(activatedComponent).toBeInstanceOf(RedirectTestComponent);
   });
 
   // Story: User is not redirected
@@ -65,9 +70,10 @@ describe("Deep Link Cache Guard", () => {
     routerService.getAndClearLoginRedirectUrl.mockResolvedValue("");
 
     // Act
-    await routerHarness.navigateByUrl("/guarded-route");
+    const activatedComponent = await routerHarness.navigateByUrl("/guarded-route");
 
     // Assert
     expect(TestBed.inject(Router).url).toEqual("/guarded-route");
+    expect(activatedComponent).toBeInstanceOf(GuardedRouteTestComponent);
   });
 });

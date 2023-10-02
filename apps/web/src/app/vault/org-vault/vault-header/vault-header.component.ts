@@ -73,7 +73,7 @@ export class VaultHeaderComponent {
       return this.i18nService.t("unassigned");
     }
 
-    return `${this.organization.name} ${this.i18nService.t("vault").toLowerCase()}`;
+    return `${this.organization.name} ${this.i18nService.t("collections").toLowerCase()}`;
   }
 
   protected get showBreadcrumbs() {

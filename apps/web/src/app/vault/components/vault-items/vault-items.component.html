@@ -20,6 +20,7 @@
         <th bitCell class="tw-w-2/5" *ngIf="showOwner">{{ "owner" | i18n }}</th>
         <th bitCell class="tw-w-2/5" *ngIf="showCollections">{{ "collections" | i18n }}</th>
         <th bitCell class="tw-w-2/5" *ngIf="showGroups">{{ "groups" | i18n }}</th>
+        <th bitCell class="tw-w-2/5" *ngIf="orgVault">{{ "permission" | i18n }}</th>
         <th bitCell class="tw-w-12 tw-text-right">
           <button
             [disabled]="disabled || isEmpty"
@@ -79,6 +80,7 @@
           [showCollections]="showCollections"
           [showGroups]="showGroups"
           [organizations]="allOrganizations"
+          [orgVault]="orgVault"
           [groups]="allGroups"
           [canDeleteCollection]="canDeleteCollection(item.collection)"
           [canEditCollection]="canEditCollection(item.collection)"

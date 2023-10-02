@@ -1,6 +1,15 @@
-import { Component, EventEmitter, HostBinding, HostListener, Input, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  HostBinding,
+  HostListener,
+  Input,
+  OnInit,
+  Output,
+} from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 
+import { OrganizationUserType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { CollectionView } from "@bitwarden/common/vault/models/view/collection.view";
 
@@ -14,7 +23,7 @@ import { RowHeightClass } from "./vault-items.component";
   selector: "tr[appVaultCollectionRow]",
   templateUrl: "vault-collection-row.component.html",
 })
-export class VaultCollectionRowComponent {
+export class VaultCollectionRowComponent implements OnInit {
   protected RowHeightClass = RowHeightClass;
 
   @Input() disabled: boolean;
@@ -26,6 +35,8 @@ export class VaultCollectionRowComponent {
   @Input() canDeleteCollection: boolean;
   @Input() organizations: Organization[];
   @Input() groups: GroupView[];
+  @Input() orgVault: boolean;
+  permissionText: string;
 
   @Output() onEvent = new EventEmitter<VaultItemEvent>();
 
@@ -33,6 +44,23 @@ export class VaultCollectionRowComponent {
   @Output() checkedToggled = new EventEmitter<void>();
 
   constructor(private router: Router, private activatedRoute: ActivatedRoute) {}
+
+  // we will have more permissions when this PR is merged
+  // https://github.com/bitwarden/clients/pull/6417
+
+  ngOnInit() {
+    // change this to use new collection data
+    if (
+      this.organizations[0].type === OrganizationUserType.Owner ||
+      this.organizations[0].type === OrganizationUserType.Manager
+    ) {
+      this.permissionText = "canManage"; // how to bring this from json. maybe set the json key
+    } else if (this.organizations[0].type === OrganizationUserType.Admin) {
+      this.permissionText = "canEdit";
+    } else {
+      this.permissionText = "-";
+    }
+  }
 
   @HostBinding("class")
   get classes() {

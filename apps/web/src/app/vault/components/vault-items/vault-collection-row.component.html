@@ -47,6 +47,9 @@
     [allGroups]="groups"
   ></app-group-badge>
 </td>
+<td bitCell [ngClass]="RowHeightClass" *ngIf="orgVault">
+  <p>{{ permissionText | i18n }}</p>
+</td>
 <td bitCell [ngClass]="RowHeightClass" class="tw-text-right">
   <button
     *ngIf="canEditCollection || canDeleteCollection"

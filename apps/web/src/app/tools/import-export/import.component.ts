@@ -4,9 +4,7 @@ import { Router } from "@angular/router";
 import * as JSZip from "jszip";
 import { concat, Observable, Subject, lastValueFrom, combineLatest } from "rxjs";
 import { map, takeUntil } from "rxjs/operators";
-import Swal, { SweetAlertIcon } from "sweetalert2";
 
-import { ModalService } from "@bitwarden/angular/services/modal.service";
 import {
   canAccessImportExport,
   OrganizationService,
@@ -31,7 +29,11 @@ import {
   ImportType,
 } from "@bitwarden/importer";
 
-import { FilePasswordPromptComponent, ImportSuccessDialogComponent } from "./dialog";
+import {
+  FilePasswordPromptComponent,
+  ImportErrorDialogComponent,
+  ImportSuccessDialogComponent,
+} from "./dialog";
 
 @Component({
   selector: "app-import",
@@ -73,7 +75,6 @@ export class ImportComponent implements OnInit, OnDestroy {
     protected platformUtilsService: PlatformUtilsService,
     protected policyService: PolicyService,
     private logService: LogService,
-    protected modalService: ModalService,
     protected syncService: SyncService,
     protected dialogService: DialogService,
     protected folderService: FolderService,
@@ -247,7 +248,9 @@ export class ImportComponent implements OnInit, OnDestroy {
       this.syncService.fullSync(true);
       await this.onSuccessfulImport();
     } catch (e) {
-      this.error(e);
+      this.dialogService.open<unknown, Error>(ImportErrorDialogComponent, {
+        data: e,
+      });
       this.logService.error(e);
     }
   }
@@ -303,29 +306,8 @@ export class ImportComponent implements OnInit, OnDestroy {
     this.fileSelected = fileInputEl.files.length > 0 ? fileInputEl.files[0] : null;
   }
 
-  private async error(error: Error) {
-    await Swal.fire({
-      heightAuto: false,
-      buttonsStyling: false,
-      icon: "error" as SweetAlertIcon,
-      iconHtml: `<i class="swal-custom-icon bwi bwi-error text-danger"></i>`,
-      input: "textarea",
-      inputValue: error.message,
-      inputAttributes: {
-        readonly: "true",
-      },
-      titleText: this.i18nService.t("importError"),
-      text: this.i18nService.t("importErrorDesc"),
-      showConfirmButton: true,
-      confirmButtonText: this.i18nService.t("ok"),
-      onOpen: (popupEl) => {
-        popupEl.querySelector(".swal2-textarea").scrollTo(0, 0);
-      },
-    });
-  }
-
   private getFileContents(file: File): Promise<string> {
-    if (this.format === "1password1pux") {
+    if (this.format === "1password1pux" && file.name.endsWith(".1pux")) {
       return this.extractZipContent(file, "export.data");
     }
     if (

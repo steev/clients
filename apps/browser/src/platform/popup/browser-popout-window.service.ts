@@ -1,3 +1,5 @@
+import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
+
 import { BrowserApi } from "../browser/browser-api";
 
 import { BrowserPopoutWindowService as BrowserPopupWindowServiceInterface } from "./abstractions/browser-popout-window.service";
@@ -12,7 +14,6 @@ class BrowserPopoutWindowService implements BrowserPopupWindowServiceInterface {
   };
 
   async openUnlockPrompt(senderWindowId: number) {
-    await this.closeUnlockPrompt();
     await this.openSingleActionPopout(
       senderWindowId,
       "popup/index.html?uilocation=popout",
@@ -36,8 +37,6 @@ class BrowserPopoutWindowService implements BrowserPopupWindowServiceInterface {
       action: string;
     }
   ) {
-    await this.closePasswordRepromptPrompt();
-
     const promptWindowPath =
       "popup/index.html#/view-cipher" +
       "?uilocation=popout" +
@@ -46,6 +45,50 @@ class BrowserPopoutWindowService implements BrowserPopupWindowServiceInterface {
       `&action=${action}`;
 
     await this.openSingleActionPopout(senderWindowId, promptWindowPath, "passwordReprompt");
+  }
+
+  async openCipherCreation(
+    senderWindowId: number,
+    {
+      cipherType = CipherType.Login,
+      senderTabId,
+      senderTabURI,
+    }: {
+      cipherType?: CipherType;
+      senderTabId: number;
+      senderTabURI: string;
+    }
+  ) {
+    const promptWindowPath =
+      "popup/index.html#/edit-cipher" +
+      "?uilocation=popout" +
+      `&type=${cipherType}` +
+      `&senderTabId=${senderTabId}` +
+      `&uri=${senderTabURI}`;
+
+    await this.openSingleActionPopout(senderWindowId, promptWindowPath, "cipherCreation");
+  }
+
+  async openCipherEdit(
+    senderWindowId: number,
+    {
+      cipherId,
+      senderTabId,
+      senderTabURI,
+    }: {
+      cipherId: string;
+      senderTabId: number;
+      senderTabURI: string;
+    }
+  ) {
+    const promptWindowPath =
+      "popup/index.html#/edit-cipher" +
+      "?uilocation=popout" +
+      `&cipherId=${cipherId}` +
+      `&senderTabId=${senderTabId}` +
+      `&uri=${senderTabURI}`;
+
+    await this.openSingleActionPopout(senderWindowId, promptWindowPath, "cipherEdit");
   }
 
   async closePasswordRepromptPrompt() {
@@ -73,18 +116,16 @@ class BrowserPopoutWindowService implements BrowserPopupWindowServiceInterface {
 
     const popupWindow = await BrowserApi.createWindow(windowOptions);
 
-    if (!singleActionPopoutKey) {
-      return;
-    }
+    await this.closeSingleActionPopout(singleActionPopoutKey);
     this.singleActionPopoutTabIds[singleActionPopoutKey] = popupWindow?.tabs[0].id;
   }
 
   private async closeSingleActionPopout(popoutKey: string) {
     const tabId = this.singleActionPopoutTabIds[popoutKey];
-    if (!tabId) {
-      return;
+
+    if (tabId) {
+      await BrowserApi.removeTab(tabId);
     }
-    await BrowserApi.removeTab(tabId);
     this.singleActionPopoutTabIds[popoutKey] = null;
   }
 }

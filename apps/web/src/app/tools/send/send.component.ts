@@ -1,6 +1,6 @@
 import { Component, NgZone, ViewChild, ViewContainerRef } from "@angular/core";
+import { lastValueFrom } from "rxjs";
 
-import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { SendComponent as BaseSendComponent } from "@bitwarden/angular/tools/send/send.component";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
@@ -51,7 +51,6 @@ export class SendComponent extends BaseSendComponent {
     ngZone: NgZone,
     searchService: SearchService,
     policyService: PolicyService,
-    private modalService: ModalService,
     private broadcasterService: BroadcasterService,
     logService: LogService,
     sendApiService: SendApiService,
@@ -98,29 +97,17 @@ export class SendComponent extends BaseSendComponent {
       return;
     }
 
-    const component = await this.editSend(null);
-    component.type = this.type;
+    await this.editSend(null);
   }
 
   async editSend(send: SendView) {
-    const [modal, childComponent] = await this.modalService.openViewRef(
-      AddEditComponent,
-      this.sendAddEditModalRef,
-      (comp) => {
-        comp.sendId = send == null ? null : send.id;
-        // eslint-disable-next-line rxjs-angular/prefer-takeuntil, rxjs/no-async-subscribe
-        comp.onSavedSend.subscribe(async () => {
-          modal.close();
-          await this.load();
-        });
-        // eslint-disable-next-line rxjs-angular/prefer-takeuntil, rxjs/no-async-subscribe
-        comp.onDeletedSend.subscribe(async () => {
-          modal.close();
-          await this.load();
-        });
-      }
-    );
+    const dialog = this.dialogService.open(AddEditComponent, {
+      data: {
+        sendId: send == null ? null : send.id,
+      },
+    });
 
-    return childComponent;
+    await lastValueFrom(dialog.closed);
+    await this.load();
   }
 }

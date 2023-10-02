@@ -27,6 +27,7 @@ import { EFFLongWordList } from "../misc/wordlist";
 import { EncArrayBuffer } from "../models/domain/enc-array-buffer";
 import { EncString } from "../models/domain/enc-string";
 import {
+  CipherKey,
   MasterKey,
   OrgKey,
   PinKey,
@@ -77,6 +78,12 @@ export class CryptoService implements CryptoServiceAbstraction {
     }
   }
 
+  async isLegacyUser(masterKey?: MasterKey, userId?: string): Promise<boolean> {
+    return await this.validateUserKey(
+      (masterKey ?? (await this.getMasterKey(userId))) as unknown as UserKey
+    );
+  }
+
   async getUserKeyWithLegacySupport(userId?: string): Promise<UserKey> {
     const userKey = await this.getUserKey(userId);
     if (userKey) {
@@ -119,7 +126,7 @@ export class CryptoService implements CryptoServiceAbstraction {
       throw new Error("No Master Key found.");
     }
 
-    const newUserKey = await this.cryptoFunctionService.randomBytes(64);
+    const newUserKey = await this.cryptoFunctionService.aesGenerateKey(512);
     return this.buildProtectedSymmetricKey(masterKey, newUserKey);
   }
 
@@ -367,7 +374,7 @@ export class CryptoService implements CryptoServiceAbstraction {
       throw new Error("No key provided");
     }
 
-    const newSymKey = await this.cryptoFunctionService.randomBytes(64);
+    const newSymKey = await this.cryptoFunctionService.aesGenerateKey(512);
     return this.buildProtectedSymmetricKey(key, newSymKey);
   }
 
@@ -458,7 +465,7 @@ export class CryptoService implements CryptoServiceAbstraction {
   }
 
   async makeOrgKey<T extends OrgKey | ProviderKey>(): Promise<[EncString, T]> {
-    const shareKey = await this.cryptoFunctionService.randomBytes(64);
+    const shareKey = await this.cryptoFunctionService.aesGenerateKey(512);
     const publicKey = await this.getPublicKey();
     const encShareKey = await this.rsaEncrypt(shareKey, publicKey);
     return [encShareKey, new SymmetricCryptoKey(shareKey) as T];
@@ -510,7 +517,8 @@ export class CryptoService implements CryptoServiceAbstraction {
   }
 
   async makeKeyPair(key?: SymmetricCryptoKey): Promise<[string, EncString]> {
-    key ||= await this.getUserKey();
+    // Default to user key
+    key ||= await this.getUserKeyWithLegacySupport();
 
     const keyPair = await this.cryptoFunctionService.rsaGenerateKeyPair(2048);
     const publicB64 = Utils.fromBufferToB64(keyPair[0]);
@@ -587,6 +595,11 @@ export class CryptoService implements CryptoServiceAbstraction {
       "sha256"
     );
     return new SymmetricCryptoKey(sendKey);
+  }
+
+  async makeCipherKey(): Promise<CipherKey> {
+    const randomBytes = await this.cryptoFunctionService.aesGenerateKey(512);
+    return new SymmetricCryptoKey(randomBytes) as CipherKey;
   }
 
   async clearKeys(userId?: string): Promise<any> {
@@ -731,8 +744,8 @@ export class CryptoService implements CryptoServiceAbstraction {
     publicKey: string;
     privateKey: EncString;
   }> {
-    const randomBytes = await this.cryptoFunctionService.randomBytes(64);
-    const userKey = new SymmetricCryptoKey(randomBytes) as UserKey;
+    const rawKey = await this.cryptoFunctionService.aesGenerateKey(512);
+    const userKey = new SymmetricCryptoKey(rawKey) as UserKey;
     const [publicKey, privateKey] = await this.makeKeyPair(userKey);
     await this.setUserKey(userKey);
     await this.stateService.setEncryptedPrivateKey(privateKey.encryptedString);
@@ -943,23 +956,30 @@ export class CryptoService implements CryptoServiceAbstraction {
 
   async migrateAutoKeyIfNeeded(userId?: string) {
     const oldAutoKey = await this.stateService.getCryptoMasterKeyAuto({ userId: userId });
-    if (oldAutoKey) {
-      // decrypt
-      const masterKey = new SymmetricCryptoKey(Utils.fromB64ToArray(oldAutoKey)) as MasterKey;
-      const encryptedUserKey = await this.stateService.getEncryptedCryptoSymmetricKey({
-        userId: userId,
-      });
-      const userKey = await this.decryptUserKeyWithMasterKey(
-        masterKey,
-        new EncString(encryptedUserKey),
-        userId
-      );
-      // migrate
-      await this.stateService.setUserKeyAutoUnlock(userKey.keyB64, { userId: userId });
-      await this.stateService.setCryptoMasterKeyAuto(null, { userId: userId });
-      // set encrypted user key in case user immediately locks without syncing
-      await this.setMasterKeyEncryptedUserKey(encryptedUserKey);
+    if (!oldAutoKey) {
+      return;
     }
+    // Decrypt
+    const masterKey = new SymmetricCryptoKey(Utils.fromB64ToArray(oldAutoKey)) as MasterKey;
+    if (await this.isLegacyUser(masterKey, userId)) {
+      // Legacy users don't have a user key, so no need to migrate.
+      // Instead, set the master key for additional isLegacyUser checks that will log the user out.
+      await this.setMasterKey(masterKey, userId);
+      return;
+    }
+    const encryptedUserKey = await this.stateService.getEncryptedCryptoSymmetricKey({
+      userId: userId,
+    });
+    const userKey = await this.decryptUserKeyWithMasterKey(
+      masterKey,
+      new EncString(encryptedUserKey),
+      userId
+    );
+    // Migrate
+    await this.stateService.setUserKeyAutoUnlock(userKey.keyB64, { userId: userId });
+    await this.stateService.setCryptoMasterKeyAuto(null, { userId: userId });
+    // Set encrypted user key in case user immediately locks without syncing
+    await this.setMasterKeyEncryptedUserKey(encryptedUserKey);
   }
 
   async decryptAndMigrateOldPinKey(

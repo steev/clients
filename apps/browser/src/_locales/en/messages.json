@@ -91,6 +91,15 @@
   "autoFill": {
     "message": "Auto-fill"
   },
+  "autoFillLogin": {
+    "message": "Auto-fill login"
+  },
+  "autoFillCard": {
+    "message": "Auto-fill card"
+  },
+  "autoFillIdentity": {
+    "message": "Auto-fill identity"
+  },
   "generatePasswordCopied": {
     "message": "Generate password (copied)"
   },
@@ -99,6 +108,21 @@
   },
   "noMatchingLogins": {
     "message": "No matching logins"
+  },
+  "noCards": {
+    "message": "No cards"
+  },
+  "noIdentities": {
+    "message": "No identities"
+  },
+  "addLoginMenu": {
+    "message": "Add login"
+  },
+  "addCardMenu": {
+    "message": "Add card"
+  },
+  "addIdentityMenu": {
+    "message": "Add identity"
   },
   "unlockVaultMenu": {
     "message": "Unlock your vault"
@@ -771,8 +795,8 @@
   "featureUnavailable": {
     "message": "Feature unavailable"
   },
-  "updateKey": {
-    "message": "You cannot use this feature until you update your encryption key."
+  "encryptionKeyMigrationRequired": {
+    "message": "Encryption key migration required. Please login through the web vault to update your encryption key."
   },
   "premiumMembership": {
     "message": "Premium membership"
@@ -795,8 +819,8 @@
   "ppremiumSignUpStorage": {
     "message": "1 GB encrypted storage for file attachments."
   },
-  "ppremiumSignUpTwoStep": {
-    "message": "Additional two-step login options such as YubiKey, FIDO U2F, and Duo."
+  "premiumSignUpTwoStepOptions": {
+    "message": "Proprietary two-step login options such as YubiKey and Duo."
   },
   "ppremiumSignUpReports": {
     "message": "Password hygiene, account health, and data breach reports to keep your vault safe."
@@ -1991,8 +2015,8 @@
   "exportingPersonalVaultTitle": {
     "message": "Exporting individual vault"
   },
-  "exportingPersonalVaultDescription": {
-    "message": "Only the individual vault items associated with $EMAIL$ will be exported. Organization vault items will not be included.",
+  "exportingIndividualVaultDescription": {
+    "message": "Only the individual vault items associated with $EMAIL$ will be exported. Organization vault items will not be included. Only vault item information will be exported and will not include associated attachments.",
     "placeholders": {
       "email": {
         "content": "$1",
@@ -2092,8 +2116,8 @@
   "serverVersion": {
     "message": "Server version"
   },
-  "selfHosted": {
-    "message": "Self-hosted"
+  "selfHostedServer": {
+    "message": "self-hosted"
   },
   "thirdParty": {
     "message": "Third-party"
@@ -2406,5 +2430,20 @@
   "toggleCollapse": {
     "message": "Toggle collapse",
     "description": "Toggling an expand/collapse state."
+  },
+  "aliasDomain": {
+    "message": "Alias domain"
+  },
+  "passwordRepromptDisabledAutofillOnPageLoad": {
+    "message": "Items with master password re-prompt cannot be auto-filled on page load. Auto-fill on page load turned off.",
+    "description": "Toast message for describing that master password re-prompt cannot be auto-filled on page load."
+  },
+  "autofillOnPageLoadSetToDefault": {
+    "message": "Auto-fill on page load set to use default setting.",
+    "description": "Toast message for informing the user that auto-fill on page load has been set to the default setting."
+  },
+  "turnOffMasterPasswordPromptToEditField": {
+    "message": "Turn off master password re-prompt to edit this field",
+    "description": "Message appearing below the autofill on load message when master password reprompt is set for a vault item."
   }
 }

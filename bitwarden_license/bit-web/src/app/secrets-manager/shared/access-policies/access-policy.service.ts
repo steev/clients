@@ -23,7 +23,6 @@ import {
 import { PotentialGranteeView } from "../../models/view/potential-grantee.view";
 import { AccessPoliciesCreateRequest } from "../../shared/access-policies/models/requests/access-policies-create.request";
 import { PeopleAccessPoliciesRequest } from "../../shared/access-policies/models/requests/people-access-policies.request";
-import { PeopleAccessPoliciesResponse } from "../../shared/access-policies/models/responses/people-access-policies.response";
 import { ProjectAccessPoliciesResponse } from "../../shared/access-policies/models/responses/project-access-policies.response";
 import { ServiceAccountAccessPoliciesResponse } from "../../shared/access-policies/models/responses/service-accounts-access-policies.response";
 
@@ -39,6 +38,7 @@ import {
   UserProjectAccessPolicyResponse,
 } from "./models/responses/access-policy.response";
 import { PotentialGranteeResponse } from "./models/responses/potential-grantee.response";
+import { ProjectPeopleAccessPoliciesResponse } from "./models/responses/project-people-access-policies.response";
 
 @Injectable({
   providedIn: "root",
@@ -147,7 +147,7 @@ export class AccessPolicyService {
       true
     );
 
-    const results = new PeopleAccessPoliciesResponse(r);
+    const results = new ProjectPeopleAccessPoliciesResponse(r);
     return this.createProjectPeopleAccessPoliciesView(results);
   }
 
@@ -163,7 +163,7 @@ export class AccessPolicyService {
       true,
       true
     );
-    const results = new PeopleAccessPoliciesResponse(r);
+    const results = new ProjectPeopleAccessPoliciesResponse(r);
     return this.createProjectPeopleAccessPoliciesView(results);
   }
 
@@ -293,7 +293,7 @@ export class AccessPolicyService {
   }
 
   private createProjectPeopleAccessPoliciesView(
-    peopleAccessPoliciesResponse: PeopleAccessPoliciesResponse
+    peopleAccessPoliciesResponse: ProjectPeopleAccessPoliciesResponse
   ): ProjectAccessPoliciesView {
     const view = new ProjectAccessPoliciesView();
 

@@ -10,12 +10,11 @@ import {
   factory,
 } from "../../../platform/background/service-factories/factory-options";
 
-type ImportApiServiceFactoryOptions = FactoryOptions;
-
-export type ImportApiServiceInitOptions = ImportApiServiceFactoryOptions & ApiServiceInitOptions;
+export type ImportApiServiceInitOptions = FactoryOptions & ApiServiceInitOptions;
+type ServiceCache = { importApiService?: ImportApiServiceAbstraction } & CachedServices;
 
 export function importApiServiceFactory(
-  cache: { importApiService?: ImportApiServiceAbstraction } & CachedServices,
+  cache: ServiceCache,
   opts: ImportApiServiceInitOptions
 ): Promise<ImportApiServiceAbstraction> {
   return factory(

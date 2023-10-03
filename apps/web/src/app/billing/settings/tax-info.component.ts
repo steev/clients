@@ -73,7 +73,7 @@ export class TaxInfoComponent {
             this.taxInfo.postalCode = taxInfo.postalCode;
             this.taxInfo.country = taxInfo.country || "US";
             this.taxInfo.includeTaxId =
-              this.taxInfo.country !== "US" &&
+              this.countrySupportsTax(this.taxInfo.country) &&
               (!!taxInfo.taxId ||
                 !!taxInfo.line1 ||
                 !!taxInfo.line2 ||
@@ -125,14 +125,22 @@ export class TaxInfoComponent {
   getTaxInfoRequest(): TaxInfoUpdateRequest {
     if (this.organizationId) {
       const request = new OrganizationTaxInfoUpdateRequest();
-      request.taxId = this.taxInfo.taxId;
-      request.state = this.taxInfo.state;
-      request.line1 = this.taxInfo.line1;
-      request.line2 = this.taxInfo.line2;
-      request.city = this.taxInfo.city;
-      request.state = this.taxInfo.state;
-      request.postalCode = this.taxInfo.postalCode;
       request.country = this.taxInfo.country;
+      request.postalCode = this.taxInfo.postalCode;
+
+      if (this.taxInfo.includeTaxId) {
+        request.taxId = this.taxInfo.taxId;
+        request.line1 = this.taxInfo.line1;
+        request.line2 = this.taxInfo.line2;
+        request.city = this.taxInfo.city;
+        request.state = this.taxInfo.state;
+      } else {
+        request.taxId = null;
+        request.line1 = null;
+        request.line2 = null;
+        request.city = null;
+        request.state = null;
+      }
       return request;
     } else {
       const request = new TaxInfoUpdateRequest();
@@ -158,7 +166,7 @@ export class TaxInfoComponent {
   }
 
   changeCountry() {
-    if (this.taxInfo.country === "US") {
+    if (!this.countrySupportsTax(this.taxInfo.country)) {
       this.taxInfo.includeTaxId = false;
       this.taxInfo.taxId = null;
       this.taxInfo.line1 = null;
@@ -167,6 +175,10 @@ export class TaxInfoComponent {
       this.taxInfo.state = null;
     }
     this.onCountryChanged.emit();
+  }
+
+  countrySupportsTax(countryCode: string) {
+    return this.taxSupportedCountryCodes.includes(countryCode);
   }
 
   private hasChanged(): boolean {
@@ -178,4 +190,80 @@ export class TaxInfoComponent {
     }
     return false;
   }
+
+  private taxSupportedCountryCodes: string[] = [
+    "CN",
+    "FR",
+    "DE",
+    "CA",
+    "GB",
+    "AU",
+    "IN",
+    "AD",
+    "AR",
+    "AT",
+    "BE",
+    "BO",
+    "BR",
+    "BG",
+    "CL",
+    "CO",
+    "CR",
+    "HR",
+    "CY",
+    "CZ",
+    "DK",
+    "DO",
+    "EC",
+    "EG",
+    "SV",
+    "EE",
+    "FI",
+    "GE",
+    "GR",
+    "HK",
+    "HU",
+    "IS",
+    "ID",
+    "IQ",
+    "IE",
+    "IL",
+    "IT",
+    "JP",
+    "KE",
+    "KR",
+    "LV",
+    "LI",
+    "LT",
+    "LU",
+    "MY",
+    "MT",
+    "MX",
+    "NL",
+    "NZ",
+    "NO",
+    "PE",
+    "PH",
+    "PL",
+    "PT",
+    "RO",
+    "RU",
+    "SA",
+    "RS",
+    "SG",
+    "SK",
+    "SI",
+    "ZA",
+    "ES",
+    "SE",
+    "CH",
+    "TW",
+    "TH",
+    "TR",
+    "UA",
+    "AE",
+    "UY",
+    "VE",
+    "VN",
+  ];
 }

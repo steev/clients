@@ -332,23 +332,6 @@ export default class MainBackground {
     );
     this.searchService = new SearchService(this.logService, this.i18nService);
 
-    this.cipherService = new CipherService(
-      this.cryptoService,
-      this.settingsService,
-      this.apiService,
-      this.i18nService,
-      this.searchService,
-      this.stateService,
-      this.encryptService,
-      this.cipherFileUploadService
-    );
-    this.folderService = new BrowserFolderService(
-      this.cryptoService,
-      this.i18nService,
-      this.cipherService,
-      this.stateService
-    );
-    this.folderApiService = new FolderApiService(this.folderService, this.apiService);
     this.collectionService = new CollectionService(
       this.cryptoService,
       this.i18nService,
@@ -371,14 +354,6 @@ export default class MainBackground {
       this.organizationService,
       this.cryptoFunctionService,
       logoutCallback
-    );
-    this.vaultFilterService = new VaultFilterService(
-      this.stateService,
-      this.organizationService,
-      this.folderService,
-      this.cipherService,
-      this.collectionService,
-      this.policyService
     );
 
     this.passwordStrengthService = new PasswordStrengthService();
@@ -446,12 +421,51 @@ export default class MainBackground {
       this.userVerificationApiService
     );
 
+    this.configApiService = new ConfigApiService(this.apiService, this.authService);
+
+    this.configService = new BrowserConfigService(
+      this.stateService,
+      this.configApiService,
+      this.authService,
+      this.environmentService,
+      this.logService,
+      true
+    );
+
+    this.cipherService = new CipherService(
+      this.cryptoService,
+      this.settingsService,
+      this.apiService,
+      this.i18nService,
+      this.searchService,
+      this.stateService,
+      this.encryptService,
+      this.cipherFileUploadService,
+      this.configService
+    );
+    this.folderService = new BrowserFolderService(
+      this.cryptoService,
+      this.i18nService,
+      this.cipherService,
+      this.stateService
+    );
+    this.folderApiService = new FolderApiService(this.folderService, this.apiService);
+
     this.vaultTimeoutSettingsService = new VaultTimeoutSettingsService(
       this.cryptoService,
       this.tokenService,
       this.policyService,
       this.stateService,
       this.userVerificationService
+    );
+
+    this.vaultFilterService = new VaultFilterService(
+      this.stateService,
+      this.organizationService,
+      this.folderService,
+      this.cipherService,
+      this.collectionService,
+      this.policyService
     );
 
     this.vaultTimeoutService = new VaultTimeoutService(
@@ -555,16 +569,6 @@ export default class MainBackground {
       this.messagingService
     );
 
-    this.configApiService = new ConfigApiService(this.apiService, this.authService);
-
-    this.configService = new BrowserConfigService(
-      this.stateService,
-      this.configApiService,
-      this.authService,
-      this.environmentService,
-      this.logService,
-      true
-    );
     this.browserPopoutWindowService = new BrowserPopoutWindowService();
 
     const systemUtilsServiceReloadCallback = () => {

@@ -11,8 +11,8 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 
-import { PaymentComponent } from "../../billing/settings/payment.component";
-import { TaxInfoComponent } from "../../billing/settings/tax-info.component";
+import { PaymentComponent } from "./payment.component";
+import { TaxInfoComponent } from "./tax-info.component";
 
 @Component({
   selector: "app-premium",
@@ -74,6 +74,7 @@ export class PremiumComponent implements OnInit {
 
     try {
       if (this.selfHosted) {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         if (!this.tokenService.getEmailVerified()) {
           this.platformUtilsService.showToast(
             "error",

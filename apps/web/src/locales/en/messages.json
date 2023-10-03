@@ -7183,5 +7183,8 @@
   },
   "customBillingEnd": {
     "message": " page for latest invoicing."
+  },
+  "projectAccessUpdated": {
+    "message": "Project access updated"
   }
 }

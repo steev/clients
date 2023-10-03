@@ -3,6 +3,8 @@ import { FormControl, FormGroup } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { combineLatest, Subject, switchMap, takeUntil } from "rxjs";
 
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { DialogService } from "@bitwarden/components";
@@ -93,6 +95,8 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
     private validationService: ValidationService,
     private accessPolicyService: AccessPolicyService,
     private router: Router,
+    private platformUtilsService: PlatformUtilsService,
+    private i18nService: I18nService,
     private accessPolicySelectorService: AccessPolicySelectorService
   ) {}
 
@@ -150,6 +154,11 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
       if (showAccessRemovalWarning) {
         this.router.navigate(["sm", this.organizationId, "projects"]);
       }
+      this.platformUtilsService.showToast(
+        "success",
+        null,
+        this.i18nService.t("projectAccessUpdated")
+      );
     } catch (e) {
       this.validationService.showError(e);
       this.setSelected(this.currentAccessPolicies);

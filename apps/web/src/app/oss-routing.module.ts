@@ -17,7 +17,6 @@ import { AcceptFamilySponsorshipComponent } from "./admin-console/organizations/
 import { FamiliesForEnterpriseSetupComponent } from "./admin-console/organizations/sponsorships/families-for-enterprise-setup.component";
 import { CreateOrganizationComponent } from "./admin-console/settings/create-organization.component";
 import { SponsoredFamiliesComponent } from "./admin-console/settings/sponsored-families.component";
-import { AcceptEmergencyComponent } from "./auth/accept-emergency.component";
 import { AcceptOrganizationComponent } from "./auth/accept-organization.component";
 import { HintComponent } from "./auth/hint.component";
 import { LockComponent } from "./auth/lock.component";
@@ -124,8 +123,11 @@ const routes: Routes = [
       },
       {
         path: "accept-emergency",
-        component: AcceptEmergencyComponent,
         data: { titleId: "acceptEmergency", doNotSaveUrl: false },
+        loadComponent: () =>
+          import("./auth/emergency-access/accept-emergency.component").then(
+            (mod) => mod.AcceptEmergencyComponent
+          ),
       },
       {
         path: "accept-families-for-enterprise",

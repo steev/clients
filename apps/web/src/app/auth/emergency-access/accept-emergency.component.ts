@@ -1,16 +1,16 @@
 import { Component } from "@angular/core";
 import { ActivatedRoute, Params, Router } from "@angular/router";
 
-import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { EmergencyAccessAcceptRequest } from "@bitwarden/common/auth/models/request/emergency-access-accept.request";
-import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 
-import { BaseAcceptComponent } from "../common/base.accept.component";
+import { BaseAcceptComponent } from "../../common/base.accept.component";
+import { StateService } from "../../core";
+import { I18nService } from "../../core/i18n.service";
+import { EmergencyAccessApiService } from "../core/services/emergency-access/emergency-access-api.service";
 
 @Component({
-  selector: "app-accept-emergency",
+  standalone: true,
   templateUrl: "accept-emergency.component.html",
 })
 export class AcceptEmergencyComponent extends BaseAcceptComponent {
@@ -25,7 +25,7 @@ export class AcceptEmergencyComponent extends BaseAcceptComponent {
     platformUtilsService: PlatformUtilsService,
     i18nService: I18nService,
     route: ActivatedRoute,
-    private apiService: ApiService,
+    private emergencyAccessApiService: EmergencyAccessApiService,
     stateService: StateService
   ) {
     super(router, platformUtilsService, i18nService, route, stateService);
@@ -34,7 +34,10 @@ export class AcceptEmergencyComponent extends BaseAcceptComponent {
   async authedHandler(qParams: Params): Promise<void> {
     const request = new EmergencyAccessAcceptRequest();
     request.token = qParams.token;
-    this.actionPromise = this.apiService.postEmergencyAccessAccept(qParams.id, request);
+    this.actionPromise = this.emergencyAccessApiService.postEmergencyAccessAccept(
+      qParams.id,
+      request
+    );
     await this.actionPromise;
     await this.stateService.setEmergencyAccessInvitation(null);
     this.platformUtilService.showToast(

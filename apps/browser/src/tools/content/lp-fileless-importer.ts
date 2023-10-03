@@ -131,7 +131,7 @@ class LpFilelessImporter implements LpFilelessImporterInterface {
 
         const preElement: HTMLPreElement = addedNode as HTMLPreElement;
         const textContent: string = preElement.textContent?.trim();
-        if (!textContent) {
+        if (!textContent || textContent.indexOf("url,username,password") === -1) {
           continue;
         }
 

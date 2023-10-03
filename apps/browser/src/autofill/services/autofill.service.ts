@@ -19,9 +19,9 @@ import AutofillScript from "../models/autofill-script";
 import {
   AutoFillOptions,
   AutofillService as AutofillServiceInterface,
-  PageDetail,
   FormData,
   GenerateFillScriptOptions,
+  PageDetail,
 } from "./abstractions/autofill.service";
 import {
   AutoFillConstants,
@@ -205,6 +205,7 @@ export default class AutofillService implements AutofillServiceInterface {
 
         if (
           options.cipher.type !== CipherType.Login ||
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
           totpPromise ||
           !options.cipher.login.totp ||
           (!canAccessPremium && !options.cipher.organizationUseTotp)
@@ -260,7 +261,7 @@ export default class AutofillService implements AutofillServiceInterface {
       }
     }
 
-    if (cipher == null) {
+    if (cipher == null || (cipher.reprompt === CipherRepromptType.Password && !fromCommand)) {
       return null;
     }
 
@@ -303,21 +304,51 @@ export default class AutofillService implements AutofillServiceInterface {
   }
 
   /**
-   * Autofill the active tab with the next login item from the cache
+   * Autofill the active tab with the next cipher from the cache
    * @param {PageDetail[]} pageDetails The data scraped from the page
    * @param {boolean} fromCommand Whether the autofill is triggered by a keyboard shortcut (`true`) or autofill on page load (`false`)
    * @returns {Promise<string | null>} The TOTP code of the successfully autofilled login, if any
    */
   async doAutoFillActiveTab(
     pageDetails: PageDetail[],
-    fromCommand: boolean
+    fromCommand: boolean,
+    cipherType?: CipherType
   ): Promise<string | null> {
+    if (!pageDetails[0]?.details?.fields?.length) {
+      return null;
+    }
+
     const tab = await this.getActiveTab();
+
     if (!tab || !tab.url) {
       return null;
     }
 
-    return await this.doAutoFillOnTab(pageDetails, tab, fromCommand);
+    if (!cipherType || cipherType === CipherType.Login) {
+      return await this.doAutoFillOnTab(pageDetails, tab, fromCommand);
+    }
+
+    // Cipher is a non-login type
+    const cipher: CipherView = (
+      (await this.cipherService.getAllDecryptedForUrl(tab.url, [cipherType])) || []
+    ).find(({ type }) => type === cipherType);
+
+    if (!cipher || cipher.reprompt !== CipherRepromptType.None) {
+      return null;
+    }
+
+    return await this.doAutoFill({
+      tab: tab,
+      cipher: cipher,
+      pageDetails: pageDetails,
+      skipLastUsed: !fromCommand,
+      skipUsernameOnlyFill: !fromCommand,
+      onlyEmptyFields: !fromCommand,
+      onlyVisibleFields: !fromCommand,
+      fillNewPassword: false,
+      allowUntrustedIframe: fromCommand,
+      allowTotpAutofill: false,
+    });
   }
 
   /**

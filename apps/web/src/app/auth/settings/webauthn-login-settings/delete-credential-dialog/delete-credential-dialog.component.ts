@@ -11,7 +11,7 @@ import { Verification } from "@bitwarden/common/types/verification";
 import { DialogService } from "@bitwarden/components";
 
 import { WebauthnLoginService } from "../../../core";
-import { WebauthnCredentialView } from "../../../core/views/webauth-credential.view";
+import { WebauthnLoginCredentialView } from "../../../core/views/webauthn-login-credential.view";
 
 export interface DeleteCredentialDialogParams {
   credentialId: string;
@@ -27,7 +27,7 @@ export class DeleteCredentialDialogComponent implements OnInit, OnDestroy {
   protected formGroup = this.formBuilder.group({
     secret: null as Verification | null,
   });
-  protected credential?: WebauthnCredentialView;
+  protected credential?: WebauthnLoginCredentialView;
   protected loading$ = this.webauthnService.loading$;
 
   constructor(

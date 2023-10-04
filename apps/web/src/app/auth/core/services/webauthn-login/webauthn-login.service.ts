@@ -5,8 +5,10 @@ import { UserVerificationService } from "@bitwarden/common/auth/abstractions/use
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { Verification } from "@bitwarden/common/types/verification";
 
+import { WebauthnLoginCredentialPrfStatus } from "../../enums/webauthn-login-credential-prf-status.enum";
 import { CredentialCreateOptionsView } from "../../views/credential-create-options.view";
-import { WebauthnCredentialView } from "../../views/webauth-credential.view";
+import { PendingWebauthnLoginCredentialView } from "../../views/pending-webauthn-login-credential.view";
+import { WebauthnLoginCredentialView } from "../../views/webauthn-login-credential.view";
 
 import { SaveCredentialRequest } from "./request/save-credential.request";
 import { WebauthnLoginAttestationResponseRequest } from "./request/webauthn-login-attestation-response.request";
@@ -48,7 +50,7 @@ export class WebauthnLoginService {
 
   async createCredential(
     credentialOptions: CredentialCreateOptionsView
-  ): Promise<PublicKeyCredential | undefined> {
+  ): Promise<PendingWebauthnLoginCredentialView | undefined> {
     const nativeOptions: CredentialCreationOptions = {
       publicKey: credentialOptions.options,
     };
@@ -58,21 +60,17 @@ export class WebauthnLoginService {
       if (!(response instanceof PublicKeyCredential)) {
         return undefined;
       }
-      return response;
+      return new PendingWebauthnLoginCredentialView(credentialOptions, response, false);
     } catch (error) {
       this.logService?.error(error);
       return undefined;
     }
   }
 
-  async saveCredential(
-    credentialOptions: CredentialCreateOptionsView,
-    deviceResponse: PublicKeyCredential,
-    name: string
-  ) {
+  async saveCredential(name: string, credential: PendingWebauthnLoginCredentialView) {
     const request = new SaveCredentialRequest();
-    request.deviceResponse = new WebauthnLoginAttestationResponseRequest(deviceResponse);
-    request.token = credentialOptions.token;
+    request.deviceResponse = new WebauthnLoginAttestationResponseRequest(credential.deviceResponse);
+    request.token = credential.createOptions.token;
     request.name = name;
     await this.apiService.saveCredential(request);
     this.refresh();
@@ -88,11 +86,11 @@ export class WebauthnLoginService {
    *   - The observable is lazy and will only fetch credentials when subscribed to.
    *   - Don't subscribe to this in the constructor of a long-running service, as it will keep the observable alive.
    */
-  getCredentials$(): Observable<WebauthnCredentialView[]> {
+  getCredentials$(): Observable<WebauthnLoginCredentialView[]> {
     return this.credentials$;
   }
 
-  getCredential$(credentialId: string): Observable<WebauthnCredentialView> {
+  getCredential$(credentialId: string): Observable<WebauthnLoginCredentialView> {
     return this.credentials$.pipe(
       map((credentials) => credentials.find((c) => c.id === credentialId)),
       filter((c) => c !== undefined)
@@ -105,8 +103,21 @@ export class WebauthnLoginService {
     this.refresh();
   }
 
-  private fetchCredentials$(): Observable<WebauthnCredentialView[]> {
-    return from(this.apiService.getCredentials()).pipe(map((response) => response.data));
+  private fetchCredentials$(): Observable<WebauthnLoginCredentialView[]> {
+    return from(this.apiService.getCredentials()).pipe(
+      map((response) =>
+        response.data.map(
+          (credential) =>
+            new WebauthnLoginCredentialView(
+              credential.id,
+              credential.name,
+              credential.prfSupport
+                ? WebauthnLoginCredentialPrfStatus.Supported
+                : WebauthnLoginCredentialPrfStatus.Unsupported
+            )
+        )
+      )
+    );
   }
 
   private refresh() {

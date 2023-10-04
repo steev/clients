@@ -34,13 +34,13 @@ describe("WebauthnService", () => {
     });
 
     it("should return credential when navigator.credentials does not throw", async () => {
-      const credential = createDeviceResponse();
-      credentials.create.mockResolvedValue(credential as PublicKeyCredential);
-      const options = createCredentialCreateOptions();
+      const deviceResponse = createDeviceResponse();
+      credentials.create.mockResolvedValue(deviceResponse as PublicKeyCredential);
+      const createOptions = createCredentialCreateOptions();
 
-      const result = await webauthnService.createCredential(options);
+      const result = await webauthnService.createCredential(createOptions);
 
-      expect(result).toBe(credential);
+      expect(result).toEqual({ deviceResponse, createOptions, supportsPrf: false });
     });
   });
 });
@@ -51,7 +51,7 @@ function createCredentialCreateOptions(): CredentialCreateOptionsView {
 
 function createDeviceResponse(): PublicKeyCredential {
   const credential = {
-    id: "dGVzdA==",
+    id: "Y29yb2l1IHdhcyBoZXJl",
     rawId: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
     type: "public-key",
     response: {

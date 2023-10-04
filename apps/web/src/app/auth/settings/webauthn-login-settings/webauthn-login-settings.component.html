@@ -23,7 +23,7 @@
   <tr *ngFor="let credential of credentials">
     <td class="tw-p-2 tw-pl-0 tw-font-semibold">{{ credential.name }}</td>
     <td class="tw-p-2 tw-pr-10">
-      <ng-container *ngIf="credential.prfSupport">
+      <ng-container *ngIf="credential.prfStatus === WebauthnLoginCredentialPrfStatus.Supported">
         <i class="bwi bwi-lock-encrypted"></i>
         {{ "supportsEncryption" | i18n }}
       </ng-container>

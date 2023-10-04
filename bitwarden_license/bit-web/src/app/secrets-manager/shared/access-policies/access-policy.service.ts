@@ -294,8 +294,8 @@ export class AccessPolicyService {
 
   private createProjectPeopleAccessPoliciesView(
     peopleAccessPoliciesResponse: ProjectPeopleAccessPoliciesResponse
-  ): ProjectAccessPoliciesView {
-    const view = new ProjectAccessPoliciesView();
+  ): ProjectPeopleAccessPoliciesView {
+    const view = new ProjectPeopleAccessPoliciesView();
 
     view.userAccessPolicies = peopleAccessPoliciesResponse.userAccessPolicies.map((ap) => {
       return this.createUserProjectAccessPolicyView(ap);

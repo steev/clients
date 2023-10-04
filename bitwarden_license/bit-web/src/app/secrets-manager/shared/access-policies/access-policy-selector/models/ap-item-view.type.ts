@@ -1,6 +1,8 @@
+import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SelectItemView } from "@bitwarden/components";
 
 import { ProjectPeopleAccessPoliciesView } from "../../../../models/view/access-policy.view";
+import { PotentialGranteeView } from "../../../../models/view/potential-grantee.view";
 
 import { ApItemEnum, ApItemEnumUtil } from "./enums/ap-item.enum";
 import { ApPermissionEnum, ApPermissionEnumUtil } from "./enums/ap-permission.enum";
@@ -59,4 +61,43 @@ export function convertToAccessPolicyItemViews(
   });
 
   return accessPolicies;
+}
+
+export function convertPotentialGranteesToApItemViewType(
+  grantees: PotentialGranteeView[]
+): ApItemViewType[] {
+  return grantees.map((granteeView) => {
+    let icon: string;
+    let type: ApItemEnum;
+    let listName = granteeView.name;
+    let labelName = granteeView.name;
+    if (granteeView.type === "user") {
+      icon = ApItemEnumUtil.itemIcon(ApItemEnum.User);
+      type = ApItemEnum.User;
+      if (Utils.isNullOrWhitespace(granteeView.name)) {
+        listName = granteeView.email;
+        labelName = granteeView.email;
+      } else {
+        listName = `${granteeView.name} (${granteeView.email})`;
+      }
+    } else if (granteeView.type === "group") {
+      icon = ApItemEnumUtil.itemIcon(ApItemEnum.Group);
+      type = ApItemEnum.Group;
+    } else if (granteeView.type === "serviceAccount") {
+      icon = ApItemEnumUtil.itemIcon(ApItemEnum.ServiceAccount);
+      type = ApItemEnum.ServiceAccount;
+    } else if (granteeView.type === "project") {
+      icon = ApItemEnumUtil.itemIcon(ApItemEnum.Project);
+      type = ApItemEnum.Project;
+    }
+    return {
+      icon: icon,
+      type: type,
+      id: granteeView.id,
+      labelName: labelName,
+      listName: listName,
+      currentUserInGroup: granteeView.currentUserInGroup,
+      currentUser: granteeView.currentUser,
+    };
+  });
 }

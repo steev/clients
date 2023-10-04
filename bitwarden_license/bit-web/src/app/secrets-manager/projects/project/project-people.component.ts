@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { FormControl, FormGroup } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { combineLatest, Subject, switchMap, takeUntil } from "rxjs";
+import { combineLatest, Subject, switchMap, takeUntil, catchError, EMPTY } from "rxjs";
 
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -37,7 +37,11 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
       this.accessPolicyService.getProjectPeopleAccessPolicies(params.projectId).then((policies) => {
         return convertToAccessPolicyItemViews(policies);
       })
-    )
+    ),
+    catchError(() => {
+      this.router.navigate(["/sm", this.organizationId, "projects"]);
+      return EMPTY;
+    })
   );
 
   private potentialGrantees$ = combineLatest([this.route.params]).pipe(

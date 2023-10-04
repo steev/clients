@@ -44,17 +44,21 @@ export class ReusedPasswordsReportComponent extends CipherReportComponent implem
         return;
       }
       ciphersWithPasswords.push(c);
-      if (this.passwordUseMap.has(c.login.password)) {
-        this.passwordUseMap.set(c.login.password, this.passwordUseMap.get(c.login.password) + 1);
-      } else {
-        this.passwordUseMap.set(c.login.password, 1);
+      const org = this.organizationService.get(c.organizationId);
+      if (!org || org.isOwner) {
+        if (this.passwordUseMap.has(c.login.password)) {
+          this.passwordUseMap.set(c.login.password, this.passwordUseMap.get(c.login.password) + 1);
+        } else {
+          this.passwordUseMap.set(c.login.password, 1);
+        }
       }
     });
     const reusedPasswordCiphers = ciphersWithPasswords.filter(
       (c) =>
         this.passwordUseMap.has(c.login.password) &&
         this.passwordUseMap.get(c.login.password) > 1 &&
-        c.edit
+        c.edit &&
+        c.viewPassword
     );
     this.ciphers = reusedPasswordCiphers;
   }

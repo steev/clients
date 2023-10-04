@@ -96,7 +96,7 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
       );
     });
 
-    this.ciphers = this.weakPasswordCiphers.filter((c) => c.edit);
+    this.ciphers = this.weakPasswordCiphers.filter((c) => c.edit && c.viewPassword);
   }
 
   getAllCiphers(): Promise<CipherView[]> {

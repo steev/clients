@@ -15,4 +15,9 @@ export class SaveCredentialRequest {
    * It contains encrypted information that the server needs to verify the credential.
    */
   token: string;
+
+  /**
+   * True if the authenticator succesfully created the credential with PRF support.
+   */
+  supportsPrf: boolean;
 }

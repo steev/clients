@@ -54,13 +54,19 @@ export class WebauthnLoginService {
     const nativeOptions: CredentialCreationOptions = {
       publicKey: credentialOptions.options,
     };
+    // TODO: Remove `any` when typescript typings add support for PRF
+    nativeOptions.publicKey.extensions = {
+      prf: {},
+    } as any;
 
     try {
       const response = await this.navigatorCredentials.create(nativeOptions);
       if (!(response instanceof PublicKeyCredential)) {
         return undefined;
       }
-      return new PendingWebauthnLoginCredentialView(credentialOptions, response, false);
+      // TODO: Remove `any` when typescript typings add support for PRF
+      const supportsPrf = Boolean((response.getClientExtensionResults() as any).prf?.enabled);
+      return new PendingWebauthnLoginCredentialView(credentialOptions, response, supportsPrf);
     } catch (error) {
       this.logService?.error(error);
       return undefined;
@@ -72,6 +78,7 @@ export class WebauthnLoginService {
     request.deviceResponse = new WebauthnLoginAttestationResponseRequest(credential.deviceResponse);
     request.token = credential.createOptions.token;
     request.name = name;
+    request.supportsPrf = credential.supportsPrf;
     await this.apiService.saveCredential(request);
     this.refresh();
   }

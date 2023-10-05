@@ -1,13 +1,12 @@
 import { Component } from "@angular/core";
 import { ActivatedRoute, Params, Router } from "@angular/router";
 
-import { EmergencyAccessAcceptRequest } from "@bitwarden/common/auth/models/request/emergency-access-accept.request";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 
 import { BaseAcceptComponent } from "../../common/base.accept.component";
 import { StateService } from "../../core";
 import { I18nService } from "../../core/i18n.service";
-import { EmergencyAccessApiService } from "../core/services/emergency-access/emergency-access-api.service";
+import { EmergencyAccessService } from "../core/services/emergency-access/emergency-access.service";
 
 @Component({
   standalone: true,
@@ -25,19 +24,14 @@ export class AcceptEmergencyComponent extends BaseAcceptComponent {
     platformUtilsService: PlatformUtilsService,
     i18nService: I18nService,
     route: ActivatedRoute,
-    private emergencyAccessApiService: EmergencyAccessApiService,
-    stateService: StateService
+    stateService: StateService,
+    private emergencyAccessService: EmergencyAccessService
   ) {
     super(router, platformUtilsService, i18nService, route, stateService);
   }
 
   async authedHandler(qParams: Params): Promise<void> {
-    const request = new EmergencyAccessAcceptRequest();
-    request.token = qParams.token;
-    this.actionPromise = this.emergencyAccessApiService.postEmergencyAccessAccept(
-      qParams.id,
-      request
-    );
+    this.actionPromise = this.emergencyAccessService.accept(qParams.id, qParams.token);
     await this.actionPromise;
     await this.stateService.setEmergencyAccessInvitation(null);
     this.platformUtilService.showToast(

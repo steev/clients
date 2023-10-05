@@ -2,24 +2,21 @@ import { Component, OnInit, ViewChild, ViewContainerRef } from "@angular/core";
 
 import { UserNamePipe } from "@bitwarden/angular/pipes/user-name.pipe";
 import { ModalService } from "@bitwarden/angular/services/modal.service";
-import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { EmergencyAccessStatusType } from "@bitwarden/common/auth/enums/emergency-access-status-type";
 import { EmergencyAccessType } from "@bitwarden/common/auth/enums/emergency-access-type";
-import { EmergencyAccessConfirmRequest } from "@bitwarden/common/auth/models/request/emergency-access-confirm.request";
 import {
   EmergencyAccessGranteeDetailsResponse,
   EmergencyAccessGrantorDetailsResponse,
 } from "@bitwarden/common/auth/models/response/emergency-access.response";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
-import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { DialogService } from "@bitwarden/components";
 import { EmergencyAccessApiService } from "../../core/services/emergency-access/emergency-access-api.service";
+import { EmergencyAccessService } from "../../core/services/emergency-access/emergency-access.service";
 
 import { EmergencyAccessAddEditComponent } from "./emergency-access-add-edit.component";
 import { EmergencyAccessConfirmComponent } from "./emergency-access-confirm.component";
@@ -48,11 +45,10 @@ export class EmergencyAccessComponent implements OnInit {
 
   constructor(
     private emergencyAccessApiService: EmergencyAccessApiService,
-    private apiService: ApiService,
+    private emergencyAccessService: EmergencyAccessService,
     private i18nService: I18nService,
     private modalService: ModalService,
     private platformUtilsService: PlatformUtilsService,
-    private cryptoService: CryptoService,
     private messagingService: MessagingService,
     private userNamePipe: UserNamePipe,
     private logService: LogService,
@@ -143,7 +139,7 @@ export class EmergencyAccessComponent implements OnInit {
           comp.onConfirmed.subscribe(async () => {
             modal.close();
 
-            comp.formPromise = this.doConfirmation(contact);
+            comp.formPromise = this.emergencyAccessService.confirm(contact.id, contact.granteeId);
             await comp.formPromise;
 
             updateUser();
@@ -158,7 +154,7 @@ export class EmergencyAccessComponent implements OnInit {
       return;
     }
 
-    this.actionPromise = this.doConfirmation(contact);
+    this.actionPromise = this.emergencyAccessService.confirm(contact.id, contact.granteeId);
     await this.actionPromise;
     updateUser();
 
@@ -216,7 +212,7 @@ export class EmergencyAccessComponent implements OnInit {
       return false;
     }
 
-    await this.emergencyAccessApiService.postEmergencyAccessInitiate(details.id);
+    await this.emergencyAccessService.requestAccess(details.id);
 
     details.status = EmergencyAccessStatusType.RecoveryInitiated;
     this.platformUtilsService.showToast(
@@ -245,7 +241,7 @@ export class EmergencyAccessComponent implements OnInit {
       return false;
     }
 
-    await this.emergencyAccessApiService.postEmergencyAccessApprove(details.id);
+    await this.emergencyAccessService.approve(details.id);
     details.status = EmergencyAccessStatusType.RecoveryApproved;
 
     this.platformUtilsService.showToast(
@@ -256,7 +252,7 @@ export class EmergencyAccessComponent implements OnInit {
   }
 
   async reject(details: EmergencyAccessGranteeDetailsResponse) {
-    await this.emergencyAccessApiService.postEmergencyAccessReject(details.id);
+    await this.emergencyAccessService.reject(details.id);
     details.status = EmergencyAccessStatusType.Confirmed;
 
     this.platformUtilsService.showToast(
@@ -300,29 +296,5 @@ export class EmergencyAccessComponent implements OnInit {
     if (index > -1) {
       this.grantedContacts.splice(index, 1);
     }
-  }
-
-  // Encrypt the user key with the grantees public key, and send it to bitwarden for escrow.
-  private async doConfirmation(details: EmergencyAccessGranteeDetailsResponse) {
-    const userKey = await this.cryptoService.getUserKey();
-    if (!userKey) {
-      throw new Error("No user key found");
-    }
-    const publicKeyResponse = await this.apiService.getUserPublicKey(details.granteeId);
-    const publicKey = Utils.fromB64ToArray(publicKeyResponse.publicKey);
-
-    try {
-      this.logService.debug(
-        "User's fingerprint: " +
-          (await this.cryptoService.getFingerprint(details.granteeId, publicKey)).join("-")
-      );
-    } catch {
-      // Ignore errors since it's just a debug message
-    }
-
-    const encryptedKey = await this.cryptoService.rsaEncrypt(userKey.key, publicKey);
-    const request = new EmergencyAccessConfirmRequest();
-    request.key = encryptedKey.encryptedString;
-    await this.emergencyAccessApiService.postEmergencyAccessConfirm(details.id, request);
   }
 }

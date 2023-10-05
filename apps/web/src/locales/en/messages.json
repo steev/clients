@@ -647,6 +647,12 @@
   "customPasskeyNameInfo": {
     "message": "Name your passkey to help you identify it."
   },
+  "useForVaultEncryption": {
+    "message": "Use for vault encryption"
+  },
+  "useForVaultEncryptionInfo": {
+    "message": "Log in and unlock on supported devices without your master password. Follow the prompts from your browser to finalize setup."
+  },
   "encryptionNotSupported": {
     "message": "Encryption not supported"
   },

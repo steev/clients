@@ -43,6 +43,7 @@ export class CreateCredentialDialogComponent implements OnInit {
     }),
     credentialNaming: this.formBuilder.group({
       name: ["", Validators.maxLength(50)],
+      useForEncryption: [false],
     }),
   });
 

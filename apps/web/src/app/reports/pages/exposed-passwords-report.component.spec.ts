@@ -8,7 +8,7 @@ import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
-import { PasswordRepromptService } from "@bitwarden/common/vault/abstractions/password-reprompt.service";
+import { PasswordRepromptService } from "@bitwarden/vault";
 
 import { ExposedPasswordsReportComponent } from "./exposed-passwords-report.component";
 import { cipherData } from "./reports-ciphers.mock";

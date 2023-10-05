@@ -8,7 +8,7 @@ import { OrganizationService } from "@bitwarden/common/admin-console/abstraction
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PasswordStrengthServiceAbstraction } from "@bitwarden/common/tools/password-strength";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
-import { PasswordRepromptService } from "@bitwarden/common/vault/abstractions/password-reprompt.service";
+import { PasswordRepromptService } from "@bitwarden/vault";
 
 import { cipherData } from "./reports-ciphers.mock";
 import { WeakPasswordsReportComponent } from "./weak-passwords-report.component";

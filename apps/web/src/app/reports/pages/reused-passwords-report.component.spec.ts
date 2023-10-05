@@ -7,7 +7,7 @@ import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
-import { PasswordRepromptService } from "@bitwarden/common/vault/abstractions/password-reprompt.service";
+import { PasswordRepromptService } from "@bitwarden/vault";
 
 import { cipherData } from "./reports-ciphers.mock";
 import { ReusedPasswordsReportComponent } from "./reused-passwords-report.component";

@@ -9,7 +9,7 @@ import { EmergencyAccessUpdateRequest } from "@bitwarden/common/auth/models/requ
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
-import { EncryptedString, EncString } from "@bitwarden/common/platform/models/domain/enc-string";
+import { EncryptedString } from "@bitwarden/common/platform/models/domain/enc-string";
 import { UserKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
 import { EmergencyAccessApiService } from "./emergency-access-api.service";
 

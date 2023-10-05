@@ -7,7 +7,7 @@ describe("EmergencyAccessService", () => {
   let emergencyAccessService: EmergencyAccessService;
 
   beforeAll(() => {
-    emergencyAccessService = new EmergencyAccessService();
+    // emergencyAccessService = new EmergencyAccessService();
   });
 
   // describe("createCredential", () => {

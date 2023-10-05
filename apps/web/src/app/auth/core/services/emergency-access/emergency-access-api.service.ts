@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { PolicyResponse } from "@bitwarden/common/admin-console/models/response/policy.response";
 import { EmergencyAccessAcceptRequest } from "@bitwarden/common/auth/models/request/emergency-access-accept.request";
@@ -44,23 +45,23 @@ export class EmergencyAccessApiService {
     return new ListResponse(r, PolicyResponse);
   }
 
-  putEmergencyAccess(id: string, request: EmergencyAccessUpdateRequest): Promise<any> {
+  putEmergencyAccess(id: string, request: EmergencyAccessUpdateRequest): Promise<void> {
     return this.apiService.send("PUT", "/emergency-access/" + id, request, true, false);
   }
 
-  deleteEmergencyAccess(id: string): Promise<any> {
+  deleteEmergencyAccess(id: string): Promise<void> {
     return this.apiService.send("DELETE", "/emergency-access/" + id, null, true, false);
   }
 
-  postEmergencyAccessInvite(request: EmergencyAccessInviteRequest): Promise<any> {
+  postEmergencyAccessInvite(request: EmergencyAccessInviteRequest): Promise<void> {
     return this.apiService.send("POST", "/emergency-access/invite", request, true, false);
   }
 
-  postEmergencyAccessReinvite(id: string): Promise<any> {
+  postEmergencyAccessReinvite(id: string): Promise<void> {
     return this.apiService.send("POST", "/emergency-access/" + id + "/reinvite", null, true, false);
   }
 
-  postEmergencyAccessAccept(id: string, request: EmergencyAccessAcceptRequest): Promise<any> {
+  postEmergencyAccessAccept(id: string, request: EmergencyAccessAcceptRequest): Promise<void> {
     return this.apiService.send(
       "POST",
       "/emergency-access/" + id + "/accept",
@@ -70,7 +71,7 @@ export class EmergencyAccessApiService {
     );
   }
 
-  postEmergencyAccessConfirm(id: string, request: EmergencyAccessConfirmRequest): Promise<any> {
+  postEmergencyAccessConfirm(id: string, request: EmergencyAccessConfirmRequest): Promise<void> {
     return this.apiService.send(
       "POST",
       "/emergency-access/" + id + "/confirm",
@@ -80,15 +81,15 @@ export class EmergencyAccessApiService {
     );
   }
 
-  postEmergencyAccessInitiate(id: string): Promise<any> {
+  postEmergencyAccessInitiate(id: string): Promise<void> {
     return this.apiService.send("POST", "/emergency-access/" + id + "/initiate", null, true, false);
   }
 
-  postEmergencyAccessApprove(id: string): Promise<any> {
+  postEmergencyAccessApprove(id: string): Promise<void> {
     return this.apiService.send("POST", "/emergency-access/" + id + "/approve", null, true, false);
   }
 
-  postEmergencyAccessReject(id: string): Promise<any> {
+  postEmergencyAccessReject(id: string): Promise<void> {
     return this.apiService.send("POST", "/emergency-access/" + id + "/reject", null, true, false);
   }
 
@@ -106,7 +107,7 @@ export class EmergencyAccessApiService {
   async postEmergencyAccessPassword(
     id: string,
     request: EmergencyAccessPasswordRequest
-  ): Promise<any> {
+  ): Promise<void> {
     await this.apiService.send(
       "POST",
       "/emergency-access/" + id + "/password",

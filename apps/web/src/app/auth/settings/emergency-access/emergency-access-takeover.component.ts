@@ -6,8 +6,6 @@ import { PolicyService } from "@bitwarden/common/admin-console/abstractions/poli
 import { PolicyData } from "@bitwarden/common/admin-console/models/data/policy.data";
 import { Policy } from "@bitwarden/common/admin-console/models/domain/policy";
 import { PolicyResponse } from "@bitwarden/common/admin-console/models/response/policy.response";
-import { KdfConfig } from "@bitwarden/common/auth/models/domain/kdf-config";
-import { EmergencyAccessPasswordRequest } from "@bitwarden/common/auth/models/request/emergency-access-password.request";
 import { KdfType } from "@bitwarden/common/enums";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -15,13 +13,11 @@ import { LogService } from "@bitwarden/common/platform/abstractions/log.service"
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
-import {
-  SymmetricCryptoKey,
-  UserKey,
-} from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
 import { DialogService } from "@bitwarden/components";
+
 import { EmergencyAccessApiService } from "../../core/services/emergency-access/emergency-access-api.service";
+import { EmergencyAccessService } from "../../core/services/emergency-access/emergency-access.service";
 
 @Component({
   selector: "emergency-access-takeover",
@@ -49,6 +45,7 @@ export class EmergencyAccessTakeoverComponent
     passwordGenerationService: PasswordGenerationServiceAbstraction,
     platformUtilsService: PlatformUtilsService,
     policyService: PolicyService,
+    private emergencyAccessService: EmergencyAccessService,
     private emergencyAccessApiService: EmergencyAccessApiService,
     private logService: LogService,
     dialogService: DialogService
@@ -91,46 +88,20 @@ export class EmergencyAccessTakeoverComponent
       return;
     }
 
-    const takeoverResponse = await this.emergencyAccessApiService.postEmergencyAccessTakeover(
-      this.emergencyAccessId
-    );
-
-    const oldKeyBuffer = await this.cryptoService.rsaDecrypt(takeoverResponse.keyEncrypted);
-    const oldUserKey = new SymmetricCryptoKey(oldKeyBuffer) as UserKey;
-
-    if (oldUserKey == null) {
+    try {
+      await this.emergencyAccessService.takeover(
+        this.emergencyAccessId,
+        this.masterPassword,
+        this.email
+      );
+      this.onDone.emit();
+    } catch (e) {
+      this.logService.error(e);
       this.platformUtilsService.showToast(
         "error",
         this.i18nService.t("errorOccurred"),
         this.i18nService.t("unexpectedError")
       );
-      return;
-    }
-
-    const masterKey = await this.cryptoService.makeMasterKey(
-      this.masterPassword,
-      this.email,
-      takeoverResponse.kdf,
-      new KdfConfig(
-        takeoverResponse.kdfIterations,
-        takeoverResponse.kdfMemory,
-        takeoverResponse.kdfParallelism
-      )
-    );
-    const masterKeyHash = await this.cryptoService.hashMasterKey(this.masterPassword, masterKey);
-
-    const encKey = await this.cryptoService.encryptUserKeyWithMasterKey(masterKey, oldUserKey);
-
-    const request = new EmergencyAccessPasswordRequest();
-    request.newMasterPasswordHash = masterKeyHash;
-    request.key = encKey[1].encryptedString;
-
-    this.emergencyAccessApiService.postEmergencyAccessPassword(this.emergencyAccessId, request);
-
-    try {
-      this.onDone.emit();
-    } catch (e) {
-      this.logService.error(e);
     }
   }
 }

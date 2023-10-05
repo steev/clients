@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
+import { KdfConfig } from "@bitwarden/common/auth/models/domain/kdf-config";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
@@ -25,6 +26,7 @@ import { EmergencyAccessApiService } from "./emergency-access-api.service";
 import { EmergencyAccessAcceptRequest } from "./request/emergency-access-accept.request";
 import { EmergencyAccessConfirmRequest } from "./request/emergency-access-confirm.request";
 import { EmergencyAccessInviteRequest } from "./request/emergency-access-invite.request";
+import { EmergencyAccessPasswordRequest } from "./request/emergency-access-password.request";
 import { EmergencyAccessUpdateRequest } from "./request/emergency-access-update.request";
 
 @Injectable()
@@ -39,23 +41,23 @@ export class EmergencyAccessService {
   ) {}
 
   /**
-   * Gets all emergency access that the user has been granted
+   * Gets all emergency access that the user has been granted.
    */
   async getEmergencyAccessTrusted(): Promise<EmergencyAccessGranteeView[]> {
     return (await this.emergencyAccessApiService.getEmergencyAccessTrusted()).data;
   }
 
   /**
-   * Gets all emergency access that the user has granted
+   * Gets all emergency access that the user has granted.
    */
   async getEmergencyAccessGranted(): Promise<EmergencyAccessGrantorView[]> {
     return (await this.emergencyAccessApiService.getEmergencyAccessGranted()).data;
   }
 
   /**
-   * Invites the email address to be an emergency contact
-   * Step 1 of the 3 step setup flow
-   * Intended for grantor
+   * Invites the email address to be an emergency contact.
+   * Step 1 of the 3 step setup flow.
+   * Intended for grantor.
    * @param email email address of trusted emergency contact
    * @param type type of emergency access
    * @param waitTimeDays number of days to wait before granting access
@@ -70,8 +72,17 @@ export class EmergencyAccessService {
   }
 
   /**
-   * Edits an existing emergency access
-   * Intended for grantor
+   * Sends another email for an existing emergency access invitation.
+   * Intended for grantor.
+   * @param id emergency access id
+   */
+  reinvite(id: string): Promise<void> {
+    return this.emergencyAccessApiService.postEmergencyAccessReinvite(id);
+  }
+
+  /**
+   * Edits an existing emergency access.
+   * Intended for grantor.
    * @param id emergency access id
    * @param type type of emergency access
    * @param waitTimeDays number of days to wait before granting access
@@ -85,9 +96,9 @@ export class EmergencyAccessService {
   }
 
   /**
-   * Accepts an emergency access invitation
-   * Step 2 of the 3 step setup flow
-   * Intended for grantee
+   * Accepts an emergency access invitation.
+   * Step 2 of the 3 step setup flow.
+   * Intended for grantee.
    * @param id emergency access id
    * @param token secret token provided in email
    */
@@ -99,9 +110,9 @@ export class EmergencyAccessService {
   }
 
   /**
-   * Encrypts user key with grantee's public key and sends to bitwarden
-   * Step 3 of the 3 step setup flow
-   * Intended for grantor
+   * Encrypts user key with grantee's public key and sends to bitwarden.
+   * Step 3 of the 3 step setup flow.
+   * Intended for grantor.
    * @param id emergency access id
    * @param token secret token provided in email
    */
@@ -128,8 +139,17 @@ export class EmergencyAccessService {
   }
 
   /**
-   * Requests access to grantor's vault
-   * Intended for grantee
+   * Deletes an existing emergency access.
+   * Intended for either grantor or grantee.
+   * @param id emergency access id
+   */
+  delete(id: string): Promise<void> {
+    return this.emergencyAccessApiService.deleteEmergencyAccess(id);
+  }
+
+  /**
+   * Requests access to grantor's vault.
+   * Intended for grantee.
    * @param id emergency access id
    */
   requestAccess(id: string): Promise<void> {
@@ -137,8 +157,8 @@ export class EmergencyAccessService {
   }
 
   /**
-   * Approves access to grantor's vault
-   * Intended for grantor
+   * Approves access to grantor's vault.
+   * Intended for grantor.
    * @param id emergency access id
    */
   approve(id: string): Promise<void> {
@@ -146,8 +166,8 @@ export class EmergencyAccessService {
   }
 
   /**
-   * Rejects access to grantor's vault
-   * Intended for grantor
+   * Rejects access to grantor's vault.
+   * Intended for grantor.
    * @param id emergency access id
    */
   reject(id: string): Promise<void> {
@@ -155,8 +175,8 @@ export class EmergencyAccessService {
   }
 
   /**
-   * Gets the grantor ciphers for an emergency access in view mode
-   * Intended for grantee
+   * Gets the grantor ciphers for an emergency access in view mode.
+   * Intended for grantee.
    * @param id emergency access id
    */
   async getViewOnlyCiphers(id: string): Promise<CipherView[]> {
@@ -170,6 +190,44 @@ export class EmergencyAccessService {
       grantorUserKey
     );
     return ciphers.sort(this.cipherService.getLocaleSortingFunction());
+  }
+
+  /**
+   * Changes the password for an emergency access.
+   * Intended for grantee.
+   * @param id emergency access id
+   * @param masterPassword new master password
+   * @param email email address of grantee (must be consistent or login will fail)
+   */
+  async takeover(id: string, masterPassword: string, email: string) {
+    const takeoverResponse = await this.emergencyAccessApiService.postEmergencyAccessTakeover(id);
+
+    const grantorKeyBuffer = await this.cryptoService.rsaDecrypt(takeoverResponse.keyEncrypted);
+    const grantorUserKey = new SymmetricCryptoKey(grantorKeyBuffer) as UserKey;
+
+    if (grantorUserKey == null) {
+      throw new Error("Failed to decrypt grantor key");
+    }
+
+    const masterKey = await this.cryptoService.makeMasterKey(
+      masterPassword,
+      email,
+      takeoverResponse.kdf,
+      new KdfConfig(
+        takeoverResponse.kdfIterations,
+        takeoverResponse.kdfMemory,
+        takeoverResponse.kdfParallelism
+      )
+    );
+    const masterKeyHash = await this.cryptoService.hashMasterKey(masterPassword, masterKey);
+
+    const encKey = await this.cryptoService.encryptUserKeyWithMasterKey(masterKey, grantorUserKey);
+
+    const request = new EmergencyAccessPasswordRequest();
+    request.newMasterPasswordHash = masterKeyHash;
+    request.key = encKey[1].encryptedString;
+
+    this.emergencyAccessApiService.postEmergencyAccessPassword(id, request);
   }
 
   async rotateEmergencyAccess(newUserKey: UserKey) {

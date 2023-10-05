@@ -12,7 +12,6 @@ import { DialogService } from "@bitwarden/components";
 
 import { EmergencyAccessStatusType } from "../../core/enums/emergency-access-status-type";
 import { EmergencyAccessType } from "../../core/enums/emergency-access-type";
-import { EmergencyAccessApiService } from "../../core/services/emergency-access/emergency-access-api.service";
 import { EmergencyAccessService } from "../../core/services/emergency-access/emergency-access.service";
 import {
   EmergencyAccessGranteeView,
@@ -45,7 +44,6 @@ export class EmergencyAccessComponent implements OnInit {
   isOrganizationOwner: boolean;
 
   constructor(
-    private emergencyAccessApiService: EmergencyAccessApiService,
     private emergencyAccessService: EmergencyAccessService,
     private i18nService: I18nService,
     private modalService: ModalService,
@@ -108,7 +106,7 @@ export class EmergencyAccessComponent implements OnInit {
     if (this.actionPromise != null) {
       return;
     }
-    this.actionPromise = this.emergencyAccessApiService.postEmergencyAccessReinvite(contact.id);
+    this.actionPromise = this.emergencyAccessService.reinvite(contact.id);
     await this.actionPromise;
     this.platformUtilsService.showToast(
       "success",
@@ -179,7 +177,7 @@ export class EmergencyAccessComponent implements OnInit {
     }
 
     try {
-      await this.emergencyAccessApiService.deleteEmergencyAccess(details.id);
+      await this.emergencyAccessService.delete(details.id);
       this.platformUtilsService.showToast(
         "success",
         null,

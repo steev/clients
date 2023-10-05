@@ -2,18 +2,19 @@ import { Injectable } from "@angular/core";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { PolicyResponse } from "@bitwarden/common/admin-console/models/response/policy.response";
-import { EmergencyAccessAcceptRequest } from "@bitwarden/common/auth/models/request/emergency-access-accept.request";
-import { EmergencyAccessConfirmRequest } from "@bitwarden/common/auth/models/request/emergency-access-confirm.request";
-import { EmergencyAccessInviteRequest } from "@bitwarden/common/auth/models/request/emergency-access-invite.request";
-import { EmergencyAccessPasswordRequest } from "@bitwarden/common/auth/models/request/emergency-access-password.request";
-import { EmergencyAccessUpdateRequest } from "@bitwarden/common/auth/models/request/emergency-access-update.request";
+import { ListResponse } from "@bitwarden/common/models/response/list.response";
+
+import { EmergencyAccessAcceptRequest } from "./request/emergency-access-accept.request";
+import { EmergencyAccessConfirmRequest } from "./request/emergency-access-confirm.request";
+import { EmergencyAccessInviteRequest } from "./request/emergency-access-invite.request";
+import { EmergencyAccessPasswordRequest } from "./request/emergency-access-password.request";
+import { EmergencyAccessUpdateRequest } from "./request/emergency-access-update.request";
 import {
   EmergencyAccessGranteeDetailsResponse,
   EmergencyAccessGrantorDetailsResponse,
   EmergencyAccessTakeoverResponse,
   EmergencyAccessViewResponse,
-} from "@bitwarden/common/auth/models/response/emergency-access.response";
-import { ListResponse } from "@bitwarden/common/models/response/list.response";
+} from "./response/emergency-access.response";
 
 @Injectable()
 export class EmergencyAccessApiService {

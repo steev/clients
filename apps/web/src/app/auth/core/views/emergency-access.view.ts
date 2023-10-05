@@ -1,3 +1,9 @@
+import { KdfType } from "@bitwarden/common/enums";
+import { CipherResponse } from "@bitwarden/common/vault/models/response/cipher.response";
+
+import { EmergencyAccessStatusType } from "../enums/emergency-access-status-type";
+import { EmergencyAccessType } from "../enums/emergency-access-type";
+
 export class EmergencyAccessGranteeView {
   id: string;
   granteeId: string;
@@ -22,7 +28,7 @@ export class EmergencyAccessGrantorView {
   avatarColor: string;
 }
 
-export class EmergencyAccessTakeoverView {
+export class EmergencyAccessTakeoverTypeView {
   keyEncrypted: string;
   kdf: KdfType;
   kdfIterations: number;
@@ -30,7 +36,7 @@ export class EmergencyAccessTakeoverView {
   kdfParallelism?: number;
 }
 
-export class EmergencyAccessViewView {
+export class EmergencyAccessViewTypeView {
   keyEncrypted: string;
   ciphers: CipherResponse[] = [];
 }

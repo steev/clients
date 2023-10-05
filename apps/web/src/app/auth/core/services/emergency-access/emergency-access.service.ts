@@ -1,12 +1,8 @@
 import { Injectable } from "@angular/core";
+
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { EmergencyAccessStatusType } from "@bitwarden/common/auth/enums/emergency-access-status-type";
-import { EmergencyAccessType } from "@bitwarden/common/auth/enums/emergency-access-type";
-import { EmergencyAccessAcceptRequest } from "@bitwarden/common/auth/models/request/emergency-access-accept.request";
-import { EmergencyAccessConfirmRequest } from "@bitwarden/common/auth/models/request/emergency-access-confirm.request";
-import { EmergencyAccessInviteRequest } from "@bitwarden/common/auth/models/request/emergency-access-invite.request";
-import { EmergencyAccessUpdateRequest } from "@bitwarden/common/auth/models/request/emergency-access-update.request";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { EncryptedString } from "@bitwarden/common/platform/models/domain/enc-string";
@@ -14,12 +10,22 @@ import {
   SymmetricCryptoKey,
   UserKey,
 } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
-import { EmergencyAccessApiService } from "./emergency-access-api.service";
-import { EmergencyAccessGranteeView } from "../../views/emergency-access.view";
-import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
-import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
-import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
+import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
+import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
+
+import { EmergencyAccessStatusType } from "../../enums/emergency-access-status-type";
+import { EmergencyAccessType } from "../../enums/emergency-access-type";
+import {
+  EmergencyAccessGranteeView,
+  EmergencyAccessGrantorView,
+} from "../../views/emergency-access.view";
+
+import { EmergencyAccessApiService } from "./emergency-access-api.service";
+import { EmergencyAccessAcceptRequest } from "./request/emergency-access-accept.request";
+import { EmergencyAccessConfirmRequest } from "./request/emergency-access-confirm.request";
+import { EmergencyAccessInviteRequest } from "./request/emergency-access-invite.request";
+import { EmergencyAccessUpdateRequest } from "./request/emergency-access-update.request";
 
 @Injectable()
 export class EmergencyAccessService {
@@ -32,8 +38,18 @@ export class EmergencyAccessService {
     private logService: LogService
   ) {}
 
-  async getEmergencyAccessTrusted(): Promise<EmergencyAccessGranteeView> {
-    return;
+  /**
+   * Gets all emergency access that the user has been granted
+   */
+  async getEmergencyAccessTrusted(): Promise<EmergencyAccessGranteeView[]> {
+    return (await this.emergencyAccessApiService.getEmergencyAccessTrusted()).data;
+  }
+
+  /**
+   * Gets all emergency access that the user has granted
+   */
+  async getEmergencyAccessGranted(): Promise<EmergencyAccessGrantorView[]> {
+    return (await this.emergencyAccessApiService.getEmergencyAccessGranted()).data;
   }
 
   /**

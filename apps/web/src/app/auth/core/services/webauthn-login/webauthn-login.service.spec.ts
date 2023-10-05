@@ -1,6 +1,8 @@
 import { mock, MockProxy } from "jest-mock-extended";
 
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
+import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 
 import { CredentialCreateOptionsView } from "../../views/credential-create-options.view";
 import { PendingWebauthnLoginCredentialView } from "../../views/pending-webauthn-login-credential.view";
@@ -11,7 +13,9 @@ import { WebauthnLoginService } from "./webauthn-login.service";
 describe("WebauthnService", () => {
   let apiService!: MockProxy<WebauthnLoginApiService>;
   let userVerificationService!: MockProxy<UserVerificationService>;
-  let credentials: MockProxy<CredentialsContainer>;
+  let cryptoService!: MockProxy<CryptoService>;
+  let encryptService!: MockProxy<EncryptService>;
+  let credentials!: MockProxy<CredentialsContainer>;
   let webauthnService!: WebauthnLoginService;
 
   beforeAll(() => {
@@ -20,8 +24,16 @@ describe("WebauthnService", () => {
     window.AuthenticatorAttestationResponse = class {} as any;
     apiService = mock<WebauthnLoginApiService>();
     userVerificationService = mock<UserVerificationService>();
+    cryptoService = mock<CryptoService>();
+    encryptService = mock<EncryptService>();
     credentials = mock<CredentialsContainer>();
-    webauthnService = new WebauthnLoginService(apiService, userVerificationService, credentials);
+    webauthnService = new WebauthnLoginService(
+      apiService,
+      userVerificationService,
+      cryptoService,
+      encryptService,
+      credentials
+    );
   });
 
   describe("createCredential", () => {

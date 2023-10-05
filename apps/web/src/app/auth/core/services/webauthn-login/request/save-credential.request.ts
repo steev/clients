@@ -20,4 +20,8 @@ export class SaveCredentialRequest {
    * True if the authenticator succesfully created the credential with PRF support.
    */
   supportsPrf: boolean;
+
+  encryptedUserKey?: string;
+  encryptedPublicKey?: string;
+  encryptedPrivateKey?: string;
 }

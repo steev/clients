@@ -2,16 +2,21 @@ import { Injectable, Optional } from "@angular/core";
 import { BehaviorSubject, filter, from, map, Observable, shareReplay, switchMap, tap } from "rxjs";
 
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
+import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { Verification } from "@bitwarden/common/types/verification";
 
 import { WebauthnLoginCredentialPrfStatus } from "../../enums/webauthn-login-credential-prf-status.enum";
 import { CredentialCreateOptionsView } from "../../views/credential-create-options.view";
 import { PendingWebauthnLoginCredentialView } from "../../views/pending-webauthn-login-credential.view";
+import { PendingWebauthnLoginCryptoKeysView } from "../../views/pending-webauthn-login-crypto-keys.view";
 import { WebauthnLoginCredentialView } from "../../views/webauthn-login-credential.view";
 
 import { SaveCredentialRequest } from "./request/save-credential.request";
 import { WebauthnLoginAttestationResponseRequest } from "./request/webauthn-login-attestation-response.request";
+import { createSymmetricKeyFromPrf, getLoginWithPrfSalt } from "./utils";
 import { WebauthnLoginApiService } from "./webauthn-login-api.service";
 
 @Injectable({ providedIn: "root" })
@@ -33,6 +38,8 @@ export class WebauthnLoginService {
   constructor(
     private apiService: WebauthnLoginApiService,
     private userVerificationService: UserVerificationService,
+    private cryptoService: CryptoService,
+    private encryptService: EncryptService,
     @Optional() navigatorCredentials?: CredentialsContainer,
     @Optional() private logService?: LogService
   ) {
@@ -73,12 +80,62 @@ export class WebauthnLoginService {
     }
   }
 
-  async saveCredential(name: string, credential: PendingWebauthnLoginCredentialView) {
+  async createCryptoKeys(
+    pendingCredential: PendingWebauthnLoginCredentialView
+  ): Promise<PendingWebauthnLoginCryptoKeysView | undefined> {
+    const nativeOptions: CredentialRequestOptions = {
+      publicKey: {
+        challenge: pendingCredential.createOptions.options.challenge,
+        allowCredentials: [{ id: pendingCredential.deviceResponse.rawId, type: "public-key" }],
+        rpId: pendingCredential.createOptions.options.rp.id,
+        timeout: pendingCredential.createOptions.options.timeout,
+        userVerification:
+          pendingCredential.createOptions.options.authenticatorSelection.userVerification,
+        // TODO: Remove `any` when typescript typings add support for PRF
+        extensions: { prf: { eval: { first: await getLoginWithPrfSalt() } } } as any,
+      },
+    };
+
+    try {
+      const response = await this.navigatorCredentials.get(nativeOptions);
+      if (!(response instanceof PublicKeyCredential)) {
+        return undefined;
+      }
+      // TODO: Remove `any` when typescript typings add support for PRF
+      const prfResult = (response.getClientExtensionResults() as any).prf?.results?.first;
+      const symmetricPrfKey = createSymmetricKeyFromPrf(prfResult);
+      const [publicKey, encryptedPrivateKey] = await this.cryptoService.makeKeyPair(
+        symmetricPrfKey
+      );
+      const userKey = await this.cryptoService.getUserKey();
+      const rawPublicKey = Utils.fromB64ToArray(publicKey);
+      const encryptedUserKey = await this.cryptoService.rsaEncrypt(userKey.key, rawPublicKey);
+      const encryptedPublicKey = await this.encryptService.encrypt(rawPublicKey, userKey);
+
+      return new PendingWebauthnLoginCryptoKeysView(
+        encryptedUserKey,
+        encryptedPublicKey,
+        encryptedPrivateKey
+      );
+    } catch (error) {
+      this.logService?.error(error);
+      return undefined;
+    }
+  }
+
+  async saveCredential(
+    name: string,
+    credential: PendingWebauthnLoginCredentialView,
+    cryptoKeys?: PendingWebauthnLoginCryptoKeysView
+  ) {
     const request = new SaveCredentialRequest();
     request.deviceResponse = new WebauthnLoginAttestationResponseRequest(credential.deviceResponse);
     request.token = credential.createOptions.token;
     request.name = name;
     request.supportsPrf = credential.supportsPrf;
+    request.encryptedUserKey = cryptoKeys?.encryptedUserKey.encryptedString;
+    request.encryptedPublicKey = cryptoKeys?.encryptedPublicKey.encryptedString;
+    request.encryptedPrivateKey = cryptoKeys?.encryptedPrivateKey.encryptedString;
     await this.apiService.saveCredential(request);
     this.refresh();
   }

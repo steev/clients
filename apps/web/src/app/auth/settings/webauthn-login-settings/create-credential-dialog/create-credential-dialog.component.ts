@@ -13,6 +13,7 @@ import { DialogService } from "@bitwarden/components";
 import { WebauthnLoginService } from "../../../core";
 import { CredentialCreateOptionsView } from "../../../core/views/credential-create-options.view";
 import { PendingWebauthnLoginCredentialView } from "../../../core/views/pending-webauthn-login-credential.view";
+import { PendingWebauthnLoginCryptoKeysView } from "../../../core/views/pending-webauthn-login-crypto-keys.view";
 
 import { CreatePasskeyFailedIcon } from "./create-passkey-failed.icon";
 import { CreatePasskeyIcon } from "./create-passkey.icon";
@@ -135,11 +136,26 @@ export class CreateCredentialDialogComponent implements OnInit {
       return;
     }
 
+    let cryptoKeys: undefined | PendingWebauthnLoginCryptoKeysView;
+    if (this.formGroup.value.credentialNaming.useForEncryption) {
+      try {
+        cryptoKeys = await this.webauthnService.createCryptoKeys(this.pendingCredential);
+      } catch (error) {
+        this.logService?.error(error);
+        this.platformUtilsService.showToast(
+          "error",
+          this.i18nService.t("unexpectedError"),
+          error.message
+        );
+      }
+    }
+
     const name = this.formGroup.value.credentialNaming.name;
     try {
       await this.webauthnService.saveCredential(
         this.formGroup.value.credentialNaming.name,
-        this.pendingCredential
+        this.pendingCredential,
+        cryptoKeys
       );
     } catch (error) {
       this.logService?.error(error);

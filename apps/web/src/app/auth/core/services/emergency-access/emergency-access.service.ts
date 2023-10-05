@@ -10,8 +10,16 @@ import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.se
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { EncryptedString } from "@bitwarden/common/platform/models/domain/enc-string";
-import { UserKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
+import {
+  SymmetricCryptoKey,
+  UserKey,
+} from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
 import { EmergencyAccessApiService } from "./emergency-access-api.service";
+import { EmergencyAccessGranteeView } from "../../views/emergency-access.view";
+import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
+import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
+import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
+import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 
 @Injectable()
 export class EmergencyAccessService {
@@ -19,13 +27,19 @@ export class EmergencyAccessService {
     private emergencyAccessApiService: EmergencyAccessApiService,
     private apiService: ApiService,
     private cryptoService: CryptoService,
+    private encryptService: EncryptService,
+    private cipherService: CipherService,
     private logService: LogService
   ) {}
+
+  async getEmergencyAccessTrusted(): Promise<EmergencyAccessGranteeView> {
+    return;
+  }
 
   /**
    * Invites the email address to be an emergency contact
    * Step 1 of the 3 step setup flow
-   * Performed by grantor
+   * Intended for grantor
    * @param email email address of trusted emergency contact
    * @param type type of emergency access
    * @param waitTimeDays number of days to wait before granting access
@@ -41,7 +55,7 @@ export class EmergencyAccessService {
 
   /**
    * Edits an existing emergency access
-   * Performed by grantor
+   * Intended for grantor
    * @param id emergency access id
    * @param type type of emergency access
    * @param waitTimeDays number of days to wait before granting access
@@ -57,7 +71,7 @@ export class EmergencyAccessService {
   /**
    * Accepts an emergency access invitation
    * Step 2 of the 3 step setup flow
-   * Performed by grantee
+   * Intended for grantee
    * @param id emergency access id
    * @param token secret token provided in email
    */
@@ -71,7 +85,7 @@ export class EmergencyAccessService {
   /**
    * Encrypts user key with grantee's public key and sends to bitwarden
    * Step 3 of the 3 step setup flow
-   * Performed by grantor
+   * Intended for grantor
    * @param id emergency access id
    * @param token secret token provided in email
    */
@@ -99,7 +113,7 @@ export class EmergencyAccessService {
 
   /**
    * Requests access to grantor's vault
-   * Performed by grantee
+   * Intended for grantee
    * @param id emergency access id
    */
   requestAccess(id: string): Promise<void> {
@@ -108,7 +122,7 @@ export class EmergencyAccessService {
 
   /**
    * Approves access to grantor's vault
-   * Performed by grantor
+   * Intended for grantor
    * @param id emergency access id
    */
   approve(id: string): Promise<void> {
@@ -117,11 +131,29 @@ export class EmergencyAccessService {
 
   /**
    * Rejects access to grantor's vault
-   * Performed by grantor
+   * Intended for grantor
    * @param id emergency access id
    */
   reject(id: string): Promise<void> {
     return this.emergencyAccessApiService.postEmergencyAccessReject(id);
+  }
+
+  /**
+   * Gets the grantor ciphers for an emergency access in view mode
+   * Intended for grantee
+   * @param id emergency access id
+   */
+  async getViewOnlyCiphers(id: string): Promise<CipherView[]> {
+    const response = await this.emergencyAccessApiService.postEmergencyAccessView(id);
+
+    const grantorKeyBuffer = await this.cryptoService.rsaDecrypt(response.keyEncrypted);
+    const grantorUserKey = new SymmetricCryptoKey(grantorKeyBuffer) as UserKey;
+
+    const ciphers = await this.encryptService.decryptItems(
+      response.ciphers.map((c) => new Cipher(c)),
+      grantorUserKey
+    );
+    return ciphers.sort(this.cipherService.getLocaleSortingFunction());
   }
 
   async rotateEmergencyAccess(newUserKey: UserKey) {

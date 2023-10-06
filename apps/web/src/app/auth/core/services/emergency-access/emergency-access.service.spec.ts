@@ -1,16 +1,80 @@
 import { MockProxy } from "jest-mock-extended";
+import mock from "jest-mock-extended/lib/Mock";
+
+import { ApiService } from "@bitwarden/common/abstractions/api.service";
+import { EncryptionType, KdfType } from "@bitwarden/common/enums";
+import { ListResponse } from "@bitwarden/common/models/response/list.response";
+import { UserKeyResponse } from "@bitwarden/common/models/response/user-key.response";
+import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
+import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { EncString } from "@bitwarden/common/platform/models/domain/enc-string";
+import {
+  UserKey,
+  SymmetricCryptoKey,
+} from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
+import { CsprngArray } from "@bitwarden/common/types/csprng";
+import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
+
+import { EmergencyAccessStatusType } from "../../enums/emergency-access-status-type";
+
 import { EmergencyAccessApiService } from "./emergency-access-api.service";
 import { EmergencyAccessService } from "./emergency-access.service";
+import { EmergencyAccessUpdateRequest } from "./request/emergency-access-update.request";
+import {
+  EmergencyAccessGranteeDetailsResponse,
+  EmergencyAccessTakeoverResponse,
+} from "./response/emergency-access.response";
 
 describe("EmergencyAccessService", () => {
-  let apiService!: MockProxy<EmergencyAccessApiService>;
+  let emergencyAccessApiService: MockProxy<EmergencyAccessApiService>;
+  let apiService: MockProxy<ApiService>;
+  let cryptoService: MockProxy<CryptoService>;
+  let encryptService: MockProxy<EncryptService>;
+  let cipherService: MockProxy<CipherService>;
+  let logService: MockProxy<LogService>;
   let emergencyAccessService: EmergencyAccessService;
 
   beforeAll(() => {
-    // emergencyAccessService = new EmergencyAccessService();
+    emergencyAccessApiService = mock<EmergencyAccessApiService>();
+    apiService = mock<ApiService>();
+    cryptoService = mock<CryptoService>();
+    encryptService = mock<EncryptService>();
+    cipherService = mock<CipherService>();
+    logService = mock<LogService>();
+
+    emergencyAccessService = new EmergencyAccessService(
+      emergencyAccessApiService,
+      apiService,
+      cryptoService,
+      encryptService,
+      cipherService,
+      logService
+    );
   });
 
-  describe("updateEmergencyAccesses", () => {
+  describe("takeover", () => {
+    const mockId = "emergencyAccessId";
+    const mockEmail = "emergencyAccessEmail";
+    const mockName = "emergencyAccessName";
+
+    it("should not post a new password if decryption fails", async () => {
+      cryptoService.rsaDecrypt.mockResolvedValueOnce(null);
+      emergencyAccessApiService.postEmergencyAccessTakeover.mockResolvedValueOnce({
+        keyEncrypted: "EncryptedKey",
+        kdf: KdfType.PBKDF2_SHA256,
+        kdfIterations: 500,
+      } as EmergencyAccessTakeoverResponse);
+
+      await expect(
+        emergencyAccessService.takeover(mockId, mockEmail, mockName)
+      ).rejects.toThrowError("Failed to decrypt grantor key");
+
+      expect(emergencyAccessApiService.postEmergencyAccessPassword).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("rotate", () => {
     let mockUserKey: UserKey;
 
     beforeEach(() => {
@@ -40,7 +104,7 @@ describe("EmergencyAccessService", () => {
     });
 
     it("Only updates emergency accesses with allowed statuses", async () => {
-      await migrateFromLegacyEncryptionService.updateEmergencyAccesses(mockUserKey);
+      await emergencyAccessService.rotate(mockUserKey);
 
       expect(emergencyAccessApiService.putEmergencyAccess).not.toHaveBeenCalledWith(
         "0",
@@ -52,14 +116,17 @@ describe("EmergencyAccessService", () => {
       );
     });
   });
-
-  // describe("createCredential", () => {
-  //   it("should return undefined when navigator.credentials throws", async () => {
-  //     credentials.create.mockRejectedValue(new Error("Mocked error"));
-  //     const options = createCredentialCreateOptions();
-
-  //     const result = await webauthnService.createCredential(options);
-
-  //     expect(result).toBeUndefined();
-  //   });
 });
+
+function createMockEmergencyAccess(
+  id: string,
+  name: string,
+  status: EmergencyAccessStatusType
+): EmergencyAccessGranteeDetailsResponse {
+  const emergencyAccess = new EmergencyAccessGranteeDetailsResponse({});
+  emergencyAccess.id = id;
+  emergencyAccess.name = name;
+  emergencyAccess.type = 0;
+  emergencyAccess.status = status;
+  return emergencyAccess;
+}

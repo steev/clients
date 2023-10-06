@@ -227,11 +227,11 @@ export class EmergencyAccessService {
     const takeoverResponse = await this.emergencyAccessApiService.postEmergencyAccessTakeover(id);
 
     const grantorKeyBuffer = await this.cryptoService.rsaDecrypt(takeoverResponse.keyEncrypted);
-    const grantorUserKey = new SymmetricCryptoKey(grantorKeyBuffer) as UserKey;
-
-    if (grantorUserKey == null) {
+    if (grantorKeyBuffer == null) {
       throw new Error("Failed to decrypt grantor key");
     }
+
+    const grantorUserKey = new SymmetricCryptoKey(grantorKeyBuffer) as UserKey;
 
     const masterKey = await this.cryptoService.makeMasterKey(
       masterPassword,
@@ -275,12 +275,12 @@ export class EmergencyAccessService {
       const publicKey = Utils.fromB64ToArray(publicKeyResponse.publicKey);
 
       // Encrypt new user key with public key
-      const encryptedKey = await this.cryptoService.rsaEncrypt(newUserKey.key, publicKey);
+      const encryptedKey = await this.encryptKey(newUserKey, publicKey);
 
       const updateRequest = new EmergencyAccessUpdateRequest();
       updateRequest.type = details.type;
       updateRequest.waitTimeDays = details.waitTimeDays;
-      updateRequest.keyEncrypted = encryptedKey.encryptedString;
+      updateRequest.keyEncrypted = encryptedKey;
 
       await this.emergencyAccessApiService.putEmergencyAccess(details.id, updateRequest);
     }

@@ -163,7 +163,9 @@ export class Organization {
   }
 
   get canCreateNewCollections() {
-    return this.isManager || this.permissions.createNewCollections;
+    return (
+      !this.limitCollectionCreationDeletion || this.isAdmin || this.permissions.createNewCollections
+    );
   }
 
   get canEditAnyCollection() {

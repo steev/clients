@@ -52,8 +52,8 @@
         [showBulkMove]="false"
         [showBulkTrashOptions]="filter.type === 'trash'"
         [useEvents]="organization?.useEvents"
-        [editableCollections]="true"
         [cloneableOrganizationCiphers]="true"
+        [showAdminActions]="true"
         (onEvent)="onVaultItemsEvent($event)"
       >
       </app-vault-items>

@@ -14,6 +14,7 @@ describe("Collection", () => {
       externalId: "extId",
       readOnly: true,
       manage: true,
+      hidePasswords: true,
     };
   });
 
@@ -41,8 +42,8 @@ describe("Collection", () => {
       name: { encryptedString: "encName", encryptionType: 0 },
       externalId: "extId",
       readOnly: true,
-      hidePasswords: null,
       manage: true,
+      hidePasswords: true,
     });
   });
 

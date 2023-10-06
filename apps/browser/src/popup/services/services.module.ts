@@ -80,11 +80,11 @@ import {
   FolderService,
   InternalFolderService,
 } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
-import { PasswordRepromptService as PasswordRepromptServiceAbstraction } from "@bitwarden/common/vault/abstractions/password-reprompt.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { FolderApiService } from "@bitwarden/common/vault/services/folder/folder-api.service";
 import { DialogService } from "@bitwarden/components";
 import { VaultExportServiceAbstraction } from "@bitwarden/exporter/vault-export";
+import { ImportServiceAbstraction } from "@bitwarden/importer";
 
 import { BrowserOrganizationService } from "../../admin-console/services/browser-organization.service";
 import { BrowserPolicyService } from "../../admin-console/services/browser-policy.service";
@@ -103,7 +103,6 @@ import BrowserMessagingService from "../../platform/services/browser-messaging.s
 import { BrowserStateService } from "../../platform/services/browser-state.service";
 import { BrowserSendService } from "../../services/browser-send.service";
 import { BrowserSettingsService } from "../../services/browser-settings.service";
-import { PasswordRepromptService } from "../../vault/popup/services/password-reprompt.service";
 import { BrowserFolderService } from "../../vault/services/browser-folder.service";
 import { VaultFilterService } from "../../vault/services/vault-filter.service";
 
@@ -369,6 +368,11 @@ function getBgService<T>(service: keyof MainBackground) {
       deps: [],
     },
     {
+      provide: ImportServiceAbstraction,
+      useFactory: getBgService<ImportServiceAbstraction>("importService"),
+      deps: [],
+    },
+    {
       provide: VaultExportServiceAbstraction,
       useFactory: getBgService<VaultExportServiceAbstraction>("exportService"),
       deps: [],
@@ -403,7 +407,6 @@ function getBgService<T>(service: keyof MainBackground) {
       useFactory: getBgService<ConsoleLogService>("logService"),
       deps: [],
     },
-    { provide: PasswordRepromptServiceAbstraction, useClass: PasswordRepromptService },
     {
       provide: OrganizationService,
       useFactory: (stateService: StateServiceAbstraction) => {

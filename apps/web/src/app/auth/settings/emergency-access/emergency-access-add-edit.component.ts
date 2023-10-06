@@ -1,10 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 
-import { EmergencyAccessType } from "@bitwarden/common/auth/enums/emergency-access-type";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { EmergencyAccessApiService } from "../../core/services/emergency-access/emergency-access-api.service";
+import { EmergencyAccessType } from "../../core/enums/emergency-access-type";
 import { EmergencyAccessService } from "../../core/services/emergency-access/emergency-access.service";
 
 @Component({
@@ -31,7 +30,6 @@ export class EmergencyAccessAddEditComponent implements OnInit {
   waitTime: number;
 
   constructor(
-    private emergencyAccessApiService: EmergencyAccessApiService,
     private emergencyAccessService: EmergencyAccessService,
     private i18nService: I18nService,
     private platformUtilsService: PlatformUtilsService,
@@ -54,7 +52,7 @@ export class EmergencyAccessAddEditComponent implements OnInit {
       this.editMode = true;
       this.title = this.i18nService.t("editEmergencyContact");
       try {
-        const emergencyAccess = await this.emergencyAccessApiService.getEmergencyAccess(
+        const emergencyAccess = await this.emergencyAccessService.getEmergencyAccess(
           this.emergencyAccessId
         );
         this.type = emergencyAccess.type;

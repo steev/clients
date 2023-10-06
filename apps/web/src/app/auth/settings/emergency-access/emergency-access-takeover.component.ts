@@ -3,9 +3,6 @@ import { takeUntil } from "rxjs";
 
 import { ChangePasswordComponent } from "@bitwarden/angular/auth/components/change-password.component";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
-import { PolicyData } from "@bitwarden/common/admin-console/models/data/policy.data";
-import { Policy } from "@bitwarden/common/admin-console/models/domain/policy";
-import { PolicyResponse } from "@bitwarden/common/admin-console/models/response/policy.response";
 import { KdfType } from "@bitwarden/common/enums";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -16,7 +13,6 @@ import { StateService } from "@bitwarden/common/platform/abstractions/state.serv
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
 import { DialogService } from "@bitwarden/components";
 
-import { EmergencyAccessApiService } from "../../core/services/emergency-access/emergency-access-api.service";
 import { EmergencyAccessService } from "../../core/services/emergency-access/emergency-access.service";
 
 @Component({
@@ -46,7 +42,6 @@ export class EmergencyAccessTakeoverComponent
     platformUtilsService: PlatformUtilsService,
     policyService: PolicyService,
     private emergencyAccessService: EmergencyAccessService,
-    private emergencyAccessApiService: EmergencyAccessApiService,
     private logService: LogService,
     dialogService: DialogService
   ) {
@@ -63,19 +58,11 @@ export class EmergencyAccessTakeoverComponent
   }
 
   async ngOnInit() {
-    const response = await this.emergencyAccessApiService.getEmergencyGrantorPolicies(
-      this.emergencyAccessId
-    );
-    if (response.data != null && response.data.length > 0) {
-      const policies = response.data.map(
-        (policyResponse: PolicyResponse) => new Policy(new PolicyData(policyResponse))
-      );
-
-      this.policyService
-        .masterPasswordPolicyOptions$(policies)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((enforcedPolicyOptions) => (this.enforcedPolicyOptions = enforcedPolicyOptions));
-    }
+    const policies = await this.emergencyAccessService.getGrantorPolicies(this.emergencyAccessId);
+    this.policyService
+      .masterPasswordPolicyOptions$(policies)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((enforcedPolicyOptions) => (this.enforcedPolicyOptions = enforcedPolicyOptions));
   }
 
   // eslint-disable-next-line rxjs-angular/prefer-takeuntil

@@ -1,6 +1,8 @@
 import { Injectable } from "@angular/core";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
+import { PolicyData } from "@bitwarden/common/admin-console/models/data/policy.data";
+import { Policy } from "@bitwarden/common/admin-console/models/domain/policy";
 import { KdfConfig } from "@bitwarden/common/auth/models/domain/kdf-config";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
@@ -41,6 +43,14 @@ export class EmergencyAccessService {
   ) {}
 
   /**
+   * Gets an emergency access by id.
+   * @param id emergency access id
+   */
+  getEmergencyAccess(id: string): Promise<EmergencyAccessGranteeView> {
+    return this.emergencyAccessApiService.getEmergencyAccess(id);
+  }
+
+  /**
    * Gets all emergency access that the user has been granted.
    */
   async getEmergencyAccessTrusted(): Promise<EmergencyAccessGranteeView[]> {
@@ -52,6 +62,20 @@ export class EmergencyAccessService {
    */
   async getEmergencyAccessGranted(): Promise<EmergencyAccessGrantorView[]> {
     return (await this.emergencyAccessApiService.getEmergencyAccessGranted()).data;
+  }
+
+  /**
+   * Returns policies that apply to the grantor.
+   * Intended for grantee.
+   * @param id emergency access id
+   */
+  async getGrantorPolicies(id: string): Promise<Policy[]> {
+    const response = await this.emergencyAccessApiService.getEmergencyGrantorPolicies(id);
+    let policies: Policy[];
+    if (response.data != null && response.data.length > 0) {
+      policies = response.data.map((policyResponse) => new Policy(new PolicyData(policyResponse)));
+    }
+    return policies;
   }
 
   /**
@@ -230,7 +254,12 @@ export class EmergencyAccessService {
     this.emergencyAccessApiService.postEmergencyAccessPassword(id, request);
   }
 
-  async rotateEmergencyAccess(newUserKey: UserKey) {
+  /**
+   * Rotates the user key for all existing emergency access.
+   * Intended for grantor.
+   * @param newUserKey the new user key
+   */
+  async rotate(newUserKey: UserKey): Promise<void> {
     const emergencyAccess = await this.emergencyAccessApiService.getEmergencyAccessTrusted();
     // Any Invited or Accepted requests won't have the key yet, so we don't need to update them
     const allowedStatuses = new Set([

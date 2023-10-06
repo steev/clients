@@ -23,11 +23,7 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { EncString } from "@bitwarden/common/platform/models/domain/enc-string";
-import {
-  MasterKey,
-  SymmetricCryptoKey,
-  UserKey,
-} from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
+import { MasterKey, UserKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
 import { SendWithIdRequest } from "@bitwarden/common/tools/send/models/request/send-with-id.request";
 import { SendService } from "@bitwarden/common/tools/send/services/send.service.abstraction";
@@ -37,9 +33,7 @@ import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.serv
 import { CipherWithIdRequest } from "@bitwarden/common/vault/models/request/cipher-with-id.request";
 import { FolderWithIdRequest } from "@bitwarden/common/vault/models/request/folder-with-id.request";
 import { DialogService } from "@bitwarden/components";
-import { EmergencyAccessApiService } from "../core/services/emergency-access/emergency-access-api.service";
-import { EmergencyAccessStatusType } from "../core/enums/emergency-access-status-type";
-import { EmergencyAccessUpdateRequest } from "../core/services/emergency-access/request/emergency-access-update.request";
+import { EmergencyAccessService } from "../core/services/emergency-access/emergency-access.service";
 
 @Component({
   selector: "app-change-password",
@@ -66,7 +60,7 @@ export class ChangePasswordComponent extends BaseChangePasswordComponent {
     private folderService: FolderService,
     private cipherService: CipherService,
     private syncService: SyncService,
-    private emergencyAccessApiService: EmergencyAccessApiService,
+    private emergencyAccessService: EmergencyAccessService,
     private apiService: ApiService,
     private sendService: SendService,
     private organizationService: OrganizationService,
@@ -269,34 +263,9 @@ export class ChangePasswordComponent extends BaseChangePasswordComponent {
 
     await this.apiService.postAccountKey(request);
 
-    await this.updateEmergencyAccesses(newUserKey);
+    await this.emergencyAccessService.rotate(newUserKey);
 
     await this.updateAllResetPasswordKeys(newUserKey, masterPasswordHash);
-  }
-
-  private async updateEmergencyAccesses(encKey: SymmetricCryptoKey) {
-    const emergencyAccess = await this.emergencyAccessApiService.getEmergencyAccessTrusted();
-    const allowedStatuses = [
-      EmergencyAccessStatusType.Confirmed,
-      EmergencyAccessStatusType.RecoveryInitiated,
-      EmergencyAccessStatusType.RecoveryApproved,
-    ];
-
-    const filteredAccesses = emergencyAccess.data.filter((d) => allowedStatuses.includes(d.status));
-
-    for (const details of filteredAccesses) {
-      const publicKeyResponse = await this.apiService.getUserPublicKey(details.granteeId);
-      const publicKey = Utils.fromB64ToArray(publicKeyResponse.publicKey);
-
-      const encryptedKey = await this.cryptoService.rsaEncrypt(encKey.key, publicKey);
-
-      const updateRequest = new EmergencyAccessUpdateRequest();
-      updateRequest.type = details.type;
-      updateRequest.waitTimeDays = details.waitTimeDays;
-      updateRequest.keyEncrypted = encryptedKey.encryptedString;
-
-      await this.emergencyAccessApiService.putEmergencyAccess(details.id, updateRequest);
-    }
   }
 
   private async updateAllResetPasswordKeys(userKey: UserKey, masterPasswordHash: string) {

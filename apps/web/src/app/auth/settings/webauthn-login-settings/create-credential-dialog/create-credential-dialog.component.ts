@@ -132,21 +132,21 @@ export class CreateCredentialDialogComponent implements OnInit {
 
   protected async submitCredentialNaming() {
     this.formGroup.controls.credentialNaming.markAllAsTouched();
-    if (this.formGroup.controls.credentialNaming.invalid) {
+    if (this.formGroup.controls.credentialNaming.controls.name.invalid) {
       return;
     }
 
     let keySet: PrfKeySet | undefined;
     if (this.formGroup.value.credentialNaming.useForEncryption) {
-      try {
-        keySet = await this.webauthnService.createKeySet(this.pendingCredential);
-      } catch (error) {
-        this.logService?.error(error);
-        this.platformUtilsService.showToast(
-          "error",
-          this.i18nService.t("unexpectedError"),
-          error.message
-        );
+      keySet = await this.webauthnService.createKeySet(this.pendingCredential);
+
+      if (keySet === undefined) {
+        this.formGroup.controls.credentialNaming.controls.useForEncryption?.setErrors({
+          error: {
+            message: this.i18nService.t("useForVaultEncryptionErrorReadingPasskey"),
+          },
+        });
+        return;
       }
     }
 

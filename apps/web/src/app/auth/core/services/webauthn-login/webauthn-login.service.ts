@@ -100,8 +100,12 @@ export class WebauthnLoginService {
 
       // TODO: Remove `any` when typescript typings add support for PRF
       const prfResult = (response.getClientExtensionResults() as any).prf?.results?.first;
-      const symmetricPrfKey = createSymmetricKeyFromPrf(prfResult);
 
+      if (prfResult === undefined) {
+        return undefined;
+      }
+
+      const symmetricPrfKey = createSymmetricKeyFromPrf(prfResult);
       return await this.rotateableKeySetService.createKeySet(symmetricPrfKey);
     } catch (error) {
       this.logService?.error(error);

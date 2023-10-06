@@ -6,10 +6,12 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { BaseAcceptComponent } from "../../common/base.accept.component";
 import { StateService } from "../../core";
 import { I18nService } from "../../core/i18n.service";
+import { SharedModule } from "../../shared";
 import { EmergencyAccessService } from "../core/services/emergency-access/emergency-access.service";
 
 @Component({
   standalone: true,
+  imports: [SharedModule],
   templateUrl: "accept-emergency.component.html",
 })
 export class AcceptEmergencyComponent extends BaseAcceptComponent {

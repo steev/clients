@@ -8,7 +8,6 @@ import { LogService } from "@bitwarden/common/platform/abstractions/log.service"
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { Verification } from "@bitwarden/common/types/verification";
 
-import { WebauthnLoginCredentialPrfStatus } from "../../enums/webauthn-login-credential-prf-status.enum";
 import { CredentialCreateOptionsView } from "../../views/credential-create-options.view";
 import { PendingWebauthnLoginCredentialView } from "../../views/pending-webauthn-login-credential.view";
 import { PendingWebauthnLoginCryptoKeysView } from "../../views/pending-webauthn-login-crypto-keys.view";
@@ -172,13 +171,7 @@ export class WebauthnLoginService {
       map((response) =>
         response.data.map(
           (credential) =>
-            new WebauthnLoginCredentialView(
-              credential.id,
-              credential.name,
-              credential.prfSupport
-                ? WebauthnLoginCredentialPrfStatus.Supported
-                : WebauthnLoginCredentialPrfStatus.Unsupported
-            )
+            new WebauthnLoginCredentialView(credential.id, credential.name, credential.prfStatus)
         )
       )
     );

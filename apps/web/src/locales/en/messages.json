@@ -656,6 +656,12 @@
   "encryptionNotSupported": {
     "message": "Encryption not supported"
   },
+  "encryptionNotEnabled": {
+    "message": "Encryption not enabled"
+  },
+  "usedForEncryption": {
+    "message": "Used for encryption"
+  },
   "loginWithPasskeyEnabled": {
     "message": "Log in with passkey turned on"
   },

@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { provideRouter } from "@angular/router";
+import { Router, provideRouter } from "@angular/router";
 import { RouterTestingHarness } from "@angular/router/testing";
 import { MockProxy, mock } from "jest-mock-extended";
 
@@ -9,7 +9,7 @@ import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authenticatio
 
 import { RouterService } from "../../core/router.service";
 
-import { deepLinkCacheGuard } from "./deep-link-cache.guard";
+import { deepLinkGuard } from "./deep-link.guard";
 
 @Component({
   template: "",
@@ -21,6 +21,11 @@ export class GuardedRouteTestComponent {}
 })
 export class LockTestComponent {}
 
+@Component({
+  template: "",
+})
+export class RedirectTestComponent {}
+
 /**
  * We are assuming the guard is always being called. We are creating routes using the
  * RouterTestingHarness.
@@ -28,10 +33,10 @@ export class LockTestComponent {}
  * when persisting a URL to storage we don't care wether or not the user is locked or logged out.
  * We only care about where the user is going, and has been.
  *
- * We don't need to test which component is activated because we are only testing
- * weather or not the guard is calling the routerService.persistLoginRedirectUrl().
+ * We are testing the activatedComponent because we are testing that the guard redirects when a user is
+ * unlocked.
  */
-describe("Deep Link Cache Guard", () => {
+describe("Deep Link Guard", () => {
   let authService: MockProxy<AuthService>;
   let routerService: MockProxy<RouterService>;
   let routerHarness: RouterTestingHarness;
@@ -47,12 +52,16 @@ describe("Deep Link Cache Guard", () => {
           {
             path: "guarded-route",
             component: GuardedRouteTestComponent,
-            canActivate: [deepLinkCacheGuard()],
+            canActivate: [deepLinkGuard()],
           },
           {
             path: "lock-route",
             component: LockTestComponent,
-            canActivate: [deepLinkCacheGuard()],
+            canActivate: [deepLinkGuard()],
+          },
+          {
+            path: "redirect-route",
+            component: RedirectTestComponent,
           },
         ]),
       ],
@@ -147,5 +156,35 @@ describe("Deep Link Cache Guard", () => {
 
     // Assert
     expect(routerService.persistLoginRedirectUrl).not.toHaveBeenCalled();
+  });
+
+  // Story: User is redirected
+  it("should redirect user", async () => {
+    // Arrange
+    authService.getAuthStatus.mockResolvedValue(AuthenticationStatus.Unlocked);
+    routerService.getAndClearLoginRedirectUrl.mockResolvedValue("/redirect-route");
+
+    // Act
+    const activatedComponent = await routerHarness.navigateByUrl("/guarded-route");
+
+    // Assert
+    expect(routerService.persistLoginRedirectUrl).not.toHaveBeenCalled();
+    expect(TestBed.inject(Router).url).toEqual("/redirect-route");
+    expect(activatedComponent).toBeInstanceOf(RedirectTestComponent);
+  });
+
+  // Story: User is not redirected
+  it("should not redirect user", async () => {
+    // Arrange
+    authService.getAuthStatus.mockResolvedValue(AuthenticationStatus.Unlocked);
+    routerService.getAndClearLoginRedirectUrl.mockResolvedValue("");
+
+    // Act
+    const activatedComponent = await routerHarness.navigateByUrl("/guarded-route");
+
+    // Assert
+    expect(routerService.persistLoginRedirectUrl).not.toHaveBeenCalled();
+    expect(TestBed.inject(Router).url).toEqual("/guarded-route");
+    expect(activatedComponent).toBeInstanceOf(GuardedRouteTestComponent);
   });
 });

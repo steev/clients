@@ -1,5 +1,5 @@
 import { inject } from "@angular/core";
-import { CanActivateFn } from "@angular/router";
+import { CanActivateFn, Router } from "@angular/router";
 
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
@@ -8,14 +8,15 @@ import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { RouterService } from "../../core/router.service";
 
 /**
- * Guard to persist deep-linking URL to state
+ * Guard to persist and apply deep links to handle users who are not unlocked.
  * @returns returns true. If user is not Unlocked will store URL to state for redirect once
  * user is unlocked/Authenticated.
  */
-export function deepLinkCacheGuard(): CanActivateFn {
+export function deepLinkGuard(): CanActivateFn {
   return async (route, routerState) => {
     // Inject Services
     const authService = inject(AuthService);
+    const router = inject(Router);
     const routerService = inject(RouterService);
 
     // Fetch State
@@ -26,6 +27,10 @@ export function deepLinkCacheGuard(): CanActivateFn {
     // Evaluate State
     /** before anything else, check if the user is already unlocked. */
     if (authStatus === AuthenticationStatus.Unlocked) {
+      const persistedPreLoginUrl = await routerService.getAndClearLoginRedirectUrl();
+      if (!Utils.isNullOrEmpty(persistedPreLoginUrl)) {
+        return router.navigateByUrl(persistedPreLoginUrl);
+      }
       return true;
     }
     /**

@@ -20,7 +20,7 @@ import { CreateOrganizationComponent } from "./admin-console/settings/create-org
 import { SponsoredFamiliesComponent } from "./admin-console/settings/sponsored-families.component";
 import { AcceptEmergencyComponent } from "./auth/accept-emergency.component";
 import { AcceptOrganizationComponent } from "./auth/accept-organization.component";
-import { deepLinkCacheGuard } from "./auth/guards/deep-link-cache.guard";
+import { deepLinkGuard as deepLinkGuard } from "./auth/guards/deep-link.guard";
 import { HintComponent } from "./auth/hint.component";
 import { LockComponent } from "./auth/lock.component";
 import { LoginDecryptionOptionsComponent } from "./auth/login/login-decryption-options/login-decryption-options.component";
@@ -116,25 +116,25 @@ const routes: Routes = [
       {
         path: "lock",
         component: LockComponent,
-        canActivate: [deepLinkCacheGuard(), lockGuard()],
+        canActivate: [deepLinkGuard(), lockGuard()],
       },
       { path: "verify-email", component: VerifyEmailTokenComponent },
       {
         path: "accept-organization",
         component: AcceptOrganizationComponent,
-        canActivate: [deepLinkCacheGuard()],
+        canActivate: [deepLinkGuard()],
         data: { titleId: "joinOrganization", doNotSaveUrl: false },
       },
       {
         path: "accept-emergency",
         component: AcceptEmergencyComponent,
-        canActivate: [deepLinkCacheGuard()],
+        canActivate: [deepLinkGuard()],
         data: { titleId: "acceptEmergency", doNotSaveUrl: false },
       },
       {
         path: "accept-families-for-enterprise",
         component: AcceptFamilySponsorshipComponent,
-        canActivate: [deepLinkCacheGuard()],
+        canActivate: [deepLinkGuard()],
         data: { titleId: "acceptFamilySponsorship", doNotSaveUrl: false },
       },
       { path: "recover", pathMatch: "full", redirectTo: "recover-2fa" },
@@ -191,7 +191,7 @@ const routes: Routes = [
   {
     path: "",
     component: UserLayoutComponent,
-    canActivate: [deepLinkCacheGuard(), AuthGuard],
+    canActivate: [deepLinkGuard(), AuthGuard],
     children: [
       {
         path: "vault",

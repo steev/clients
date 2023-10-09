@@ -1,8 +1,9 @@
 import { DIALOG_DATA, DialogConfig, DialogRef } from "@angular/cdk/dialog";
-import { Component, Inject, OnDestroy, OnInit } from "@angular/core";
-import { FormBuilder, Validators } from "@angular/forms";
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from "@angular/core";
+import { AbstractControl, FormBuilder, Validators } from "@angular/forms";
 import {
   combineLatest,
+  from,
   map,
   Observable,
   of,
@@ -20,7 +21,7 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { CollectionResponse } from "@bitwarden/common/vault/models/response/collection.response";
 import { CollectionView } from "@bitwarden/common/vault/models/view/collection.view";
-import { DialogService, BitValidators } from "@bitwarden/components";
+import { BitValidators, DialogService } from "@bitwarden/components";
 
 import { GroupService, GroupView } from "../../../admin-console/organizations/core";
 import { PermissionMode } from "../../../admin-console/organizations/shared/components/access-selector/access-selector.component";
@@ -28,6 +29,7 @@ import {
   AccessItemType,
   AccessItemValue,
   AccessItemView,
+  CollectionPermission,
   convertToPermission,
   convertToSelectionView,
   mapGroupToAccessItemView,
@@ -80,7 +82,7 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
     name: ["", [Validators.required, BitValidators.forbiddenCharacters(["/"])]],
     externalId: "",
     parent: undefined as string | undefined,
-    access: [[] as AccessItemValue[]],
+    access: [[] as AccessItemValue[], [validateCanManagePermission]],
     selectedOrg: "",
   });
   protected PermissionMode = PermissionMode;
@@ -95,7 +97,8 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
     private i18nService: I18nService,
     private platformUtilsService: PlatformUtilsService,
     private organizationUserService: OrganizationUserService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private changeDetectorRef: ChangeDetectorRef
   ) {
     this.tabIndex = params.initialTab ?? CollectionDialogTabType.Info;
   }
@@ -119,7 +122,7 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
     } else {
       // Opened from the org vault
       this.formGroup.patchValue({ selectedOrg: this.params.organizationId });
-      this.loadOrg(this.params.organizationId, this.params.collectionIds);
+      await this.loadOrg(this.params.organizationId, this.params.collectionIds);
     }
   }
 
@@ -140,7 +143,7 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
       organization: organization$,
       collections: this.collectionService.getAll(orgId),
       collectionDetails: this.params.collectionId
-        ? this.collectionService.get(orgId, this.params.collectionId)
+        ? from(this.collectionService.get(orgId, this.params.collectionId))
         : of(null),
       groups: groups$,
       users: this.organizationUserService.getAllUsers(orgId),
@@ -152,6 +155,9 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
           groups.map(mapGroupToAccessItemView),
           users.data.map(mapUserToAccessItemView)
         );
+
+        // Force change detection to update the access selector's items
+        this.changeDetectorRef.detectChanges();
 
         if (collectionIds) {
           collections = collections.filter((c) => collectionIds.includes(c.id));
@@ -180,7 +186,24 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
         } else {
           this.nestOptions = collections;
           const parent = collections.find((c) => c.id === this.params.parentCollectionId);
-          this.formGroup.patchValue({ parent: parent?.name ?? undefined });
+          const currentOrgUserId = users.data.find(
+            (u) => u.userId === this.organization?.userId
+          )?.id;
+          const initialSelection: AccessItemValue[] =
+            currentOrgUserId !== undefined
+              ? [
+                  {
+                    id: currentOrgUserId,
+                    type: AccessItemType.Member,
+                    permission: CollectionPermission.Manage,
+                  },
+                ]
+              : [];
+
+          this.formGroup.patchValue({
+            parent: parent?.name ?? undefined,
+            access: initialSelection,
+          });
         }
 
         this.loading = false;
@@ -203,11 +226,19 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
     this.formGroup.markAllAsTouched();
 
     if (this.formGroup.invalid) {
-      if (this.tabIndex === CollectionDialogTabType.Access) {
+      const accessTabError = this.formGroup.controls.access.hasError("managePermissionRequired");
+
+      if (this.tabIndex === CollectionDialogTabType.Access && !accessTabError) {
         this.platformUtilsService.showToast(
           "error",
           null,
           this.i18nService.t("fieldOnTabRequiresAttention", this.i18nService.t("collectionInfo"))
+        );
+      } else if (this.tabIndex === CollectionDialogTabType.Info && accessTabError) {
+        this.platformUtilsService.showToast(
+          "error",
+          null,
+          this.i18nService.t("fieldOnTabRequiresAttention", this.i18nService.t("access"))
         );
       }
       return;
@@ -301,6 +332,16 @@ function mapToAccessSelections(collectionDetails: CollectionAdminView): AccessIt
       permission: convertToPermission(selection),
     }))
   );
+}
+
+/**
+ * Validator to ensure that at least one access item has Manage permission
+ */
+function validateCanManagePermission(control: AbstractControl) {
+  const access = control.value as AccessItemValue[];
+  const hasManagePermission = access.some((a) => a.permission === CollectionPermission.Manage);
+
+  return hasManagePermission ? null : { managePermissionRequired: true };
 }
 
 /**

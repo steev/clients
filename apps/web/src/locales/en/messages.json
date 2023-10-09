@@ -7099,8 +7099,8 @@
       }
     }
   },
-  "addSecretsManager": {
-    "message": "Add Secrets Manager"
+  "subscribeToSecretsManager": {
+    "message": "Subscribe to Secrets Manager"
   },
   "addSecretsManagerUpgradeDesc": {
     "message": "Add Secrets Manager to your upgraded plan to maintain access to any secrets created with your previous plan."
@@ -7204,5 +7204,8 @@
   },
   "customBillingEnd": {
     "message": " page for latest invoicing."
+  },
+  "managePermissionRequired": {
+    "message": "At least one member or group must have can manage permission."
   }
 }

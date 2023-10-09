@@ -62,8 +62,6 @@ export class AccessRemovalDialogComponent implements OnInit {
   private refreshPolicyChanges() {
     if (this.data.type == "project") {
       this.accessPolicyService.refreshProjectAccessPolicyChanges();
-    } else if (this.data.type == "service-account") {
-      this.accessPolicyService.refreshServiceAccountAccessPolicyChanges();
     }
   }
 }

@@ -8,7 +8,6 @@ import {
   ServiceAccountSecretsDetailsView,
   ServiceAccountView,
 } from "../models/view/service-account.view";
-import { AccessPolicyService } from "../shared/access-policies/access-policy.service";
 
 import {
   ServiceAccountDeleteDialogComponent,
@@ -34,7 +33,6 @@ export class ServiceAccountsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private dialogService: DialogService,
-    private accessPolicyService: AccessPolicyService,
     private serviceAccountService: ServiceAccountService
   ) {}
 
@@ -42,7 +40,6 @@ export class ServiceAccountsComponent implements OnInit {
     this.serviceAccounts$ = combineLatest([
       this.route.params,
       this.serviceAccountService.serviceAccount$.pipe(startWith(null)),
-      this.accessPolicyService.serviceAccountAccessPolicyChanges$.pipe(startWith(null)),
     ]).pipe(
       switchMap(async ([params]) => {
         this.organizationId = params.organizationId;

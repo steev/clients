@@ -7,6 +7,7 @@ import { concatMap, Subject, takeUntil } from "rxjs";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
+import { EnvironmentUrls } from "@bitwarden/common/auth/models/domain/environment-urls";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
@@ -18,25 +19,34 @@ type ActiveAccount = {
   name: string;
   email: string;
   avatarColor: string;
-  serverUrl: string;
+  server: string;
 };
 
-export class SwitcherAccount extends Account {
-  get serverUrl() {
-    return this.removeWebProtocolFromString(
-      this.settings?.environmentUrls?.base ??
-        this.settings?.environmentUrls.api ??
-        this.settings.region
-    );
-  }
+type SwitcherAccount = {
+  id: string;
+  name: string;
+  email: string;
+  avatarColor?: string;
+  server?: string;
+  environmentUrls?: EnvironmentUrls;
+};
 
-  avatarColor: string;
+// export class SwitcherAccount extends Account {
+//   get serverUrl() {
+//     return this.removeWebProtocolFromString(
+//       this.settings?.environmentUrls?.base ??
+//         this.settings?.environmentUrls.api ??
+//         this.settings.region
+//     );
+//   }
 
-  private removeWebProtocolFromString(urlString: string) {
-    const regex = /http(s)?(:)?(\/\/)?|(\/\/)?(www\.)?/g;
-    return urlString.replace(regex, "");
-  }
-}
+//   avatarColor: string;
+
+//   private removeWebProtocolFromString(urlString: string) {
+//     const regex = /http(s)?(:)?(\/\/)?|(\/\/)?(www\.)?/g;
+//     return urlString.replace(regex, "");
+//   }
+// }
 
 @Component({
   selector: "app-account-switcher",
@@ -120,13 +130,16 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
               name: (await this.tokenService.getName()) ?? (await this.tokenService.getEmail()),
               email: await this.tokenService.getEmail(),
               avatarColor: await this.stateService.getAvatarColor(),
-              serverUrl: Utils.removeVaultfromHostname(
+              server: Utils.removeVaultfromHostname(
                 Utils.getHostname(this.environmentService.getWebVaultUrl())
               ),
             };
           } catch {
             this.activeAccount = undefined;
           }
+
+          // console.log("this.accounts");
+          // console.log(this.accounts);
         }),
         takeUntil(this.destroy$)
       )
@@ -169,22 +182,35 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
         continue;
       }
 
+      switcherAccounts[userId] = {
+        id: userId,
+        avatarColor: await this.stateService.getAvatarColor({ userId: userId }),
+        name: baseAccounts[userId].profile.name,
+        email: baseAccounts[userId].profile.email,
+        server: (await this.stateService.getServerConfig({ userId: userId })).environment.vault,
+        /**
+         * environmentUrls are stored on disk and must be retrieved separately from the
+         * in memory state offered from subscribing to accounts
+         */
+        environmentUrls: await this.stateService.getEnvironmentUrls({ userId: userId }),
+      };
+
       // environmentUrls are stored on disk and must be retrieved separately from the in memory state offered from subscribing to accounts
-      baseAccounts[userId].settings.environmentUrls = await this.stateService.getEnvironmentUrls({
-        userId: userId,
-      });
+      // baseAccounts[userId].settings.environmentUrls = await this.stateService.getEnvironmentUrls({
+      //   userId: userId,
+      // });
 
-      const serverConfig = await this.stateService.getServerConfig({
-        userId: userId,
-      });
+      // const serverConfig = await this.stateService.getServerConfig({
+      //   userId: userId,
+      // });
 
-      baseAccounts[userId].settings.region = Utils.removeVaultfromHostname(
-        Utils.getHostname(serverConfig.environment.vault)
-      );
-      switcherAccounts[userId] = new SwitcherAccount(baseAccounts[userId]);
-      switcherAccounts[userId].avatarColor = await this.stateService.getAvatarColor({
-        userId: userId,
-      });
+      // baseAccounts[userId].settings.region = Utils.removeVaultfromHostname(
+      //   Utils.getHostname(serverConfig.environment.vault)
+      // );
+      // switcherAccounts[userId] = new SwitcherAccount(baseAccounts[userId]);
+      // switcherAccounts[userId].avatarColor = await this.stateService.getAvatarColor({
+      //   userId: userId,
+      // });
     }
 
     return switcherAccounts;

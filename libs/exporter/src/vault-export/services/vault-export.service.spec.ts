@@ -3,7 +3,7 @@ import { Arg, Substitute, SubstituteOf } from "@fluffy-spoon/substitute";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { KdfConfig } from "@bitwarden/common/auth/models/domain/kdf-config";
-import { KdfType, DEFAULT_PBKDF2_ITERATIONS } from "@bitwarden/common/enums";
+import { KdfType, PBKDF2_ITERATIONS } from "@bitwarden/common/enums";
 import { CipherWithIdExport } from "@bitwarden/common/models/export/cipher-with-ids.export";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
@@ -160,7 +160,7 @@ describe("VaultExportService", () => {
     folderService.getAllDecryptedFromState().resolves(UserFolderViews);
     folderService.getAllFromState().resolves(UserFolders);
     stateService.getKdfType().resolves(KdfType.PBKDF2_SHA256);
-    stateService.getKdfConfig().resolves(new KdfConfig(DEFAULT_PBKDF2_ITERATIONS));
+    stateService.getKdfConfig().resolves(new KdfConfig(PBKDF2_ITERATIONS.defaultValue));
 
     exportService = new VaultExportService(
       folderService,
@@ -240,7 +240,7 @@ describe("VaultExportService", () => {
       });
 
       it("specifies kdfIterations", () => {
-        expect(exportObject.kdfIterations).toEqual(DEFAULT_PBKDF2_ITERATIONS);
+        expect(exportObject.kdfIterations).toEqual(PBKDF2_ITERATIONS.defaultValue);
       });
 
       it("has kdfType", () => {

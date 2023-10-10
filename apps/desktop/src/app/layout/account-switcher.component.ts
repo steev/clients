@@ -22,32 +22,10 @@ type ActiveAccount = {
   server: string;
 };
 
-type InactiveAccount = {
-  id: string;
-  name: string;
-  email: string;
+type InactiveAccount = ActiveAccount & {
   authenticationStatus: AuthenticationStatus;
-  avatarColor?: string;
-  server?: string;
   environmentUrls?: EnvironmentUrls;
 };
-
-// export class SwitcherAccount extends Account {
-//   get serverUrl() {
-//     return this.removeWebProtocolFromString(
-//       this.settings?.environmentUrls?.base ??
-//         this.settings?.environmentUrls.api ??
-//         this.settings.region
-//     );
-//   }
-
-//   avatarColor: string;
-
-//   private removeWebProtocolFromString(urlString: string) {
-//     const regex = /http(s)?(:)?(\/\/)?|(\/\/)?(www\.)?/g;
-//     return urlString.replace(regex, "");
-//   }
-// }
 
 @Component({
   selector: "app-account-switcher",

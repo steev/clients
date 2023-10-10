@@ -16,7 +16,7 @@ import { SendAccessView } from "@bitwarden/common/tools/send/models/view/send-ac
 import { SendApiService } from "@bitwarden/common/tools/send/services/send-api.service.abstraction";
 import { NoItemsModule } from "@bitwarden/components";
 
-import { LooseComponentsModule, SharedModule } from "../../shared";
+import { SharedModule } from "../../shared";
 
 import { ExpiredSend } from "./icons/expired-send.icon";
 import { SendAccessFileComponent } from "./send-access-file.component";
@@ -29,7 +29,6 @@ import { SendAccessTextComponent } from "./send-access-text.component";
   standalone: true,
   imports: [
     SendAccessFileComponent,
-    LooseComponentsModule,
     SendAccessTextComponent,
     SendAccessPasswordComponent,
     SharedModule,

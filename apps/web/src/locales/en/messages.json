@@ -7096,8 +7096,8 @@
       }
     }
   },
-  "addSecretsManager": {
-    "message": "Add Secrets Manager"
+  "subscribeToSecretsManager": {
+    "message": "Subscribe to Secrets Manager"
   },
   "addSecretsManagerUpgradeDesc": {
     "message": "Add Secrets Manager to your upgraded plan to maintain access to any secrets created with your previous plan."
@@ -7169,8 +7169,20 @@
   "beta": {
     "message": "Beta"
   },
+  "baseUrl": {
+    "message": "Server URL"
+  },
+  "aliasDomain": {
+    "message": "Alias domain"
+  },
   "alreadyHaveAccount": {
     "message": "Already have an account?"
+  },
+  "customBillingStart": {
+    "message": "Custom billing is not reflected. Visit the "
+  },
+  "customBillingEnd": {
+    "message": " page for latest invoicing."
   },
   "unexpectedErrorSend": {
     "message": "An unexpected error has occurred while loading this Send. Try again later."

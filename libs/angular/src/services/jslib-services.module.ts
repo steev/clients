@@ -136,7 +136,6 @@ import {
   FolderService as FolderServiceAbstraction,
   InternalFolderService,
 } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
-import { PasswordRepromptService as PasswordRepromptServiceAbstraction } from "@bitwarden/common/vault/abstractions/password-reprompt.service";
 import { SyncNotifierService as SyncNotifierServiceAbstraction } from "@bitwarden/common/vault/abstractions/sync/sync-notifier.service.abstraction";
 import { SyncService as SyncServiceAbstraction } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { CipherService } from "@bitwarden/common/vault/services/cipher.service";
@@ -150,13 +149,19 @@ import {
   VaultExportService,
   VaultExportServiceAbstraction,
 } from "@bitwarden/exporter/vault-export";
+import {
+  ImportApiService,
+  ImportApiServiceAbstraction,
+  ImportService,
+  ImportServiceAbstraction,
+} from "@bitwarden/importer";
+import { PasswordRepromptService } from "@bitwarden/vault";
 
 import { AuthGuard } from "../auth/guards/auth.guard";
 import { UnauthGuard } from "../auth/guards/unauth.guard";
 import { FormValidationErrorsService as FormValidationErrorsServiceAbstraction } from "../platform/abstractions/form-validation-errors.service";
 import { BroadcasterService } from "../platform/services/broadcaster.service";
 import { FormValidationErrorsService } from "../platform/services/form-validation-errors.service";
-import { PasswordRepromptService } from "../vault/services/password-reprompt.service";
 
 import {
   LOCALES_DIRECTORY,
@@ -180,6 +185,8 @@ import { AbstractThemingService } from "./theming/theming.service.abstraction";
     AuthGuard,
     UnauthGuard,
     ModalService,
+    PasswordRepromptService,
+
     { provide: WINDOW, useValue: window },
     {
       provide: LOCALE_ID,
@@ -271,7 +278,8 @@ import { AbstractThemingService } from "./theming/theming.service.abstraction";
         searchService: SearchServiceAbstraction,
         stateService: StateServiceAbstraction,
         encryptService: EncryptService,
-        fileUploadService: CipherFileUploadServiceAbstraction
+        fileUploadService: CipherFileUploadServiceAbstraction,
+        configService: ConfigServiceAbstraction
       ) =>
         new CipherService(
           cryptoService,
@@ -281,7 +289,8 @@ import { AbstractThemingService } from "./theming/theming.service.abstraction";
           searchService,
           stateService,
           encryptService,
-          fileUploadService
+          fileUploadService,
+          configService
         ),
       deps: [
         CryptoServiceAbstraction,
@@ -292,6 +301,7 @@ import { AbstractThemingService } from "./theming/theming.service.abstraction";
         StateServiceAbstraction,
         EncryptService,
         CipherFileUploadServiceAbstraction,
+        ConfigServiceAbstraction,
       ],
     },
     {
@@ -483,6 +493,23 @@ import { AbstractThemingService } from "./theming/theming.service.abstraction";
       ],
     },
     {
+      provide: ImportApiServiceAbstraction,
+      useClass: ImportApiService,
+      deps: [ApiServiceAbstraction],
+    },
+    {
+      provide: ImportServiceAbstraction,
+      useClass: ImportService,
+      deps: [
+        CipherServiceAbstraction,
+        FolderServiceAbstraction,
+        ImportApiServiceAbstraction,
+        I18nServiceAbstraction,
+        CollectionServiceAbstraction,
+        CryptoServiceAbstraction,
+      ],
+    },
+    {
       provide: VaultExportServiceAbstraction,
       useClass: VaultExportService,
       deps: [
@@ -577,7 +604,6 @@ import { AbstractThemingService } from "./theming/theming.service.abstraction";
         UserVerificationApiServiceAbstraction,
       ],
     },
-    { provide: PasswordRepromptServiceAbstraction, useClass: PasswordRepromptService },
     {
       provide: OrganizationServiceAbstraction,
       useClass: OrganizationService,

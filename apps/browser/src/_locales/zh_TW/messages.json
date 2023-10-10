@@ -91,6 +91,15 @@
   "autoFill": {
     "message": "自動填入"
   },
+  "autoFillLogin": {
+    "message": "Auto-fill login"
+  },
+  "autoFillCard": {
+    "message": "Auto-fill card"
+  },
+  "autoFillIdentity": {
+    "message": "Auto-fill identity"
+  },
   "generatePasswordCopied": {
     "message": "產生及複製密碼"
   },
@@ -99,6 +108,21 @@
   },
   "noMatchingLogins": {
     "message": "無符合的登入資料"
+  },
+  "noCards": {
+    "message": "No cards"
+  },
+  "noIdentities": {
+    "message": "No identities"
+  },
+  "addLoginMenu": {
+    "message": "Add login"
+  },
+  "addCardMenu": {
+    "message": "Add card"
+  },
+  "addIdentityMenu": {
+    "message": "Add identity"
   },
   "unlockVaultMenu": {
     "message": "解鎖您的密碼庫"
@@ -2406,5 +2430,20 @@
   "toggleCollapse": {
     "message": "Toggle collapse",
     "description": "Toggling an expand/collapse state."
+  },
+  "aliasDomain": {
+    "message": "Alias domain"
+  },
+  "passwordRepromptDisabledAutofillOnPageLoad": {
+    "message": "使用主密碼重新提示的項目無法在頁面加載時自動填寫。已關閉頁面加載時的自動填入。",
+    "description": "Toast message for describing that master password re-prompt cannot be auto-filled on page load."
+  },
+  "autofillOnPageLoadSetToDefault": {
+    "message": "將頁面加載時的自動填入設置為使用默認設定。",
+    "description": "Toast message for informing the user that auto-fill on page load has been set to the default setting."
+  },
+  "turnOffMasterPasswordPromptToEditField": {
+    "message": "關閉主密碼重新提示以編輯此欄位",
+    "description": "Message appearing below the autofill on load message when master password reprompt is set for a vault item."
   }
 }

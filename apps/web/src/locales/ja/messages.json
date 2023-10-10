@@ -7169,7 +7169,19 @@
   "beta": {
     "message": "ベータ"
   },
+  "baseUrl": {
+    "message": "サーバー URL"
+  },
+  "aliasDomain": {
+    "message": "エイリアスドメイン"
+  },
   "alreadyHaveAccount": {
     "message": "既にアカウントをお持ちですか？"
+  },
+  "customBillingStart": {
+    "message": "カスタム請求は反映されていません。"
+  },
+  "customBillingEnd": {
+    "message": "のページで最新の請求書をご覧いただけます。"
   }
 }

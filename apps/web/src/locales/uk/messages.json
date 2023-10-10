@@ -7169,7 +7169,19 @@
   "beta": {
     "message": "Бета"
   },
+  "baseUrl": {
+    "message": "URL-адреса сервера"
+  },
+  "aliasDomain": {
+    "message": "Псевдонім домену"
+  },
   "alreadyHaveAccount": {
     "message": "Вже маєте обліковий запис?"
+  },
+  "customBillingStart": {
+    "message": "Власний рахунок не відображений. Відвідайте "
+  },
+  "customBillingEnd": {
+    "message": " для отримання останнього рахунку."
   }
 }

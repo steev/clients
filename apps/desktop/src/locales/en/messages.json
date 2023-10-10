@@ -1,4 +1,4 @@
-﻿{
+{
   "bitwarden": {
     "message": "Bitwarden"
   },
@@ -2415,5 +2415,8 @@
   },
   "submenu": {
     "message": "Submenu"
+  },
+  "aliasDomain": {
+    "message": "Alias domain"
   }
 }

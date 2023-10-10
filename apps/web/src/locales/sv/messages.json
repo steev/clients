@@ -7169,7 +7169,19 @@
   "beta": {
     "message": "Beta"
   },
+  "baseUrl": {
+    "message": "Server-URL"
+  },
+  "aliasDomain": {
+    "message": "Aliasdomän"
+  },
   "alreadyHaveAccount": {
     "message": "Har du redan ett konto?"
+  },
+  "customBillingStart": {
+    "message": "Custom billing is not reflected. Visit the "
+  },
+  "customBillingEnd": {
+    "message": " page for latest invoicing."
   }
 }

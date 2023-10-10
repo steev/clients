@@ -11,6 +11,13 @@ export class RotateableKeySetService {
   private readonly cryptoService = inject(CryptoService);
   private readonly encryptService = inject(EncryptService);
 
+  /**
+   * Create a new rotateable key set for the current user, using the provided external key.
+   * For more information on rotateable key sets, see {@link RotateableKeySet}
+   *
+   * @param externalKey The `ExternalKey` used to encrypt {@link RotateableKeySet.encryptedPrivateKey}
+   * @returns RotateableKeySet containing the current users `UserKey`
+   */
   async createKeySet<ExternalKey extends SymmetricCryptoKey>(
     externalKey: ExternalKey
   ): Promise<RotateableKeySet<ExternalKey>> {

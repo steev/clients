@@ -168,7 +168,7 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
     const inactiveAccounts: { [userId: string]: InactiveAccount } = {};
 
     for (const userId in baseAccounts) {
-      if (userId == null || userId === (await this.stateService.getUserId())) {
+      if (userId == null || userId === (await this.tokenService.getUserId())) {
         continue;
       }
 

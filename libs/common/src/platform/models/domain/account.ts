@@ -5,7 +5,6 @@ import { OrganizationData } from "../../../admin-console/models/data/organizatio
 import { PolicyData } from "../../../admin-console/models/data/policy.data";
 import { ProviderData } from "../../../admin-console/models/data/provider.data";
 import { Policy } from "../../../admin-console/models/domain/policy";
-import { AuthenticationStatus } from "../../../auth/enums/authentication-status";
 import { AdminAuthRequestStorable } from "../../../auth/models/domain/admin-auth-req-storable";
 import { EnvironmentUrls } from "../../../auth/models/domain/environment-urls";
 import { ForceResetPasswordReason } from "../../../auth/models/domain/force-reset-password-reason";
@@ -185,7 +184,6 @@ export class AccountKeys {
 
 export class AccountProfile {
   apiKeyClientId?: string;
-  authenticationStatus?: AuthenticationStatus;
   convertAccountToKeyConnector?: boolean;
   name?: string;
   email?: string;

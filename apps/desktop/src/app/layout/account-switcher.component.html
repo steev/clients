@@ -78,18 +78,17 @@
         <div class="accountInfo">
           <span class="email" aria-hidden="true">{{ a.value.email }}</span>
           <span class="server" aria-hidden="true">{{ a.value.server }}</span>
-          <!-- <span class="status" aria-hidden="true">{{
-            (a.value.profile.authenticationStatus === authStatus.Unlocked ? "unlocked" : "locked")
-              | i18n
-          }}</span> -->
+          <span class="status" aria-hidden="true">{{
+            (a.value.authenticationStatus === authStatus.Unlocked ? "unlocked" : "locked") | i18n
+          }}</span>
         </div>
-        <!-- <i
+        <i
           class="bwi bwi-2x text-muted"
           [ngClass]="
-            a.value.profile.authenticationStatus == authStatus.Unlocked ? 'bwi-unlock' : 'bwi-lock'
+            a.value.authenticationStatus == authStatus.Unlocked ? 'bwi-unlock' : 'bwi-lock'
           "
           aria-hidden="true"
-        ></i> -->
+        ></i>
       </button>
     </div>
     <ng-container *ngIf="activeAccount?.email != null">

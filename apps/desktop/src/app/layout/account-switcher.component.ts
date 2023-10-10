@@ -26,6 +26,7 @@ type SwitcherAccount = {
   id: string;
   name: string;
   email: string;
+  authenticationStatus: AuthenticationStatus;
   avatarColor?: string;
   server?: string;
   environmentUrls?: EnvironmentUrls;
@@ -116,11 +117,11 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
     this.stateService.accounts$
       .pipe(
         concatMap(async (accounts: { [userId: string]: Account }) => {
-          for (const userId in accounts) {
-            accounts[userId].profile.authenticationStatus = await this.authService.getAuthStatus(
-              userId
-            );
-          }
+          // for (const userId in accounts) {
+          //   accounts[userId].profile.authenticationStatus = await this.authService.getAuthStatus(
+          //     userId
+          //   );
+          // }
 
           this.accounts = await this.createSwitcherAccounts(accounts);
 
@@ -184,9 +185,10 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
 
       switcherAccounts[userId] = {
         id: userId,
-        avatarColor: await this.stateService.getAvatarColor({ userId: userId }),
         name: baseAccounts[userId].profile.name,
         email: baseAccounts[userId].profile.email,
+        authenticationStatus: await this.authService.getAuthStatus(userId),
+        avatarColor: await this.stateService.getAvatarColor({ userId: userId }),
         server: (await this.stateService.getServerConfig({ userId: userId })).environment.vault,
         /**
          * environmentUrls are stored on disk and must be retrieved separately from the
@@ -194,23 +196,6 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
          */
         environmentUrls: await this.stateService.getEnvironmentUrls({ userId: userId }),
       };
-
-      // environmentUrls are stored on disk and must be retrieved separately from the in memory state offered from subscribing to accounts
-      // baseAccounts[userId].settings.environmentUrls = await this.stateService.getEnvironmentUrls({
-      //   userId: userId,
-      // });
-
-      // const serverConfig = await this.stateService.getServerConfig({
-      //   userId: userId,
-      // });
-
-      // baseAccounts[userId].settings.region = Utils.removeVaultfromHostname(
-      //   Utils.getHostname(serverConfig.environment.vault)
-      // );
-      // switcherAccounts[userId] = new SwitcherAccount(baseAccounts[userId]);
-      // switcherAccounts[userId].avatarColor = await this.stateService.getAvatarColor({
-      //   userId: userId,
-      // });
     }
 
     return switcherAccounts;

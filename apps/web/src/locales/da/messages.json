@@ -7169,7 +7169,19 @@
   "beta": {
     "message": "Beta"
   },
+  "baseUrl": {
+    "message": "Server-URL"
+  },
+  "aliasDomain": {
+    "message": "Aliasdomæne"
+  },
   "alreadyHaveAccount": {
     "message": "Har allerede en konto?"
+  },
+  "customBillingStart": {
+    "message": "Tilpasset fakturering vises ikke. Besøg siden "
+  },
+  "customBillingEnd": {
+    "message": " for seneste fakturering."
   }
 }

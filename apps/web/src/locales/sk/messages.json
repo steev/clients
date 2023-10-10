@@ -7169,7 +7169,19 @@
   "beta": {
     "message": "Beta"
   },
+  "baseUrl": {
+    "message": "URL servera"
+  },
+  "aliasDomain": {
+    "message": "Alias doména"
+  },
   "alreadyHaveAccount": {
     "message": "Už máte účet?"
+  },
+  "customBillingStart": {
+    "message": "Custom billing is not reflected. Visit the "
+  },
+  "customBillingEnd": {
+    "message": " page for latest invoicing."
   }
 }

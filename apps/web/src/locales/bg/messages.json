@@ -7169,7 +7169,19 @@
   "beta": {
     "message": "Бета"
   },
+  "baseUrl": {
+    "message": "Адрес на сървъра"
+  },
+  "aliasDomain": {
+    "message": "Псевдонимен домейн"
+  },
   "alreadyHaveAccount": {
     "message": "Вече имате регистрация?"
+  },
+  "customBillingStart": {
+    "message": "Персонализираното таксуване не е отразено. Посетете страницата за "
+  },
+  "customBillingEnd": {
+    "message": " за последните фактури."
   }
 }

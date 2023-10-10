@@ -7169,7 +7169,19 @@
   "beta": {
     "message": "Beta 版"
   },
+  "baseUrl": {
+    "message": "Server URL"
+  },
+  "aliasDomain": {
+    "message": "Alias domain"
+  },
   "alreadyHaveAccount": {
     "message": "已經有帳戶？"
+  },
+  "customBillingStart": {
+    "message": "Custom billing is not reflected. Visit the "
+  },
+  "customBillingEnd": {
+    "message": " page for latest invoicing."
   }
 }

@@ -91,6 +91,15 @@
   "autoFill": {
     "message": "Auto-udfyld"
   },
+  "autoFillLogin": {
+    "message": "Autoudfyld login"
+  },
+  "autoFillCard": {
+    "message": "Autoudfyld kort"
+  },
+  "autoFillIdentity": {
+    "message": "Autoudfyld identitet"
+  },
   "generatePasswordCopied": {
     "message": "Generér adgangskode (kopieret)"
   },
@@ -99,6 +108,21 @@
   },
   "noMatchingLogins": {
     "message": "Ingen matchende logins"
+  },
+  "noCards": {
+    "message": "Ingen kort"
+  },
+  "noIdentities": {
+    "message": "Ingen identiteter"
+  },
+  "addLoginMenu": {
+    "message": "Tilføj login"
+  },
+  "addCardMenu": {
+    "message": "Tilføj kort"
+  },
+  "addIdentityMenu": {
+    "message": "Tilføj identitet"
   },
   "unlockVaultMenu": {
     "message": "Lås din boks op"
@@ -2406,5 +2430,20 @@
   "toggleCollapse": {
     "message": "Fold sammen/ud",
     "description": "Toggling an expand/collapse state."
+  },
+  "aliasDomain": {
+    "message": "Aliasdomæne"
+  },
+  "passwordRepromptDisabledAutofillOnPageLoad": {
+    "message": "Emner, hvor der anmodes om hovedadgangskode igen, kan ikke autoudfyldes ved sideindlæsning. Autoudfyldning ved sideindlæsning er slået fra.",
+    "description": "Toast message for describing that master password re-prompt cannot be auto-filled on page load."
+  },
+  "autofillOnPageLoadSetToDefault": {
+    "message": "Autoudfyldning ved sideindlæsning sat til standardindstillingen.",
+    "description": "Toast message for informing the user that auto-fill on page load has been set to the default setting."
+  },
+  "turnOffMasterPasswordPromptToEditField": {
+    "message": "Slå anmodning om hovedadgangskode igen fra for at redigere dette felt",
+    "description": "Message appearing below the autofill on load message when master password reprompt is set for a vault item."
   }
 }

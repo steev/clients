@@ -7169,7 +7169,19 @@
   "beta": {
     "message": "Beta"
   },
+  "baseUrl": {
+    "message": "Servera URL"
+  },
+  "aliasDomain": {
+    "message": "Aizstājdomēns"
+  },
   "alreadyHaveAccount": {
     "message": "Jau ir konts?"
+  },
+  "customBillingStart": {
+    "message": "Pielāgotie norēķini nav atspoguļoti. Jāapmeklē "
+  },
+  "customBillingEnd": {
+    "message": " sadaļu, lai gūtu ieskatu par jaunākajiem rēķiniem."
   }
 }

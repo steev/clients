@@ -91,6 +91,15 @@
   "autoFill": {
     "message": "Riempimento automatico"
   },
+  "autoFillLogin": {
+    "message": "Riempi automaticamente login"
+  },
+  "autoFillCard": {
+    "message": "Riempi automaticamente carta"
+  },
+  "autoFillIdentity": {
+    "message": "Riempi automaticamente identità"
+  },
   "generatePasswordCopied": {
     "message": "Genera password e copiala"
   },
@@ -99,6 +108,21 @@
   },
   "noMatchingLogins": {
     "message": "Nessun login corrispondente"
+  },
+  "noCards": {
+    "message": "Nessuna carta"
+  },
+  "noIdentities": {
+    "message": "Nessuna identità"
+  },
+  "addLoginMenu": {
+    "message": "Aggiungi login"
+  },
+  "addCardMenu": {
+    "message": "Aggiungi carta"
+  },
+  "addIdentityMenu": {
+    "message": "Aggiungi identità"
   },
   "unlockVaultMenu": {
     "message": "Sblocca la tua cassaforte"
@@ -2406,5 +2430,20 @@
   "toggleCollapse": {
     "message": "Comprimi/espandi",
     "description": "Toggling an expand/collapse state."
+  },
+  "aliasDomain": {
+    "message": "Dominio alias"
+  },
+  "passwordRepromptDisabledAutofillOnPageLoad": {
+    "message": "Gli elementi che richiedono di inserire la password principale di nuovo non possono essere riempiti automaticamente al caricamento della pagina.",
+    "description": "Toast message for describing that master password re-prompt cannot be auto-filled on page load."
+  },
+  "autofillOnPageLoadSetToDefault": {
+    "message": "Il riempimento automatico al caricamento della pagina impostata per usare l'impostazione predefinita.",
+    "description": "Toast message for informing the user that auto-fill on page load has been set to the default setting."
+  },
+  "turnOffMasterPasswordPromptToEditField": {
+    "message": "Disattiva l'inserimento della password principale di nuovo per modificare questo campo",
+    "description": "Message appearing below the autofill on load message when master password reprompt is set for a vault item."
   }
 }

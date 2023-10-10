@@ -7169,7 +7169,19 @@
   "beta": {
     "message": "Beta"
   },
+  "baseUrl": {
+    "message": "Sunucu URL'si"
+  },
+  "aliasDomain": {
+    "message": "Alias alan adı"
+  },
   "alreadyHaveAccount": {
     "message": "Zaten hesabınız var mı?"
+  },
+  "customBillingStart": {
+    "message": "Özel faturalandırma yansıtılmıyor. Son fatura sayfasını "
+  },
+  "customBillingEnd": {
+    "message": " ziyaret edin."
   }
 }

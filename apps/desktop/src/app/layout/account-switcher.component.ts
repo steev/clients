@@ -22,7 +22,7 @@ type ActiveAccount = {
   server: string;
 };
 
-type SwitcherAccount = {
+type InactiveAccount = {
   id: string;
   name: string;
   email: string;
@@ -77,7 +77,7 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   isOpen = false;
-  accounts: { [userId: string]: SwitcherAccount } = {};
+  inactiveAccounts: { [userId: string]: InactiveAccount } = {};
   activeAccount?: ActiveAccount;
   serverUrl: string;
   authStatus = AuthenticationStatus;
@@ -92,16 +92,16 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
 
   get showSwitcher() {
     const userIsInAVault = !Utils.isNullOrWhitespace(this.activeAccount?.email);
-    const userIsAddingAnAdditionalAccount = Object.keys(this.accounts).length > 0;
+    const userIsAddingAnAdditionalAccount = Object.keys(this.inactiveAccounts).length > 0;
     return userIsInAVault || userIsAddingAnAdditionalAccount;
   }
 
   get numberOfAccounts() {
-    if (this.accounts == null) {
+    if (this.inactiveAccounts == null) {
       this.isOpen = false;
       return 0;
     }
-    return Object.keys(this.accounts).length;
+    return Object.keys(this.inactiveAccounts).length;
   }
 
   constructor(
@@ -123,7 +123,7 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
           //   );
           // }
 
-          this.accounts = await this.createSwitcherAccounts(accounts);
+          this.inactiveAccounts = await this.createInactiveAccounts(accounts);
 
           try {
             this.activeAccount = {
@@ -139,8 +139,8 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
             this.activeAccount = undefined;
           }
 
-          // console.log("this.accounts");
-          // console.log(this.accounts);
+          // console.log("this.inactiveAccounts");
+          // console.log(this.inactiveAccounts);
         }),
         takeUntil(this.destroy$)
       )
@@ -173,17 +173,17 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
     this.router.navigate(["/login"]);
   }
 
-  private async createSwitcherAccounts(baseAccounts: {
+  private async createInactiveAccounts(baseAccounts: {
     [userId: string]: Account;
-  }): Promise<{ [userId: string]: SwitcherAccount }> {
-    const switcherAccounts: { [userId: string]: SwitcherAccount } = {};
+  }): Promise<{ [userId: string]: InactiveAccount }> {
+    const inactiveAccounts: { [userId: string]: InactiveAccount } = {};
 
     for (const userId in baseAccounts) {
       if (userId == null || userId === (await this.stateService.getUserId())) {
         continue;
       }
 
-      switcherAccounts[userId] = {
+      inactiveAccounts[userId] = {
         id: userId,
         name: baseAccounts[userId].profile.name,
         email: baseAccounts[userId].profile.email,
@@ -198,6 +198,6 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
       };
     }
 
-    return switcherAccounts;
+    return inactiveAccounts;
   }
 }

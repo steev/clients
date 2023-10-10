@@ -58,34 +58,35 @@
   >
     <div class="accounts" *ngIf="numberOfAccounts > 0">
       <button
-        *ngFor="let a of accounts | keyvalue"
+        *ngFor="let account of inactiveAccounts | keyvalue"
         class="account"
-        (click)="switch(a.key)"
-        appA11yTitle="{{ 'loggedInAsOn' | i18n : a.value.email : a.value.server }}"
+        (click)="switch(account.key)"
+        appA11yTitle="{{ 'loggedInAsOn' | i18n : account.value.email : account.value.server }}"
         attr.aria-label="{{ 'switchAccount' | i18n }}"
       >
         <app-avatar
-          [text]="a.value.name ?? a.value.email"
-          [id]="a.value.id"
+          [text]="account.value.name ?? account.value.email"
+          [id]="account.value.id"
           [size]="25"
           [circle]="true"
           [fontSize]="14"
           [dynamic]="true"
-          [color]="a.value.avatarColor"
-          *ngIf="a.value.email != null"
+          [color]="account.value.avatarColor"
+          *ngIf="account.value.email != null"
           aria-hidden="true"
         ></app-avatar>
         <div class="accountInfo">
-          <span class="email" aria-hidden="true">{{ a.value.email }}</span>
-          <span class="server" aria-hidden="true">{{ a.value.server }}</span>
+          <span class="email" aria-hidden="true">{{ account.value.email }}</span>
+          <span class="server" aria-hidden="true">{{ account.value.server }}</span>
           <span class="status" aria-hidden="true">{{
-            (a.value.authenticationStatus === authStatus.Unlocked ? "unlocked" : "locked") | i18n
+            (account.value.authenticationStatus === authStatus.Unlocked ? "unlocked" : "locked")
+              | i18n
           }}</span>
         </div>
         <i
           class="bwi bwi-2x text-muted"
           [ngClass]="
-            a.value.authenticationStatus == authStatus.Unlocked ? 'bwi-unlock' : 'bwi-lock'
+            account.value.authenticationStatus == authStatus.Unlocked ? 'bwi-unlock' : 'bwi-lock'
           "
           aria-hidden="true"
         ></i>

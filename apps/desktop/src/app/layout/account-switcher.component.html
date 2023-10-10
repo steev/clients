@@ -86,7 +86,7 @@
         <i
           class="bwi bwi-2x text-muted"
           [ngClass]="
-            account.value.authenticationStatus == authStatus.Unlocked ? 'bwi-unlock' : 'bwi-lock'
+            account.value.authenticationStatus === authStatus.Unlocked ? 'bwi-unlock' : 'bwi-lock'
           "
           aria-hidden="true"
         ></i>
@@ -99,7 +99,7 @@
           <i class="bwi bwi-plus" aria-hidden="true"></i> {{ "addAccount" | i18n }}
         </button>
       </ng-container>
-      <ng-container *ngIf="numberOfAccounts == 4">
+      <ng-container *ngIf="numberOfAccounts === 4">
         <span class="accountLimitReached">{{ "accountSwitcherLimitReached" | i18n }} </span>
       </ng-container>
     </ng-container>

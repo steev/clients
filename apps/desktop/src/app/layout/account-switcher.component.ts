@@ -52,12 +52,12 @@ type InactiveAccount = ActiveAccount & {
   ],
 })
 export class AccountSwitcherComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
+  activeAccount?: ActiveAccount;
+  inactiveAccounts: { [userId: string]: InactiveAccount } = {};
+
+  authStatus = AuthenticationStatus;
 
   isOpen = false;
-  inactiveAccounts: { [userId: string]: InactiveAccount } = {};
-  activeAccount?: ActiveAccount;
-  authStatus = AuthenticationStatus;
   overlayPosition: ConnectedPosition[] = [
     {
       originX: "end",
@@ -66,6 +66,8 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
       overlayY: "top",
     },
   ];
+
+  private destroy$ = new Subject<void>();
 
   get showSwitcher() {
     const userIsInAVault = !Utils.isNullOrWhitespace(this.activeAccount?.email);
@@ -145,7 +147,7 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
     const inactiveAccounts: { [userId: string]: InactiveAccount } = {};
 
     for (const userId in baseAccounts) {
-      if (userId == null || userId === (await this.tokenService.getUserId())) {
+      if (userId == null || userId === (await this.stateService.getUserId())) {
         continue;
       }
 

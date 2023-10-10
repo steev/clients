@@ -355,8 +355,8 @@ export class EnvironmentService implements EnvironmentServiceAbstraction {
 
   private removeVaultFromStringIfCloudUrl(url: string) {
     switch (url) {
-      case "https://vault.bitwarden.com":
-      case "https://vault.bitwarden.eu":
+      case this.usUrls.webVault:
+      case this.euUrls.webVault:
         return Utils.getHostname(url).replace(/vault./g, "");
       default:
         return Utils.getHostname(url);

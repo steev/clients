@@ -348,11 +348,6 @@ export class EnvironmentService implements EnvironmentServiceAbstraction {
     return url.trim();
   }
 
-  private removeWebProtocolFromString(urlString: string) {
-    const regex = /http(s)?(:)?(\/\/)?|(\/\/)?(www\.)?/g;
-    return urlString.replace(regex, "");
-  }
-
   private removeVaultFromStringIfCloudUrl(url: string) {
     switch (url) {
       case this.usUrls.webVault:

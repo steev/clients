@@ -7,6 +7,7 @@ import {
   Urls,
 } from "../abstractions/environment.service";
 import { StateService } from "../abstractions/state.service";
+import { Utils } from "../misc/utils";
 
 export class EnvironmentService implements EnvironmentServiceAbstraction {
   private readonly urlsSubject = new ReplaySubject<void>(1);
@@ -85,6 +86,22 @@ export class EnvironmentService implements EnvironmentServiceAbstraction {
       return this.baseUrl;
     }
     return "https://vault.bitwarden.com";
+  }
+
+  getWebVaultHostname(url?: string) {
+    if (url) {
+      return this.removeVaultFromStringIfCloudUrl(url);
+    }
+
+    if (this.webVaultUrl != null) {
+      return this.removeVaultFromStringIfCloudUrl(this.webVaultUrl);
+    }
+
+    if (this.baseUrl) {
+      return this.removeVaultFromStringIfCloudUrl(this.baseUrl);
+    }
+
+    return "bitwarden.com";
   }
 
   getCloudWebVaultUrl() {
@@ -329,6 +346,21 @@ export class EnvironmentService implements EnvironmentServiceAbstraction {
     }
 
     return url.trim();
+  }
+
+  private removeWebProtocolFromString(urlString: string) {
+    const regex = /http(s)?(:)?(\/\/)?|(\/\/)?(www\.)?/g;
+    return urlString.replace(regex, "");
+  }
+
+  private removeVaultFromStringIfCloudUrl(url: string) {
+    switch (url) {
+      case "https://vault.bitwarden.com":
+      case "https://vault.bitwarden.eu":
+        return Utils.getHostname(url).replace(/vault./g, "");
+      default:
+        return Utils.getHostname(url);
+    }
   }
 
   isCloud(): boolean {

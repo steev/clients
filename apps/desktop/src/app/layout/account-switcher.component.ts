@@ -117,12 +117,6 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
     this.stateService.accounts$
       .pipe(
         concatMap(async (accounts: { [userId: string]: Account }) => {
-          // for (const userId in accounts) {
-          //   accounts[userId].profile.authenticationStatus = await this.authService.getAuthStatus(
-          //     userId
-          //   );
-          // }
-
           this.inactiveAccounts = await this.createInactiveAccounts(accounts);
 
           try {
@@ -131,16 +125,11 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
               name: (await this.tokenService.getName()) ?? (await this.tokenService.getEmail()),
               email: await this.tokenService.getEmail(),
               avatarColor: await this.stateService.getAvatarColor(),
-              server: Utils.removeVaultfromHostname(
-                Utils.getHostname(this.environmentService.getWebVaultUrl())
-              ),
+              server: this.environmentService.getWebVaultHostname(),
             };
           } catch {
             this.activeAccount = undefined;
           }
-
-          // console.log("this.inactiveAccounts");
-          // console.log(this.inactiveAccounts);
         }),
         takeUntil(this.destroy$)
       )
@@ -189,7 +178,9 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
         email: baseAccounts[userId].profile.email,
         authenticationStatus: await this.authService.getAuthStatus(userId),
         avatarColor: await this.stateService.getAvatarColor({ userId: userId }),
-        server: (await this.stateService.getServerConfig({ userId: userId })).environment.vault,
+        server: this.environmentService.getWebVaultHostname(
+          (await this.stateService.getServerConfig({ userId: userId })).environment.vault
+        ),
         /**
          * environmentUrls are stored on disk and must be retrieved separately from the
          * in memory state offered from subscribing to accounts

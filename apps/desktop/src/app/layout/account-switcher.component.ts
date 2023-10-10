@@ -24,7 +24,7 @@ type ActiveAccount = {
 
 type InactiveAccount = ActiveAccount & {
   authenticationStatus: AuthenticationStatus;
-  environmentUrls?: EnvironmentUrls;
+  environmentUrls: EnvironmentUrls;
 };
 
 @Component({
@@ -57,7 +57,6 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
   isOpen = false;
   inactiveAccounts: { [userId: string]: InactiveAccount } = {};
   activeAccount?: ActiveAccount;
-  serverUrl: string;
   authStatus = AuthenticationStatus;
   overlayPosition: ConnectedPosition[] = [
     {

@@ -8,11 +8,16 @@
       appA11yTitle="{{ 'toggleCollapse' | i18n }}: {{ headerNode.node.name | i18n }}"
       aria-controls="sub-filters"
     >
-      <i
-        class="bwi bwi-fw"
-        aria-hidden="true"
-        [ngClass]="isCollapsed(headerNode.node) ? 'bwi-angle-right' : 'bwi-angle-down'"
-      ></i>
+      <ng-container *ngIf="headerNode.node.name === 'collections'">
+        <i class="bwi bwi-fw bwi-angle-down" aria-hidden="true"></i>
+      </ng-container>
+      <ng-container *ngIf="headerNode.node.name != 'collections'">
+        <i
+          class="bwi bwi-fw"
+          aria-hidden="true"
+          [ngClass]="isCollapsed(headerNode.node) ? 'bwi-angle-right' : 'bwi-angle-down'"
+        ></i>
+      </ng-container>
     </button>
     <button
       type="button"

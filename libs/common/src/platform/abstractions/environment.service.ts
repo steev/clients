@@ -39,7 +39,6 @@ export abstract class EnvironmentService {
   hasBaseUrl: () => boolean;
   getNotificationsUrl: () => string;
   getWebVaultUrl: () => string;
-  // getWebVaultHostname: (url?: string) => string;
   /**
    * Retrieves the URL of the cloud web vault app.
    *

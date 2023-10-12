@@ -4,7 +4,10 @@ import { WebauthnLoginAttestationResponseRequest } from "./webauthn-login-attest
  * Request sent to the server to save a newly created webauthn login credential.
  */
 export class SaveCredentialRequest {
-  /** The response recieved from the authenticator. This contains the public key */
+  /**
+   * The response recieved from the authenticator.
+   * This contains all information needed for future authentication flows.
+   */
   deviceResponse: WebauthnLoginAttestationResponseRequest;
 
   /** Nickname chosen by the user to identify this credential */
@@ -17,11 +20,16 @@ export class SaveCredentialRequest {
   token: string;
 
   /**
-   * True if the authenticator succesfully created the credential with PRF support.
+   * True if the credential was created with PRF support.
    */
   supportsPrf: boolean;
 
+  /** Used for vault encryption. See {@link RotateableKeySet.encryptedUserKey } */
   encryptedUserKey?: string;
+
+  /** Used for vault encryption. See {@link RotateableKeySet.encryptedPublicKey } */
   encryptedPublicKey?: string;
+
+  /** Used for vault encryption. See {@link RotateableKeySet.encryptedPrivateKey } */
   encryptedPrivateKey?: string;
 }

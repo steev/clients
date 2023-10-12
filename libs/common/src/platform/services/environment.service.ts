@@ -4,6 +4,7 @@ import { EnvironmentUrls } from "../../auth/models/domain/environment-urls";
 import {
   EnvironmentService as EnvironmentServiceAbstraction,
   Region,
+  RegionDomain,
   Urls,
 } from "../abstractions/environment.service";
 import { StateService } from "../abstractions/state.service";
@@ -86,22 +87,6 @@ export class EnvironmentService implements EnvironmentServiceAbstraction {
       return this.baseUrl;
     }
     return "https://vault.bitwarden.com";
-  }
-
-  getWebVaultHostname(url?: string) {
-    if (url) {
-      return this.removeVaultFromStringIfCloudUrl(url);
-    }
-
-    if (this.webVaultUrl != null) {
-      return this.removeVaultFromStringIfCloudUrl(this.webVaultUrl);
-    }
-
-    if (this.baseUrl) {
-      return this.removeVaultFromStringIfCloudUrl(this.baseUrl);
-    }
-
-    return "bitwarden.com";
   }
 
   getCloudWebVaultUrl() {
@@ -298,6 +283,23 @@ export class EnvironmentService implements EnvironmentServiceAbstraction {
       this.notificationsUrl == null &&
       this.eventsUrl == null
     );
+  }
+
+  async getRegion(userId?: string) {
+    return this.stateService.getRegion(userId ? { userId: userId } : null);
+  }
+
+  async getRegionDomain(userId?: string) {
+    const region = await this.getRegion(userId ? userId : null);
+
+    switch (region) {
+      case Region.US:
+        return RegionDomain.US;
+      case Region.EU:
+        return RegionDomain.EU;
+      default:
+        return null;
+    }
   }
 
   async setRegion(region: Region) {

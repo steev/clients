@@ -7,7 +7,6 @@ import { concatMap, Subject, takeUntil } from "rxjs";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
-import { EnvironmentUrls } from "@bitwarden/common/auth/models/domain/environment-urls";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
@@ -24,7 +23,6 @@ type ActiveAccount = {
 
 type InactiveAccount = ActiveAccount & {
   authenticationStatus: AuthenticationStatus;
-  environmentUrls: EnvironmentUrls;
 };
 
 @Component({
@@ -98,13 +96,20 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
         concatMap(async (accounts: { [userId: string]: Account }) => {
           this.inactiveAccounts = await this.createInactiveAccounts(accounts);
 
+          const regionDomain = await this.environmentService.getRegionDomain();
+          let selfHostedDomain = "";
+
+          if (!regionDomain) {
+            selfHostedDomain = (await this.stateService.getEnvironmentUrls()).webVault;
+          }
+
           try {
             this.activeAccount = {
               id: await this.tokenService.getUserId(),
               name: (await this.tokenService.getName()) ?? (await this.tokenService.getEmail()),
               email: await this.tokenService.getEmail(),
               avatarColor: await this.stateService.getAvatarColor(),
-              server: this.environmentService.getWebVaultHostname(),
+              server: regionDomain || Utils.getDomain(selfHostedDomain),
             };
           } catch {
             this.activeAccount = undefined;
@@ -151,20 +156,21 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
         continue;
       }
 
+      const regionDomain = await this.environmentService.getRegionDomain(userId);
+      let selfHostedDomain = "";
+
+      if (!regionDomain) {
+        selfHostedDomain = (await this.stateService.getEnvironmentUrls({ userId: userId }))
+          .webVault;
+      }
+
       inactiveAccounts[userId] = {
         id: userId,
         name: baseAccounts[userId].profile.name,
         email: baseAccounts[userId].profile.email,
         authenticationStatus: await this.authService.getAuthStatus(userId),
         avatarColor: await this.stateService.getAvatarColor({ userId: userId }),
-        server: this.environmentService.getWebVaultHostname(
-          (await this.stateService.getServerConfig({ userId: userId })).environment.vault
-        ),
-        /**
-         * environmentUrls are stored on disk and must be retrieved separately from the
-         * in memory state offered from subscribing to accounts
-         */
-        environmentUrls: await this.stateService.getEnvironmentUrls({ userId: userId }),
+        server: regionDomain || Utils.getDomain(selfHostedDomain),
       };
     }
 

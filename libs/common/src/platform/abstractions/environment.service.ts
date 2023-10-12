@@ -39,7 +39,7 @@ export abstract class EnvironmentService {
   hasBaseUrl: () => boolean;
   getNotificationsUrl: () => string;
   getWebVaultUrl: () => string;
-  getWebVaultHostname: (url?: string) => string;
+  // getWebVaultHostname: (url?: string) => string;
   /**
    * Retrieves the URL of the cloud web vault app.
    *
@@ -62,6 +62,8 @@ export abstract class EnvironmentService {
   getScimUrl: () => string;
   setUrlsFromStorage: () => Promise<void>;
   setUrls: (urls: Urls) => Promise<Urls>;
+  getRegion: (userId: string) => Promise<string>;
+  getRegionDomain: (userId?: string) => Promise<string>;
   setRegion: (region: Region) => Promise<void>;
   getUrls: () => Urls;
   isCloud: () => boolean;

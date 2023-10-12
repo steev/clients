@@ -96,20 +96,13 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
         concatMap(async (accounts: { [userId: string]: Account }) => {
           this.inactiveAccounts = await this.createInactiveAccounts(accounts);
 
-          const regionDomain = await this.environmentService.getRegionDomain();
-          let selfHostedDomain = "";
-
-          if (!regionDomain) {
-            selfHostedDomain = (await this.stateService.getEnvironmentUrls()).webVault;
-          }
-
           try {
             this.activeAccount = {
               id: await this.tokenService.getUserId(),
               name: (await this.tokenService.getName()) ?? (await this.tokenService.getEmail()),
               email: await this.tokenService.getEmail(),
               avatarColor: await this.stateService.getAvatarColor(),
-              server: regionDomain || Utils.getHost(selfHostedDomain),
+              server: await this.environmentService.getHost(),
             };
           } catch {
             this.activeAccount = undefined;
@@ -156,21 +149,13 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
         continue;
       }
 
-      const regionDomain = await this.environmentService.getRegionDomain(userId);
-      let selfHostedDomain = "";
-
-      if (!regionDomain) {
-        selfHostedDomain = (await this.stateService.getEnvironmentUrls({ userId: userId }))
-          .webVault;
-      }
-
       inactiveAccounts[userId] = {
         id: userId,
         name: baseAccounts[userId].profile.name,
         email: baseAccounts[userId].profile.email,
         authenticationStatus: await this.authService.getAuthStatus(userId),
         avatarColor: await this.stateService.getAvatarColor({ userId: userId }),
-        server: regionDomain || Utils.getHost(selfHostedDomain),
+        server: await this.environmentService.getHost(userId),
       };
     }
 

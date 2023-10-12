@@ -285,11 +285,7 @@ export class EnvironmentService implements EnvironmentServiceAbstraction {
     );
   }
 
-  async getRegion(userId?: string) {
-    return this.stateService.getRegion(userId ? { userId: userId } : null);
-  }
-
-  async getRegionDomain(userId?: string) {
+  async getHost(userId?: string) {
     const region = await this.getRegion(userId ? userId : null);
 
     switch (region) {
@@ -298,8 +294,15 @@ export class EnvironmentService implements EnvironmentServiceAbstraction {
       case Region.EU:
         return RegionDomain.EU;
       default:
-        return null;
+        // self-hosted host
+        return Utils.getHost(
+          (await this.stateService.getEnvironmentUrls(userId ? { userId: userId } : null)).webVault
+        );
     }
+  }
+
+  async getRegion(userId?: string) {
+    return this.stateService.getRegion(userId ? { userId: userId } : null);
   }
 
   async setRegion(region: Region) {
@@ -348,16 +351,6 @@ export class EnvironmentService implements EnvironmentServiceAbstraction {
     }
 
     return url.trim();
-  }
-
-  private removeVaultFromStringIfCloudUrl(url: string) {
-    switch (url) {
-      case this.usUrls.webVault:
-      case this.euUrls.webVault:
-        return Utils.getHostname(url).replace(/vault./g, "");
-      default:
-        return Utils.getHostname(url);
-    }
   }
 
   isCloud(): boolean {

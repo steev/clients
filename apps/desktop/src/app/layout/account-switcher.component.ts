@@ -109,7 +109,7 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
               name: (await this.tokenService.getName()) ?? (await this.tokenService.getEmail()),
               email: await this.tokenService.getEmail(),
               avatarColor: await this.stateService.getAvatarColor(),
-              server: regionDomain || Utils.getDomain(selfHostedDomain),
+              server: regionDomain || Utils.getHost(selfHostedDomain),
             };
           } catch {
             this.activeAccount = undefined;
@@ -170,7 +170,7 @@ export class AccountSwitcherComponent implements OnInit, OnDestroy {
         email: baseAccounts[userId].profile.email,
         authenticationStatus: await this.authService.getAuthStatus(userId),
         avatarColor: await this.stateService.getAvatarColor({ userId: userId }),
-        server: regionDomain || Utils.getDomain(selfHostedDomain),
+        server: regionDomain || Utils.getHost(selfHostedDomain),
       };
     }
 

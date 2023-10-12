@@ -384,7 +384,7 @@ export class LockComponent implements OnInit, OnDestroy {
       selfHostedDomain = (await this.stateService.getEnvironmentUrls()).webVault;
     }
 
-    this.webVaultHostname = regionDomain || Utils.getDomain(selfHostedDomain);
+    this.webVaultHostname = regionDomain || Utils.getHost(selfHostedDomain);
   }
 
   /**

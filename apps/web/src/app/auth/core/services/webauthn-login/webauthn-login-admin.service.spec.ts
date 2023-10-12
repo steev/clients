@@ -6,15 +6,15 @@ import { CredentialCreateOptionsView } from "../../views/credential-create-optio
 import { PendingWebauthnLoginCredentialView } from "../../views/pending-webauthn-login-credential.view";
 import { RotateableKeySetService } from "../rotateable-key-set.service";
 
+import { WebauthnLoginAdminService } from "./webauthn-login-admin.service";
 import { WebauthnLoginApiService } from "./webauthn-login-api.service";
-import { WebauthnLoginService } from "./webauthn-login.service";
 
-describe("WebauthnService", () => {
+describe("WebauthnAdminService", () => {
   let apiService!: MockProxy<WebauthnLoginApiService>;
   let userVerificationService!: MockProxy<UserVerificationService>;
   let rotateableKeySetService!: MockProxy<RotateableKeySetService>;
   let credentials: MockProxy<CredentialsContainer>;
-  let webauthnService!: WebauthnLoginService;
+  let service!: WebauthnLoginAdminService;
 
   beforeAll(() => {
     // Polyfill missing class
@@ -24,7 +24,7 @@ describe("WebauthnService", () => {
     userVerificationService = mock<UserVerificationService>();
     rotateableKeySetService = mock<RotateableKeySetService>();
     credentials = mock<CredentialsContainer>();
-    webauthnService = new WebauthnLoginService(
+    service = new WebauthnLoginAdminService(
       apiService,
       userVerificationService,
       rotateableKeySetService,
@@ -37,7 +37,7 @@ describe("WebauthnService", () => {
       credentials.create.mockRejectedValue(new Error("Mocked error"));
       const options = createCredentialCreateOptions();
 
-      const result = await webauthnService.createCredential(options);
+      const result = await service.createCredential(options);
 
       expect(result).toBeUndefined();
     });
@@ -47,7 +47,7 @@ describe("WebauthnService", () => {
       credentials.create.mockResolvedValue(deviceResponse as PublicKeyCredential);
       const createOptions = createCredentialCreateOptions();
 
-      const result = await webauthnService.createCredential(createOptions);
+      const result = await service.createCredential(createOptions);
 
       expect(result).toEqual({
         deviceResponse,
@@ -61,7 +61,7 @@ describe("WebauthnService", () => {
       credentials.create.mockResolvedValue(deviceResponse as PublicKeyCredential);
       const createOptions = createCredentialCreateOptions();
 
-      const result = await webauthnService.createCredential(createOptions);
+      const result = await service.createCredential(createOptions);
 
       expect(result.supportsPrf).toBe(true);
     });

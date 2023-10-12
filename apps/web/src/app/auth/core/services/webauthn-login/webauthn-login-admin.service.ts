@@ -17,7 +17,7 @@ import { createSymmetricKeyFromPrf, getLoginWithPrfSalt } from "./utils";
 import { WebauthnLoginApiService } from "./webauthn-login-api.service";
 
 @Injectable({ providedIn: "root" })
-export class WebauthnLoginService {
+export class WebauthnLoginAdminService {
   static readonly MaxCredentialCount = 5;
 
   private navigatorCredentials: CredentialsContainer;

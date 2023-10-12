@@ -3,7 +3,7 @@ import { Subject, takeUntil } from "rxjs";
 
 import { DialogService } from "@bitwarden/components";
 
-import { WebauthnLoginService } from "../../core";
+import { WebauthnLoginAdminService } from "../../core";
 import { WebauthnLoginCredentialPrfStatus } from "../../core/enums/webauthn-login-credential-prf-status.enum";
 import { WebauthnLoginCredentialView } from "../../core/views/webauthn-login-credential.view";
 
@@ -20,14 +20,14 @@ import { openDeleteCredentialDialogComponent } from "./delete-credential-dialog/
 export class WebauthnLoginSettingsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  protected readonly MaxCredentialCount = WebauthnLoginService.MaxCredentialCount;
+  protected readonly MaxCredentialCount = WebauthnLoginAdminService.MaxCredentialCount;
   protected readonly WebauthnLoginCredentialPrfStatus = WebauthnLoginCredentialPrfStatus;
 
   protected credentials?: WebauthnLoginCredentialView[];
   protected loading = true;
 
   constructor(
-    private webauthnService: WebauthnLoginService,
+    private webauthnService: WebauthnLoginAdminService,
     private dialogService: DialogService
   ) {}
 

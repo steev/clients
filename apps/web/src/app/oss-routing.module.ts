@@ -20,7 +20,7 @@ import { CreateOrganizationComponent } from "./admin-console/settings/create-org
 import { SponsoredFamiliesComponent } from "./admin-console/settings/sponsored-families.component";
 import { AcceptEmergencyComponent } from "./auth/accept-emergency.component";
 import { AcceptOrganizationComponent } from "./auth/accept-organization.component";
-import { deepLinkGuard as deepLinkGuard } from "./auth/guards/deep-link.guard";
+import { deepLinkGuard } from "./auth/guards/deep-link.guard";
 import { HintComponent } from "./auth/hint.component";
 import { LockComponent } from "./auth/lock.component";
 import { LoginDecryptionOptionsComponent } from "./auth/login/login-decryption-options/login-decryption-options.component";

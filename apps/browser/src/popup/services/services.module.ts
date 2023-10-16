@@ -106,7 +106,7 @@ import { BrowserSettingsService } from "../../services/browser-settings.service"
 import { BrowserFolderService } from "../../vault/services/browser-folder.service";
 import { VaultFilterService } from "../../vault/services/vault-filter.service";
 
-import { DebounceNavigationService } from "./debounceNavigationService";
+import { DebounceNavigationService } from "./debounce-navigation.service";
 import { InitService } from "./init.service";
 import { PopupSearchService } from "./popup-search.service";
 import { PopupUtilsService } from "./popup-utils.service";

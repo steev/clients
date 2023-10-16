@@ -42,7 +42,7 @@ import { VaultItemsComponent } from "../vault/popup/components/vault/vault-items
 import { ViewComponent } from "../vault/popup/components/vault/view.component";
 import { FolderAddEditComponent } from "../vault/popup/settings/folder-add-edit.component";
 
-import { debounceNavigationGuard } from "./services/debounceNavigationService";
+import { debounceNavigationGuard } from "./services/debounce-navigation.service";
 import { AutofillComponent } from "./settings/autofill.component";
 import { ExcludedDomainsComponent } from "./settings/excluded-domains.component";
 import { FoldersComponent } from "./settings/folders.component";

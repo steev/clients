@@ -3,8 +3,9 @@ import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+
+import { EmergencyAccessService } from "../../core";
 import { EmergencyAccessType } from "../../core/enums/emergency-access-type";
-import { EmergencyAccessService } from "../../core/services/emergency-access/emergency-access.service";
 
 @Component({
   selector: "emergency-access-add-edit",

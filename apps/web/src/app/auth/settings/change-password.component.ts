@@ -33,7 +33,8 @@ import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.serv
 import { CipherWithIdRequest } from "@bitwarden/common/vault/models/request/cipher-with-id.request";
 import { FolderWithIdRequest } from "@bitwarden/common/vault/models/request/folder-with-id.request";
 import { DialogService } from "@bitwarden/components";
-import { EmergencyAccessService } from "../core/services/emergency-access/emergency-access.service";
+
+import { EmergencyAccessService } from "../core";
 
 @Component({
   selector: "app-change-password",

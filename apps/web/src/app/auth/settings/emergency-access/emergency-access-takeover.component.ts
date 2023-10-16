@@ -13,7 +13,7 @@ import { StateService } from "@bitwarden/common/platform/abstractions/state.serv
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
 import { DialogService } from "@bitwarden/components";
 
-import { EmergencyAccessService } from "../../core/services/emergency-access/emergency-access.service";
+import { EmergencyAccessService } from "../../core";
 
 @Component({
   selector: "emergency-access-takeover",

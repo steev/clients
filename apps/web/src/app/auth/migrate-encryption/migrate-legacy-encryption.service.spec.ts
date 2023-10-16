@@ -9,8 +9,6 @@ import { Organization } from "@bitwarden/common/admin-console/models/domain/orga
 import { OrganizationKeysResponse } from "@bitwarden/common/admin-console/models/response/organization-keys.response";
 import { OrganizationApiService } from "@bitwarden/common/admin-console/services/organization/organization-api.service";
 import { EncryptionType, KdfType } from "@bitwarden/common/enums";
-import { ListResponse } from "@bitwarden/common/models/response/list.response";
-import { UserKeyResponse } from "@bitwarden/common/models/response/user-key.response";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
@@ -31,8 +29,9 @@ import { Folder } from "@bitwarden/common/vault/models/domain/folder";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
 
+import { EmergencyAccessService } from "../core";
+
 import { MigrateFromLegacyEncryptionService } from "./migrate-legacy-encryption.service";
-import { EmergencyAccessService } from "../core/services/emergency-access/emergency-access.service";
 
 describe("migrateFromLegacyEncryptionService", () => {
   let migrateFromLegacyEncryptionService: MigrateFromLegacyEncryptionService;

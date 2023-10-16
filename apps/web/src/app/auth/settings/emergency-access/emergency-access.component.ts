@@ -10,9 +10,9 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { DialogService } from "@bitwarden/components";
 
+import { EmergencyAccessService } from "../../core";
 import { EmergencyAccessStatusType } from "../../core/enums/emergency-access-status-type";
 import { EmergencyAccessType } from "../../core/enums/emergency-access-type";
-import { EmergencyAccessService } from "../../core/services/emergency-access/emergency-access.service";
 import {
   EmergencyAccessGranteeView,
   EmergencyAccessGrantorView,

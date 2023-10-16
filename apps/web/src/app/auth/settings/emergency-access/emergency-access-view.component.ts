@@ -3,7 +3,8 @@ import { ActivatedRoute, Router } from "@angular/router";
 
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
-import { EmergencyAccessService } from "../../core/services/emergency-access/emergency-access.service";
+
+import { EmergencyAccessService } from "../../core";
 
 import { EmergencyAccessAttachmentsComponent } from "./emergency-access-attachments.component";
 import { EmergencyAddEditComponent } from "./emergency-add-edit.component";

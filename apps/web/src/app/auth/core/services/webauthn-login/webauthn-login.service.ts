@@ -12,7 +12,7 @@ import { SaveCredentialRequest } from "./request/save-credential.request";
 import { WebauthnLoginAttestationResponseRequest } from "./request/webauthn-login-attestation-response.request";
 import { WebauthnLoginApiService } from "./webauthn-login-api.service";
 
-@Injectable({ providedIn: "root" })
+@Injectable()
 export class WebauthnLoginService {
   static readonly MaxCredentialCount = 5;
 

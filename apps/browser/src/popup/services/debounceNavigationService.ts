@@ -1,10 +1,17 @@
-import { Injectable, OnDestroy } from "@angular/core";
-import { CanActivate, NavigationEnd, NavigationStart, Router } from "@angular/router";
+import { inject, Injectable, OnDestroy } from "@angular/core";
+import { CanActivateFn, NavigationEnd, NavigationStart, Router } from "@angular/router";
 import { Subscription } from "rxjs";
 import { filter, pairwise } from "rxjs/operators";
 
+export function debounceNavigationGuard(): CanActivateFn {
+  return async () => {
+    const debounceNavigationService = inject(DebounceNavigationService);
+    return debounceNavigationService.canActivate();
+  };
+}
+
 @Injectable()
-export class DebounceNavigationService implements CanActivate, OnDestroy {
+export class DebounceNavigationService implements OnDestroy {
   navigationStartSub: Subscription;
   navigationSuccessSub: Subscription;
 

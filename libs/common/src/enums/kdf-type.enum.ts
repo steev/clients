@@ -19,7 +19,7 @@ class RangeConstant {
 
 export const ARGON2_MEMORY = new RangeConstant(16, 1024, 64);
 export const ARGON2_PARALLELISM = new RangeConstant(1, 16, 4);
-export const ARGON2_ITERATIONS = new RangeConstant(1, 10, 3);
+export const ARGON2_ITERATIONS = new RangeConstant(2, 10, 3);
 
 export const DEFAULT_KDF_TYPE = KdfType.PBKDF2_SHA256;
 export const PBKDF2_ITERATIONS = new RangeConstant(600_000, 2_000_000, 600_000);

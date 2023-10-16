@@ -91,6 +91,15 @@
   "autoFill": {
     "message": "Аутоматско допуњавање"
   },
+  "autoFillLogin": {
+    "message": "Ауто-пуњење пријаве"
+  },
+  "autoFillCard": {
+    "message": "Ауто-пуњење картице"
+  },
+  "autoFillIdentity": {
+    "message": "Ауто-пуњење идентитета"
+  },
   "generatePasswordCopied": {
     "message": "Генериши Лозинку (копирано)"
   },
@@ -99,6 +108,21 @@
   },
   "noMatchingLogins": {
     "message": "Нема одговарајућих пријављивања."
+  },
+  "noCards": {
+    "message": "Нема карте"
+  },
+  "noIdentities": {
+    "message": "Нема идентитета"
+  },
+  "addLoginMenu": {
+    "message": "Нема пријаве"
+  },
+  "addCardMenu": {
+    "message": "Додати картицу"
+  },
+  "addIdentityMenu": {
+    "message": "Додати идентитет"
   },
   "unlockVaultMenu": {
     "message": "Откључај свој сеф"
@@ -2408,7 +2432,7 @@
     "description": "Toggling an expand/collapse state."
   },
   "aliasDomain": {
-    "message": "Alias domain"
+    "message": "Домен алијаса"
   },
   "passwordRepromptDisabledAutofillOnPageLoad": {
     "message": "Ставке са упитом за поновно постављање главне лозинке не могу се ауто-попунити при учитавању странице. Ауто-попуњавање при учитавању странице је искључено.",

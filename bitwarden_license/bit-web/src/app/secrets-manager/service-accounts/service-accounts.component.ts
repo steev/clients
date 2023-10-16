@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { combineLatest, Observable, startWith, switchMap } from "rxjs";
 
+import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { DialogService } from "@bitwarden/components";
 
 import {
@@ -29,11 +30,13 @@ export class ServiceAccountsComponent implements OnInit {
   protected search: string;
 
   private organizationId: string;
+  private organizationEnabled: boolean;
 
   constructor(
     private route: ActivatedRoute,
     private dialogService: DialogService,
-    private serviceAccountService: ServiceAccountService
+    private serviceAccountService: ServiceAccountService,
+    private organizationService: OrganizationService
   ) {}
 
   ngOnInit() {
@@ -43,6 +46,8 @@ export class ServiceAccountsComponent implements OnInit {
     ]).pipe(
       switchMap(async ([params]) => {
         this.organizationId = params.organizationId;
+        this.organizationEnabled = this.organizationService.get(params.organizationId)?.enabled;
+
         return await this.getServiceAccounts();
       })
     );
@@ -53,6 +58,7 @@ export class ServiceAccountsComponent implements OnInit {
       data: {
         organizationId: this.organizationId,
         operation: OperationType.Add,
+        organizationEnabled: this.organizationEnabled,
       },
     });
   }
@@ -63,6 +69,7 @@ export class ServiceAccountsComponent implements OnInit {
         organizationId: this.organizationId,
         serviceAccountId: serviceAccountId,
         operation: OperationType.Edit,
+        organizationEnabled: this.organizationEnabled,
       },
     });
   }

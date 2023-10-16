@@ -7,6 +7,10 @@ export enum KdfType {
 
 class RangeConstant {
   constructor(readonly min: number, readonly max: number, readonly defaultValue: number) {
+    if (min > max) {
+      throw new Error(`${min} is greater than ${max}.`);
+    }
+
     if (this.inRange(defaultValue) === false) {
       throw new Error("Default value is not in range.");
     }
@@ -25,3 +29,7 @@ export const DEFAULT_KDF_TYPE = KdfType.PBKDF2_SHA256;
 export const PBKDF2_ITERATIONS = new RangeConstant(600_000, 2_000_000, 600_000);
 export const DEFAULT_KDF_CONFIG = new KdfConfig(PBKDF2_ITERATIONS.defaultValue);
 export const SEND_KDF_ITERATIONS = 100000;
+
+export const exportedForTesting = {
+  RangeConstant,
+};

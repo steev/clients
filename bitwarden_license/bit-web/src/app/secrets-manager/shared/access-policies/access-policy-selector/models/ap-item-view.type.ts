@@ -71,25 +71,32 @@ export function convertPotentialGranteesToApItemViewType(
     let type: ApItemEnum;
     let listName = granteeView.name;
     let labelName = granteeView.name;
-    if (granteeView.type === "user") {
-      icon = ApItemEnumUtil.itemIcon(ApItemEnum.User);
-      type = ApItemEnum.User;
-      if (Utils.isNullOrWhitespace(granteeView.name)) {
-        listName = granteeView.email;
-        labelName = granteeView.email;
-      } else {
-        listName = `${granteeView.name} (${granteeView.email})`;
-      }
-    } else if (granteeView.type === "group") {
-      icon = ApItemEnumUtil.itemIcon(ApItemEnum.Group);
-      type = ApItemEnum.Group;
-    } else if (granteeView.type === "serviceAccount") {
-      icon = ApItemEnumUtil.itemIcon(ApItemEnum.ServiceAccount);
-      type = ApItemEnum.ServiceAccount;
-    } else if (granteeView.type === "project") {
-      icon = ApItemEnumUtil.itemIcon(ApItemEnum.Project);
-      type = ApItemEnum.Project;
+
+    switch (granteeView.type) {
+      case "user":
+        icon = ApItemEnumUtil.itemIcon(ApItemEnum.User);
+        type = ApItemEnum.User;
+        if (Utils.isNullOrWhitespace(granteeView.name)) {
+          listName = granteeView.email;
+          labelName = granteeView.email;
+        } else {
+          listName = `${granteeView.name} (${granteeView.email})`;
+        }
+        break;
+      case "group":
+        icon = ApItemEnumUtil.itemIcon(ApItemEnum.Group);
+        type = ApItemEnum.Group;
+        break;
+      case "serviceAccount":
+        icon = ApItemEnumUtil.itemIcon(ApItemEnum.ServiceAccount);
+        type = ApItemEnum.ServiceAccount;
+        break;
+      case "project":
+        icon = ApItemEnumUtil.itemIcon(ApItemEnum.Project);
+        type = ApItemEnum.Project;
+        break;
     }
+
     return {
       icon: icon,
       type: type,

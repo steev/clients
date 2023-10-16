@@ -62,7 +62,6 @@ export abstract class EnvironmentService {
   setUrlsFromStorage: () => Promise<void>;
   setUrls: (urls: Urls) => Promise<Urls>;
   getHost: (userId?: string) => Promise<string>;
-  getRegion: (userId: string) => Promise<string>;
   setRegion: (region: Region) => Promise<void>;
   getUrls: () => Urls;
   isCloud: () => boolean;

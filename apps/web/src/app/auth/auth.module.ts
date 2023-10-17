@@ -1,13 +1,11 @@
 import { NgModule } from "@angular/core";
 
-import { CoreAuthModule } from "./core/core.module";
 import { AuthSettingsModule } from "./settings/settings.module";
 
-
 @NgModule({
-  imports: [AuthSettingsModule, CoreAuthModule],
+  imports: [AuthSettingsModule],
   declarations: [],
   providers: [],
-  exports: [AuthSettingsModule, CoreAuthModule],
+  exports: [AuthSettingsModule],
 })
 export class AuthModule {}

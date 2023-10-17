@@ -29,7 +29,7 @@ import { Folder } from "@bitwarden/common/vault/models/domain/folder";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
 
-import { EmergencyAccessService } from "../core";
+import { EmergencyAccessService } from "../emergency-access";
 
 import { MigrateFromLegacyEncryptionService } from "./migrate-legacy-encryption.service";
 

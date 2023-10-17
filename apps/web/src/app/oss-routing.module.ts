@@ -27,8 +27,8 @@ import { RecoverDeleteComponent } from "./auth/recover-delete.component";
 import { RecoverTwoFactorComponent } from "./auth/recover-two-factor.component";
 import { RemovePasswordComponent } from "./auth/remove-password.component";
 import { SetPasswordComponent } from "./auth/set-password.component";
-import { EmergencyAccessViewComponent } from "./auth/settings/emergency-access/emergency-access-view.component";
 import { EmergencyAccessComponent } from "./auth/settings/emergency-access/emergency-access.component";
+import { EmergencyAccessViewComponent } from "./auth/settings/emergency-access/view/emergency-access-view.component";
 import { SsoComponent } from "./auth/sso.component";
 import { TrialInitiationComponent } from "./auth/trial-initiation/trial-initiation.component";
 import { TwoFactorComponent } from "./auth/two-factor.component";
@@ -125,7 +125,7 @@ const routes: Routes = [
         path: "accept-emergency",
         data: { titleId: "acceptEmergency", doNotSaveUrl: false },
         loadComponent: () =>
-          import("./auth/emergency-access/accept-emergency.component").then(
+          import("./auth/emergency-access/accept/accept-emergency.component").then(
             (mod) => mod.AcceptEmergencyComponent
           ),
       },

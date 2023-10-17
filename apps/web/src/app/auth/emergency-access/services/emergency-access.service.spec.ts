@@ -16,15 +16,15 @@ import {
 import { CsprngArray } from "@bitwarden/common/types/csprng";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 
-import { EmergencyAccessStatusType } from "../../enums/emergency-access-status-type";
-
-import { EmergencyAccessApiService } from "./emergency-access-api.service";
-import { EmergencyAccessService } from "./emergency-access.service";
-import { EmergencyAccessUpdateRequest } from "./request/emergency-access-update.request";
+import { EmergencyAccessStatusType } from "../../core/enums/emergency-access-status-type";
+import { EmergencyAccessUpdateRequest } from "../request/emergency-access-update.request";
 import {
   EmergencyAccessGranteeDetailsResponse,
   EmergencyAccessTakeoverResponse,
-} from "./response/emergency-access.response";
+} from "../response/emergency-access.response";
+
+import { EmergencyAccessApiService } from "./emergency-access-api.service";
+import { EmergencyAccessService } from "./emergency-access.service";
 
 describe("EmergencyAccessService", () => {
   let emergencyAccessApiService: MockProxy<EmergencyAccessApiService>;

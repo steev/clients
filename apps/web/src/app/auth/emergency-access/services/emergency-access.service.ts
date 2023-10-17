@@ -17,19 +17,19 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 
-import { EmergencyAccessStatusType } from "../../enums/emergency-access-status-type";
-import { EmergencyAccessType } from "../../enums/emergency-access-type";
+import { EmergencyAccessStatusType } from "../../core/enums/emergency-access-status-type";
+import { EmergencyAccessType } from "../../core/enums/emergency-access-type";
+import { EmergencyAccessAcceptRequest } from "../request/emergency-access-accept.request";
+import { EmergencyAccessConfirmRequest } from "../request/emergency-access-confirm.request";
+import { EmergencyAccessInviteRequest } from "../request/emergency-access-invite.request";
+import { EmergencyAccessPasswordRequest } from "../request/emergency-access-password.request";
+import { EmergencyAccessUpdateRequest } from "../request/emergency-access-update.request";
 import {
   EmergencyAccessGranteeView,
   EmergencyAccessGrantorView,
-} from "../../views/emergency-access.view";
+} from "../views/emergency-access.view";
 
 import { EmergencyAccessApiService } from "./emergency-access-api.service";
-import { EmergencyAccessAcceptRequest } from "./request/emergency-access-accept.request";
-import { EmergencyAccessConfirmRequest } from "./request/emergency-access-confirm.request";
-import { EmergencyAccessInviteRequest } from "./request/emergency-access-invite.request";
-import { EmergencyAccessPasswordRequest } from "./request/emergency-access-password.request";
-import { EmergencyAccessUpdateRequest } from "./request/emergency-access-update.request";
 
 @Injectable()
 export class EmergencyAccessService {

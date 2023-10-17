@@ -34,7 +34,7 @@ import { CipherWithIdRequest } from "@bitwarden/common/vault/models/request/ciph
 import { FolderWithIdRequest } from "@bitwarden/common/vault/models/request/folder-with-id.request";
 import { DialogService } from "@bitwarden/components";
 
-import { EmergencyAccessService } from "../core";
+import { EmergencyAccessService } from "../emergency-access";
 
 @Component({
   selector: "app-change-password",

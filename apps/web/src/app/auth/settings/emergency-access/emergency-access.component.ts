@@ -10,17 +10,17 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { DialogService } from "@bitwarden/components";
 
-import { EmergencyAccessService } from "../../core";
 import { EmergencyAccessStatusType } from "../../core/enums/emergency-access-status-type";
 import { EmergencyAccessType } from "../../core/enums/emergency-access-type";
+import { EmergencyAccessService } from "../../emergency-access";
 import {
   EmergencyAccessGranteeView,
   EmergencyAccessGrantorView,
-} from "../../core/views/emergency-access.view";
+} from "../../emergency-access/views/emergency-access.view";
 
+import { EmergencyAccessConfirmComponent } from "./confirm/emergency-access-confirm.component";
 import { EmergencyAccessAddEditComponent } from "./emergency-access-add-edit.component";
-import { EmergencyAccessConfirmComponent } from "./emergency-access-confirm.component";
-import { EmergencyAccessTakeoverComponent } from "./emergency-access-takeover.component";
+import { EmergencyAccessTakeoverComponent } from "./takeover/emergency-access-takeover.component";
 
 @Component({
   selector: "emergency-access",

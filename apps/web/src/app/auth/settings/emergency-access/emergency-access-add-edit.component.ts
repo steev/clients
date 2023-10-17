@@ -4,8 +4,8 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 
-import { EmergencyAccessService } from "../../core";
 import { EmergencyAccessType } from "../../core/enums/emergency-access-type";
+import { EmergencyAccessService } from "../../emergency-access";
 
 @Component({
   selector: "emergency-access-add-edit",

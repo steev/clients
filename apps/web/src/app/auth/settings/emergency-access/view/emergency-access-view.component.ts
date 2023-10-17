@@ -4,10 +4,10 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 
-import { EmergencyAccessService } from "../../core";
+import { EmergencyAccessService } from "../../../emergency-access";
+import { EmergencyAccessAttachmentsComponent } from "../attachments/emergency-access-attachments.component";
 
-import { EmergencyAccessAttachmentsComponent } from "./emergency-access-attachments.component";
-import { EmergencyAddEditComponent } from "./emergency-add-edit.component";
+import { EmergencyAddEditCipherComponent } from "./emergency-add-edit-cipher.component";
 
 @Component({
   selector: "emergency-access-view",
@@ -47,7 +47,7 @@ export class EmergencyAccessViewComponent implements OnInit {
   async selectCipher(cipher: CipherView) {
     // eslint-disable-next-line
     const [_, childComponent] = await this.modalService.openViewRef(
-      EmergencyAddEditComponent,
+      EmergencyAddEditCipherComponent,
       this.cipherAddEditModalRef,
       (comp) => {
         comp.cipherId = cipher == null ? null : cipher.id;

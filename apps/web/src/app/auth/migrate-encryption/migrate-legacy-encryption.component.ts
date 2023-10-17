@@ -8,7 +8,7 @@ import { MessagingService } from "@bitwarden/common/platform/abstractions/messag
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 
 import { SharedModule } from "../../shared";
-import { EmergencyAccessModule } from "../core";
+import { EmergencyAccessModule } from "../emergency-access";
 
 import { MigrateFromLegacyEncryptionService } from "./migrate-legacy-encryption.service";
 

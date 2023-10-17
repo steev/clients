@@ -5,9 +5,10 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 
-import { BaseAcceptComponent } from "../../common/base.accept.component";
-import { SharedModule } from "../../shared";
-import { EmergencyAccessModule, EmergencyAccessService } from "../core";
+import { BaseAcceptComponent } from "../../../common/base.accept.component";
+import { SharedModule } from "../../../shared";
+import { EmergencyAccessModule } from "../emergency-access.module";
+import { EmergencyAccessService } from "../services/emergency-access.service";
 
 @Component({
   standalone: true,

@@ -4,17 +4,17 @@ import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { PolicyResponse } from "@bitwarden/common/admin-console/models/response/policy.response";
 import { ListResponse } from "@bitwarden/common/models/response/list.response";
 
-import { EmergencyAccessAcceptRequest } from "./request/emergency-access-accept.request";
-import { EmergencyAccessConfirmRequest } from "./request/emergency-access-confirm.request";
-import { EmergencyAccessInviteRequest } from "./request/emergency-access-invite.request";
-import { EmergencyAccessPasswordRequest } from "./request/emergency-access-password.request";
-import { EmergencyAccessUpdateRequest } from "./request/emergency-access-update.request";
+import { EmergencyAccessAcceptRequest } from "../request/emergency-access-accept.request";
+import { EmergencyAccessConfirmRequest } from "../request/emergency-access-confirm.request";
+import { EmergencyAccessInviteRequest } from "../request/emergency-access-invite.request";
+import { EmergencyAccessPasswordRequest } from "../request/emergency-access-password.request";
+import { EmergencyAccessUpdateRequest } from "../request/emergency-access-update.request";
 import {
   EmergencyAccessGranteeDetailsResponse,
   EmergencyAccessGrantorDetailsResponse,
   EmergencyAccessTakeoverResponse,
   EmergencyAccessViewResponse,
-} from "./response/emergency-access.response";
+} from "../response/emergency-access.response";
 
 @Injectable()
 export class EmergencyAccessApiService {

@@ -1,9 +1,9 @@
 import { Location } from "@angular/common";
 import { Component } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
+import { firstValueFrom } from "rxjs";
 import { first } from "rxjs/operators";
 
-import { DialogServiceAbstraction } from "@bitwarden/angular/services/dialog";
 import { AddEditComponent as BaseAddEditComponent } from "@bitwarden/angular/vault/components/add-edit.component";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
@@ -18,12 +18,17 @@ import { SendApiService } from "@bitwarden/common/tools/send/services/send-api.s
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
-import { PasswordRepromptService } from "@bitwarden/common/vault/abstractions/password-reprompt.service";
 import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
 import { LoginUriView } from "@bitwarden/common/vault/models/view/login-uri.view";
+import { DialogService } from "@bitwarden/components";
+import { PasswordRepromptService } from "@bitwarden/vault";
 
 import { BrowserApi } from "../../../../platform/browser/browser-api";
 import { PopupUtilsService } from "../../../../popup/services/popup-utils.service";
+import {
+  BrowserFido2UserInterfaceSession,
+  fido2PopoutSessionData$,
+} from "../../../fido2/browser-fido2-user-interface.service";
 
 @Component({
   selector: "app-vault-add-edit",
@@ -35,6 +40,11 @@ export class AddEditComponent extends BaseAddEditComponent {
   showAttachments = true;
   openAttachmentsInPopup: boolean;
   showAutoFillOnPageLoadOptions: boolean;
+  senderTabId?: number;
+  uilocation?: "popout" | "popup" | "sidebar" | "tab";
+  inPopout = false;
+
+  private fido2PopoutSessionData$ = fido2PopoutSessionData$();
 
   constructor(
     cipherService: CipherService,
@@ -55,7 +65,7 @@ export class AddEditComponent extends BaseAddEditComponent {
     passwordRepromptService: PasswordRepromptService,
     logService: LogService,
     sendApiService: SendApiService,
-    dialogService: DialogServiceAbstraction
+    dialogService: DialogService
   ) {
     super(
       cipherService,
@@ -81,6 +91,9 @@ export class AddEditComponent extends BaseAddEditComponent {
 
     // eslint-disable-next-line rxjs-angular/prefer-takeuntil, rxjs/no-async-subscribe
     this.route.queryParams.pipe(first()).subscribe(async (params) => {
+      this.senderTabId = parseInt(params?.senderTabId, 10) || undefined;
+      this.uilocation = params?.uilocation;
+
       if (params.cipherId) {
         this.cipherId = params.cipherId;
       }
@@ -128,6 +141,8 @@ export class AddEditComponent extends BaseAddEditComponent {
       this.openAttachmentsInPopup = this.popupUtilsService.inPopup(window);
     });
 
+    this.inPopout = this.uilocation === "popout" || this.popupUtilsService.inPopout(window);
+
     if (!this.editMode) {
       const tabs = await BrowserApi.tabsQuery({ windowType: "normal" });
       this.currentUris =
@@ -151,14 +166,41 @@ export class AddEditComponent extends BaseAddEditComponent {
   }
 
   async submit(): Promise<boolean> {
+    const fido2SessionData = await firstValueFrom(this.fido2PopoutSessionData$);
+    // Would be refactored after rework is done on the windows popout service
+    if (
+      this.inPopout &&
+      fido2SessionData.isFido2Session &&
+      !(await this.handleFido2UserVerification(
+        fido2SessionData.sessionId,
+        fido2SessionData.userVerification
+      ))
+    ) {
+      return false;
+    }
+
     const success = await super.submit();
     if (!success) {
       return false;
     }
 
+    if (this.inPopout && fido2SessionData.isFido2Session) {
+      BrowserFido2UserInterfaceSession.confirmNewCredentialResponse(
+        fido2SessionData.sessionId,
+        this.cipher.id,
+        fido2SessionData.userVerification
+      );
+      return true;
+    }
+
     if (this.popupUtilsService.inTab(window)) {
       this.popupUtilsService.disableCloseTabWarning();
       this.messagingService.send("closeTab", { delay: 1000 });
+      return true;
+    }
+
+    if (this.senderTabId && this.inPopout) {
+      setTimeout(() => this.close(), 1000);
       return true;
     }
 
@@ -191,8 +233,20 @@ export class AddEditComponent extends BaseAddEditComponent {
     }
   }
 
-  cancel() {
+  async cancel() {
     super.cancel();
+
+    // Would be refactored after rework is done on the windows popout service
+    const sessionData = await firstValueFrom(this.fido2PopoutSessionData$);
+    if (this.inPopout && sessionData.isFido2Session) {
+      BrowserFido2UserInterfaceSession.abortPopout(sessionData.sessionId);
+      return;
+    }
+
+    if (this.senderTabId && this.inPopout) {
+      this.close();
+      return;
+    }
 
     if (this.popupUtilsService.inTab(window)) {
       this.messagingService.send("closeTab");
@@ -200,6 +254,14 @@ export class AddEditComponent extends BaseAddEditComponent {
     }
 
     this.location.back();
+  }
+
+  // Used for closing single-action views
+  close() {
+    BrowserApi.focusTab(this.senderTabId);
+    window.close();
+
+    return;
   }
 
   async generateUsername(): Promise<boolean> {
@@ -263,5 +325,40 @@ export class AddEditComponent extends BaseAddEditComponent {
         document.getElementById("name").focus();
       }
     }, 200);
+  }
+
+  private async handleFido2UserVerification(
+    sessionId: string,
+    userVerification: boolean
+  ): Promise<boolean> {
+    if (userVerification && !(await this.passwordRepromptService.showPasswordPrompt())) {
+      BrowserFido2UserInterfaceSession.abortPopout(sessionId);
+      return false;
+    }
+
+    return true;
+  }
+
+  repromptChanged() {
+    super.repromptChanged();
+
+    if (!this.showAutoFillOnPageLoadOptions) {
+      return;
+    }
+
+    if (this.reprompt) {
+      this.platformUtilsService.showToast(
+        "info",
+        null,
+        this.i18nService.t("passwordRepromptDisabledAutofillOnPageLoad")
+      );
+      return;
+    }
+
+    this.platformUtilsService.showToast(
+      "info",
+      null,
+      this.i18nService.t("autofillOnPageLoadSetToDefault")
+    );
   }
 }

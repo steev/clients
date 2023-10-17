@@ -20,16 +20,16 @@ export default class ContextMenusBackground {
 
     BrowserApi.messageListener(
       "contextmenus.background",
-      async (
+      (
         msg: { command: string; data: LockedVaultPendingNotificationsItem },
-        sender: chrome.runtime.MessageSender,
-        sendResponse: any
+        sender: chrome.runtime.MessageSender
       ) => {
         if (msg.command === "unlockCompleted" && msg.data.target === "contextmenus.background") {
-          await this.contextMenuClickedHandler.cipherAction(
-            msg.data.commandToRetry.msg.data,
-            msg.data.commandToRetry.sender.tab
-          );
+          this.contextMenuClickedHandler
+            .cipherAction(msg.data.commandToRetry.msg.data, msg.data.commandToRetry.sender.tab)
+            .then(() => {
+              BrowserApi.tabSendMessageData(sender.tab, "closeNotificationBar");
+            });
         }
       }
     );

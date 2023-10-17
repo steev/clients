@@ -91,6 +91,15 @@
   "autoFill": {
     "message": "پر کردن خودکار"
   },
+  "autoFillLogin": {
+    "message": "پر کردن خودکار ورود"
+  },
+  "autoFillCard": {
+    "message": "پر کردن خودکار کارت"
+  },
+  "autoFillIdentity": {
+    "message": "پر کردن خودکار هویت"
+  },
   "generatePasswordCopied": {
     "message": "ساخت کلمه عبور (کپی شد)"
   },
@@ -99,6 +108,21 @@
   },
   "noMatchingLogins": {
     "message": "ورودی‌ها منتطبق نیست"
+  },
+  "noCards": {
+    "message": "کارتی وجود ندارد"
+  },
+  "noIdentities": {
+    "message": "هویتی وجود ندارد"
+  },
+  "addLoginMenu": {
+    "message": "افزودن ورود"
+  },
+  "addCardMenu": {
+    "message": "افزودن کارت"
+  },
+  "addIdentityMenu": {
+    "message": "افزودن هویت"
   },
   "unlockVaultMenu": {
     "message": "قفل گاوصندوق خود را باز کنید"
@@ -337,6 +361,9 @@
   },
   "other": {
     "message": "ساير"
+  },
+  "unlockMethodNeededToChangeTimeoutActionDesc": {
+    "message": "یک روش بازگشایی برای پایان زمان مجاز تنظیم کنید."
   },
   "rateExtension": {
     "message": "به این افزونه امتیاز دهید"
@@ -630,6 +657,12 @@
   "notificationChangeSave": {
     "message": "به‌روزرسانی"
   },
+  "notificationUnlockDesc": {
+    "message": "برای پر کردن خودکار گاوصندوق Bitwarden خود را باز کنید."
+  },
+  "notificationUnlock": {
+    "message": "باز کردن قفل"
+  },
   "enableContextMenuItem": {
     "message": "نمایش گزینه‌های منوی زمینه"
   },
@@ -693,7 +726,7 @@
     "message": "درباره سازمان‌ها اطلاعات کسب کنید"
   },
   "learnOrgConfirmation": {
-    "message": "Bitwarden به شما اجازه می‌دهد با استفاده از سازماندهی، موارد گاوصندوق خود را با دیگران به اشتراک بگذارید. آیا مایل به بازدید از وب سایت bitwarden.com برای کسب اطلاعات بیشتر هستید؟"
+    "message": "Bitwarden به شما اجازه می‌دهد با استفاده از سازمان، موارد گاوصندوق خود را با دیگران به اشتراک بگذارید. آیا مایل به بازدید از وب سایت bitwarden.com برای کسب اطلاعات بیشتر هستید؟"
   },
   "moveToOrganization": {
     "message": "انتقال به سازمان"
@@ -762,8 +795,8 @@
   "featureUnavailable": {
     "message": "ویژگی موجود نیست"
   },
-  "updateKey": {
-    "message": "تا زمانی که کد رمزنگاری را به‌روز نکنید نمی‌توانید از این قابلیت استفاده کنید."
+  "encryptionKeyMigrationRequired": {
+    "message": "انتقال کلید رمزگذاری مورد نیاز است. لطفاً از طریق گاوصندوق وب وارد شوید تا کلید رمزگذاری خود را به روز کنید."
   },
   "premiumMembership": {
     "message": "عضویت پرمیوم"
@@ -786,8 +819,8 @@
   "ppremiumSignUpStorage": {
     "message": "۱ گیگابایت فضای ذخیره سازی رمزگذاری شده برای پیوست های پرونده."
   },
-  "ppremiumSignUpTwoStep": {
-    "message": "گزینه‌های ورود دو مرحله‌ای اضافی مانند YubiKey, FIDO U2F و Duo."
+  "premiumSignUpTwoStepOptions": {
+    "message": "گزینه های ورود اضافی دو مرحله ای مانند YubiKey و Duo."
   },
   "ppremiumSignUpReports": {
     "message": "گزارش‌های بهداشت رمز عبور، سلامت حساب و نقض داده‌ها برای ایمن نگهداشتن گاوصندوق شما."
@@ -1440,9 +1473,6 @@
   "restoreItem": {
     "message": "بازیابی مورد"
   },
-  "restoreItemConfirmation": {
-    "message": "آیا مطمئن هستید که می‌خواهید این مورد را بازیابی کنید؟"
-  },
   "restoredItem": {
     "message": "مورد بازیابی شد"
   },
@@ -1598,6 +1628,12 @@
   },
   "biometricsNotSupportedDesc": {
     "message": "بیومتریک مرورگر در این دستگاه پشتیبانی نمی‌شود."
+  },
+  "biometricsFailedTitle": {
+    "message": "زیست‌سنجی ناموفق بود"
+  },
+  "biometricsFailedDesc": {
+    "message": "زیست‌سنجی نمی‌تواند انجام شود، استفاده از کلمه عبور اصلی یا خروج را در نظر بگیرید. اگر این مشکل ادامه یافت لطفاً با پشتیبانی Bitwarden تماس بگیرید."
   },
   "nativeMessaginPermissionErrorTitle": {
     "message": "مجوز ارائه نشده است"
@@ -1979,8 +2015,8 @@
   "exportingPersonalVaultTitle": {
     "message": "برون ریزی گاو‌صندوق شخصی"
   },
-  "exportingPersonalVaultDescription": {
-    "message": "فقط موارد گاو‌صندوق شخصی مرتبط با $EMAIL$ برون ریزی خواهد شد. موارد گاو‌صندوق سازمان شامل نخواهد شد.",
+  "exportingIndividualVaultDescription": {
+    "message": "فقط موارد شخصی گاوصندوق مرتبط با $EMAIL$ برون ریزی خواهند شد. موارد گاوصندوق سازمان شامل نخواهد شد. فقط اطلاعات مورد گاوصندوق برون ریزی خواهد شد و شامل تاریخچه کلمه عبور مرتبط یا پیوست نمی‌شود.",
     "placeholders": {
       "email": {
         "content": "$1",
@@ -2080,7 +2116,7 @@
   "serverVersion": {
     "message": "نسخه سرور"
   },
-  "selfHosted": {
+  "selfHostedServer": {
     "message": "خود میزبان"
   },
   "thirdParty": {
@@ -2140,7 +2176,7 @@
   "notificationSentDevice": {
     "message": "یک اعلان به دستگاه شما ارسال شده است."
   },
-  "logInInitiated": {
+  "loginInitiated": {
     "message": "ورود به سیستم آغاز شد"
   },
   "exposedMasterPassword": {
@@ -2221,19 +2257,42 @@
       }
     }
   },
-  "region": {
-    "message": "منطقه"
+  "loggingInOn": {
+    "message": "ورود با"
   },
   "opensInANewWindow": {
     "message": "در پنجره جدید باز می‌شود"
+  },
+  "deviceApprovalRequired": {
+    "message": "تأیید دستگاه لازم است. یک روش تأیید انتخاب کنید:"
+  },
+  "rememberThisDevice": {
+    "message": "این دستگاه را به خاطر بسپار"
+  },
+  "uncheckIfPublicDevice": {
+    "message": "اگر از دستگاه عمومی استفاده می‌کنید علامت را بردارید"
+  },
+  "approveFromYourOtherDevice": {
+    "message": "تأیید با دستگاه دیگرتان"
+  },
+  "requestAdminApproval": {
+    "message": "درخواست تأیید مدیر"
+  },
+  "approveWithMasterPassword": {
+    "message": "تأیید با کلمه عبور اصلی"
+  },
+  "ssoIdentifierRequired": {
+    "message": "شناسه سازمان SSO مورد نیاز است."
   },
   "eu": {
     "message": "اروپا",
     "description": "European Union"
   },
-  "us": {
-    "message": "امریکا",
-    "description": "United States"
+  "usDomain": {
+    "message": "bitwarden.com"
+  },
+  "euDomain": {
+    "message": "bitwarden.eu"
   },
   "accessDenied": {
     "message": "دسترسی رد شد. شما اجازه مشاهده این صفحه را ندارید."
@@ -2243,5 +2302,148 @@
   },
   "display": {
     "message": "نمایش"
+  },
+  "accountSuccessfullyCreated": {
+    "message": "حساب کاربری با موفقیت ایجاد شد!"
+  },
+  "adminApprovalRequested": {
+    "message": "تأیید مدیر درخواست شد"
+  },
+  "adminApprovalRequestSentToAdmins": {
+    "message": "درخواست شما به مدیرتان فرستاده شد."
+  },
+  "youWillBeNotifiedOnceApproved": {
+    "message": "به محض تأیید مطلع خواهید شد."
+  },
+  "troubleLoggingIn": {
+    "message": "در ورود مشکلی دارید؟"
+  },
+  "loginApproved": {
+    "message": "ورود تأیید شد"
+  },
+  "userEmailMissing": {
+    "message": "ایمیل کاربر وجود ندارد"
+  },
+  "deviceTrusted": {
+    "message": "دستگاه مورد اعتماد است"
+  },
+  "inputRequired": {
+    "message": "ورودی ضروری است."
+  },
+  "required": {
+    "message": "ضروری"
+  },
+  "search": {
+    "message": "جستجو"
+  },
+  "inputMinLength": {
+    "message": "ورودی باید حداقل $COUNT$ کاراکتر داشته باشد.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "8"
+      }
+    }
+  },
+  "inputMaxLength": {
+    "message": "طول ورودی نباید بیش از $COUNT$ کاراکتر باشد.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "20"
+      }
+    }
+  },
+  "inputForbiddenCharacters": {
+    "message": "کاراکترهای زیر مجاز نیستند: $CHARACTERS$",
+    "placeholders": {
+      "characters": {
+        "content": "$1",
+        "example": "@, #, $, %"
+      }
+    }
+  },
+  "inputMinValue": {
+    "message": "مقدار ورودی باید حداقل $MIN$ باشد.",
+    "placeholders": {
+      "min": {
+        "content": "$1",
+        "example": "8"
+      }
+    }
+  },
+  "inputMaxValue": {
+    "message": "مقدار ورودی نباید از $MAX$ تجاوز کند.",
+    "placeholders": {
+      "max": {
+        "content": "$1",
+        "example": "100"
+      }
+    }
+  },
+  "multipleInputEmails": {
+    "message": "یک یا چند ایمیل نامعتبر است"
+  },
+  "inputTrimValidator": {
+    "message": "ورودی نباید فقط حاوی فضای خالی باشد.",
+    "description": "Notification to inform the user that a form's input can't contain only whitespace."
+  },
+  "inputEmail": {
+    "message": "ورودی یک نشانی ایمیل نیست."
+  },
+  "fieldsNeedAttention": {
+    "message": "فیلد $COUNT$ در بالا به توجه شما نیاز دارد.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "4"
+      }
+    }
+  },
+  "selectPlaceholder": {
+    "message": "-- انتخاب --"
+  },
+  "multiSelectPlaceholder": {
+    "message": "-- برای فیلتر تایپ کنید --"
+  },
+  "multiSelectLoading": {
+    "message": "در حال بازیابی گزینه‌ها..."
+  },
+  "multiSelectNotFound": {
+    "message": "موردی یافت نشد"
+  },
+  "multiSelectClearAll": {
+    "message": "پاک‌کردن همه"
+  },
+  "plusNMore": {
+    "message": "+ $QUANTITY$ بیشتر",
+    "placeholders": {
+      "quantity": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "submenu": {
+    "message": "زیرمنو"
+  },
+  "toggleCollapse": {
+    "message": "دکمه بستن",
+    "description": "Toggling an expand/collapse state."
+  },
+  "aliasDomain": {
+    "message": "دامنه مستعار"
+  },
+  "passwordRepromptDisabledAutofillOnPageLoad": {
+    "message": "موارد با درخواست مجدد کلمه عبور اصلی را نمی‌توان در بارگذاری صفحه به‌صورت خودکار پر کرد. پر کردن خودکار در بارگیری صفحه خاموش شد.",
+    "description": "Toast message for describing that master password re-prompt cannot be auto-filled on page load."
+  },
+  "autofillOnPageLoadSetToDefault": {
+    "message": "پر کردن خودکار در بارگیری صفحه برای استفاده از تنظیمات پیش‌فرض تنظیم شده است.",
+    "description": "Toast message for informing the user that auto-fill on page load has been set to the default setting."
+  },
+  "turnOffMasterPasswordPromptToEditField": {
+    "message": "برای ویرایش این فیلد، درخواست مجدد کلمه عبور اصلی را خاموش کنید",
+    "description": "Message appearing below the autofill on load message when master password reprompt is set for a vault item."
   }
 }

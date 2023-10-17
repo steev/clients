@@ -508,9 +508,6 @@
   "maxFileSize": {
     "message": "La dimensione massima del file è di 500 MB."
   },
-  "updateKey": {
-    "message": "Non puoi usare questa funzionalità finché non aggiorni la tua chiave di criptografia."
-  },
   "addedItem": {
     "message": "Elemento aggiunto"
   },
@@ -614,6 +611,72 @@
   "loginWithMasterPassword": {
     "message": "Accedi con password principale"
   },
+  "loginWithPasskey": {
+    "message": "Accedi con passkey"
+  },
+  "loginWithPasskeyInfo": {
+    "message": "Usa una passkey che ti farà accedere automaticamente senza una password. L'autenticazione biometrica, come il riconoscimento facciale o l'impronta digitale, o un altro metodo di sicurezza FIDO2 verificherà la tua identità."
+  },
+  "newPasskey": {
+    "message": "Nuova passkey"
+  },
+  "learnMoreAboutPasswordless": {
+    "message": "Ulteriori informazioni sull'autenticazione senza password"
+  },
+  "passkeyEnterMasterPassword": {
+    "message": "Inserisci la tua password principale per modificare le impostazioni di accesso con le passkey."
+  },
+  "creatingPasskeyLoading": {
+    "message": "Creando la passkey..."
+  },
+  "creatingPasskeyLoadingInfo": {
+    "message": "Mantieni questa finestra aperta e segui le istruzioni del tuo browser."
+  },
+  "errorCreatingPasskey": {
+    "message": "Errore durante la creazione della passkey"
+  },
+  "errorCreatingPasskeyInfo": {
+    "message": "Si è verificato un problema durante la creazione della tua passkey."
+  },
+  "passkeySuccessfullyCreated": {
+    "message": "Passkey creata!"
+  },
+  "customName": {
+    "message": "Nome personalizzato"
+  },
+  "customPasskeyNameInfo": {
+    "message": "Dai un nome alla tua passkey per aiutarti a riconoscerla."
+  },
+  "encryptionNotSupported": {
+    "message": "Criptografia non supportata"
+  },
+  "loginWithPasskeyEnabled": {
+    "message": "Accesso con passkey attivato"
+  },
+  "passkeySaved": {
+    "message": "$NAME$ salvato",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Personal yubikey"
+      }
+    }
+  },
+  "passkeyRemoved": {
+    "message": "Passkey rimossa"
+  },
+  "removePasskey": {
+    "message": "Rimuovi passkey"
+  },
+  "removePasskeyInfo": {
+    "message": "Se tutte le passkey sono rimosse, non potrai accedere a nuovi dispositivi senza la tua password principale."
+  },
+  "passkeyLimitReachedInfo": {
+    "message": "Limite di passkey raggiunto. Rimuovi una passkey per aggiungerne un'altra."
+  },
+  "tryAgain": {
+    "message": "Riprova"
+  },
   "createAccount": {
     "message": "Crea account"
   },
@@ -711,11 +774,17 @@
   "unexpectedError": {
     "message": "Si è verificato un errore imprevisto."
   },
+  "expirationDateError": {
+    "message": "Seleziona una data di scadenza nel futuro."
+  },
   "emailAddress": {
     "message": "Indirizzo email"
   },
   "yourVaultIsLocked": {
     "message": "La tua cassaforte è bloccata. Verifica la tua password principale per continuare."
+  },
+  "uuid": {
+    "message": "UUID"
   },
   "unlock": {
     "message": "Sblocca"
@@ -869,7 +938,7 @@
     "message": "Usa qualsiasi chiave di sicurezza abilitata WebAuthn per accedere al tuo account."
   },
   "webAuthnMigrated": {
-    "message": "(Migrati da FIDO)"
+    "message": "(Trasferito da FIDO)"
   },
   "emailTitle": {
     "message": "Email"
@@ -947,6 +1016,9 @@
   },
   "copyVerificationCode": {
     "message": "Copia codice di verifica"
+  },
+  "copyUuid": {
+    "message": "Copia UUID"
   },
   "warning": {
     "message": "Attenzione"
@@ -1284,6 +1356,31 @@
   "importEncKeyError": {
     "message": "Errore durante la decriptografia del file esportato. La chiave di criptografia non corrisponde alla chiave di criptografia usata per esportare i dati."
   },
+  "importDestination": {
+    "message": "Destinazione dell'importazione"
+  },
+  "learnAboutImportOptions": {
+    "message": "Ulteriori informazioni sulle tue opzioni di importazione"
+  },
+  "selectImportFolder": {
+    "message": "Seleziona una cartella"
+  },
+  "selectImportCollection": {
+    "message": "Seleziona una raccolta"
+  },
+  "importTargetHint": {
+    "message": "Seleziona questa opzione se vuoi che i contenuti del file di importazione siano spostati in una $DESTINATION$",
+    "description": "Located as a hint under the import target. Will be appended by either folder or collection, depending if the user is importing into an individual or an organizational vault.",
+    "placeholders": {
+      "destination": {
+        "content": "$1",
+        "example": "folder or collection"
+      }
+    }
+  },
+  "importUnassignedItemsError": {
+    "message": "Il file contiene elementi non assegnati."
+  },
   "selectFormat": {
     "message": "Seleziona il formato del file da importare"
   },
@@ -1391,7 +1488,10 @@
   "twoStepLoginDesc": {
     "message": "Proteggi il tuo account richiedendo un passaggio aggiuntivo all'accesso."
   },
-  "twoStepLoginOrganizationDescStart": {
+  "twoStepLoginTeamsDesc": {
+    "message": "Abilita la verifica in due passaggi per la tua organizzazione."
+  },
+  "twoStepLoginEnterpriseDescStart": {
     "message": "Forza le opzioni di verifica in due passaggi di Bitwarden per i membri usando la ",
     "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Enforce Bitwarden Two-step Login options for members by using the Two-step Login Policy.'"
   },
@@ -1890,8 +1990,8 @@
   "premiumSignUpStorage": {
     "message": "1 GB di spazio di archiviazione criptato per gli allegati."
   },
-  "premiumSignUpTwoStep": {
-    "message": "Più opzioni di verifica in due passaggi come YubiKey, FIDO U2F, e Duo."
+  "premiumSignUpTwoStepOptions": {
+    "message": "Opzioni di verifica in due passaggi proprietarie come YubiKey e Duo."
   },
   "premiumSignUpEmergency": {
     "message": "Accesso di emergenza"
@@ -2005,6 +2105,9 @@
         "example": "month or year"
       }
     }
+  },
+  "paymentChargedWithUnpaidSubscription": {
+    "message": "Eventuali abbonamenti non pagati saranno addebitati sul tuo metodo di pagamento."
   },
   "paymentChargedWithTrial": {
     "message": "Il tuo piano include una prova gratis di 7 giorni. Il tuo metodo di pagamento non sarà addebitato fino alla fine del periodo di prova. Puoi cancellarlo in qualsiasi momento."
@@ -3436,17 +3539,11 @@
   "keyUpdated": {
     "message": "Chiave aggiornata"
   },
-  "updateKeyTitle": {
-    "message": "Aggiorna chiave"
-  },
   "updateEncryptionKey": {
     "message": "Aggiorna chiave di criptografia"
   },
-  "updateEncryptionKeyShortDesc": {
-    "message": "Stai utilizzando uno schema di criptografia obsoleto."
-  },
-  "updateEncryptionKeyDesc": {
-    "message": "Siamo passati a chiavi di criptografia più grandi che forniscono più sicurezza e accesso alle funzionalità più recenti. Aggiornare la chiave di criptografia è semplice e veloce, basta inserire la password principale qui sotto. Questo aggiornamento diventerà obbligatorio in futuro."
+  "updateEncryptionSchemeDesc": {
+    "message": "Abbiamo modificato lo schema di criptografia per fornire una maggiore sicurezza. Aggiorna la tua chiave di criptografia inserendo la tua password principale."
   },
   "updateEncryptionKeyWarning": {
     "message": "Dopo aver aggiornato la tua chiave di criptografia, devi uscire ed entrare di nuovo in tutte le app Bitwarden che stai usando (come l'app mobile o l'estensione del browser). Se non si esce e rientra (per scaricare la nuova chiave di criptografia) i dati della tua cassaforte potrebbero essere danneggiati. Cercheremo di farti uscire automaticamente, ma potrebbe esserci un ritardo."
@@ -3501,6 +3598,9 @@
   },
   "vaultTimeoutDesc": {
     "message": "Scegli quando la tua cassaforte eseguirà l'azione di timeout."
+  },
+  "vaultTimeoutLogoutDesc": {
+    "message": "Scegli quando la tua cassaforte si disconnetterà."
   },
   "oneMinute": {
     "message": "1 minuto"
@@ -3590,8 +3690,8 @@
   "attachmentsNeedFix": {
     "message": "Questo elemento ha vecchi file allegati che devono essere corretti."
   },
-  "attachmentFixDesc": {
-    "message": "Questo è un vecchio file allegato che deve essere corretto. Clicca per ulteriori informazioni."
+  "attachmentFixDescription": {
+    "message": "Questo allegato usa una criptografia obsoleta. Seleziona \"Correggi\" per scaricare, criptografare di nuovo, e caricare di nuovo l'allegato."
   },
   "fix": {
     "message": "Correggi",
@@ -3808,29 +3908,11 @@
   "restoreSelected": {
     "message": "Ripristina selezionati"
   },
-  "restoreItem": {
-    "message": "Ripristina elemento"
-  },
   "restoredItem": {
     "message": "Elemento ripristinato"
   },
   "restoredItems": {
     "message": "Elementi ripristinati"
-  },
-  "restoreItemConfirmation": {
-    "message": "Sei sicuro di voler ripristinare questo elemento?"
-  },
-  "restoreItems": {
-    "message": "Ripristina elementi"
-  },
-  "restoreSelectedItemsDesc": {
-    "message": "Hai selezionato $COUNT$ elementi da ripristinare. Sei sicuro di voler ripristinare questi elementi?",
-    "placeholders": {
-      "count": {
-        "content": "$1",
-        "example": "150"
-      }
-    }
   },
   "restoredItemId": {
     "message": "$ID$ ripristinato",
@@ -3896,7 +3978,7 @@
     "message": "Verifica SSO fallita"
   },
   "ssoIdentifierRequired": {
-    "message": "L'identificatore SSO dell'organizzazione è obbligatorio."
+    "message": "Identificatore SSO dell'organizzazione obbligatorio."
   },
   "ssoIdentifier": {
     "message": "Identificativo SSO"
@@ -4600,7 +4682,7 @@
     "message": "Gli account esistenti con password principali richiederanno ai membri di registrarsi autonomamente prima che gli amministratori possano recuperare i loro account. L'iscrizione automatica attiverà il recupero dell'account per i nuovi membri."
   },
   "accountRecoverySingleOrgRequirementDesc": {
-    "message": "La politica aziendale per l'organizzazione unica deve essere attivata prima di attivare questo politica."
+    "message": "La politica aziendale per l'organizzazione unica deve essere attivata prima di attivare questa politica."
   },
   "resetPasswordPolicyAutoEnroll": {
     "message": "Iscrizione automatica"
@@ -4705,7 +4787,7 @@
     "message": "Errore"
   },
   "accountRecoveryManageUsers": {
-    "message": "Manage users must also be granted with the manage account recovery permission"
+    "message": "Gestisci utenti deve essere abilitato con il permesso di gestire il ripristino delle password"
   },
   "setupProvider": {
     "message": "Configurazione del fornitore"
@@ -4916,8 +4998,8 @@
   "disablePersonalVaultExport": {
     "message": "Rimuovi esportazione cassaforte individuale"
   },
-  "disablePersonalVaultExportDesc": {
-    "message": "Non consentire ai membri di esportare la loro cassaforte individuale."
+  "disablePersonalVaultExportDescription": {
+    "message": "Non consentire ai membri di esportare i dati dalla loro cassaforte individuale."
   },
   "vaultExportDisabled": {
     "message": "Esportazione cassaforte rimossa"
@@ -5390,6 +5472,19 @@
   "required": {
     "message": "obbligatorio"
   },
+  "charactersCurrentAndMaximum": {
+    "message": "$CURRENT$ caratteri su $MAX$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "0"
+      },
+      "max": {
+        "content": "$2",
+        "example": "100"
+      }
+    }
+  },
   "characterMaximum": {
     "message": "Massimo $MAX$ caratteri",
     "placeholders": {
@@ -5420,8 +5515,8 @@
   "exportingOrganizationVaultTitle": {
     "message": "Esportando cassaforte dell'organizzazione"
   },
-  "exportingPersonalVaultDescription": {
-    "message": "Solo gli elementi della cassaforte personale associati a $EMAIL$ saranno esportati. Gli elementi della cassaforte dell'organizzazione non saranno inclusi. Solo le informazioni sugli elementi della cassaforte saranno esportate e non includeranno la cronologia delle password o gli allegati.",
+  "exportingIndividualVaultDescription": {
+    "message": "Solo gli elementi della cassaforte personale associati a $EMAIL$ saranno esportati. Gli elementi della cassaforte dell'organizzazione non saranno inclusi. Solo le informazioni sugli elementi della cassaforte saranno esportate e non includeranno gli allegati.",
     "placeholders": {
       "email": {
         "content": "$1",
@@ -5429,7 +5524,7 @@
       }
     }
   },
-  "exportingOrganizationVaultDescription": {
+  "exportingOrganizationVaultDesc": {
     "message": "Solo la cassaforte dell'organizzazione associata a $ORGANIZATION$ sarà esportata. Elementi nelle casseforti individuali o in altre organizzazioni non saranno inclusi.",
     "placeholders": {
       "organization": {
@@ -5661,7 +5756,7 @@
     "description": "the text, 'SCIM', is an acronymn and should not be translated."
   },
   "inputRequired": {
-    "message": "L'input è obbligatorio."
+    "message": "Input obbligatorio."
   },
   "inputEmail": {
     "message": "L'input non è un indirizzo email."
@@ -5676,7 +5771,7 @@
     }
   },
   "inputMaxLength": {
-    "message": "L'input non deve superare la lunghezza di $COUNT$ caratteri.",
+    "message": "L'input non deve essere più lungo di $COUNT$ caratteri.",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -5694,7 +5789,7 @@
     }
   },
   "inputMinValue": {
-    "message": "Il valore di input deve essere lungo almeno $MIN$ caratteri.",
+    "message": "Il valore immesso deve essere almeno $MIN$.",
     "placeholders": {
       "min": {
         "content": "$1",
@@ -5703,7 +5798,7 @@
     }
   },
   "inputMaxValue": {
-    "message": "Il valore di input non deve superare i $MAX$ caratteri.",
+    "message": "Il valore immesso non deve superare $MAX$.",
     "placeholders": {
       "max": {
         "content": "$1",
@@ -5737,6 +5832,9 @@
   },
   "on": {
     "message": "Attivo"
+  },
+  "off": {
+    "message": "No"
   },
   "members": {
     "message": "Membri"
@@ -6786,7 +6884,7 @@
     }
   },
   "inputTrimValidator": {
-    "message": "L'input non deve contenere solo spazi.",
+    "message": "L'input non può contenere solo spazi.",
     "description": "Notification to inform the user that a form's input can't contain only whitespace."
   },
   "dismiss": {
@@ -6802,16 +6900,11 @@
   "enforceOnLoginDesc": {
     "message": "Obbliga i membri esistenti a cambiare le loro password"
   },
-  "region": {
-    "message": "Regione"
+  "usDomain": {
+    "message": "bitwarden.com"
   },
-  "eu": {
-    "message": "UE",
-    "description": "European Union"
-  },
-  "us": {
-    "message": "US",
-    "description": "United States"
+  "euDomain": {
+    "message": "bitwarden.eu"
   },
   "smProjectDeleteAccessRestricted": {
     "message": "Non hai l'autorizzazione per eliminare questo progetto",
@@ -6824,28 +6917,60 @@
   "updateKdfSettings": {
     "message": "Aggiorna impostazioni KDF"
   },
+  "loginInitiated": {
+    "message": "Accesso avviato"
+  },
+  "deviceApprovalRequired": {
+    "message": "Approvazione del dispositivo obbligatoria. Seleziona un'opzione di approvazione:"
+  },
+  "rememberThisDevice": {
+    "message": "Ricorda questo dispositivo"
+  },
+  "uncheckIfPublicDevice": {
+    "message": "Deseleziona se stai usando un dispositivo pubblico"
+  },
+  "approveFromYourOtherDevice": {
+    "message": "Approva dall'altro tuo dispositivo"
+  },
+  "requestAdminApproval": {
+    "message": "Richiedi approvazione dell'amministratore"
+  },
+  "approveWithMasterPassword": {
+    "message": "Approva con password principale"
+  },
+  "trustedDeviceEncryption": {
+    "message": "Criptografia dispositivo fidato"
+  },
   "trustedDevices": {
     "message": "Dispositivi fidati"
   },
-  "memberDecryptionTdeDescriptionPartOne": {
+  "memberDecryptionOptionTdeDescriptionPartOne": {
     "message": "Una volta autenticati, i membri decriptograferanno i dati della cassaforte usando una chiave memorizzata sul proprio dispositivo. La",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO Required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
   },
-  "memberDecryptionTdeDescriptionLinkOne": {
+  "memberDecryptionOptionTdeDescriptionLinkOne": {
     "message": "politica organizzazione unica",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
   },
-  "memberDecryptionTdeDescriptionPartTwo": {
-    "message": "e la ",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+  "memberDecryptionOptionTdeDescriptionPartTwo": {
+    "message": ", la",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
   },
-  "memberDecryptionTdeDescriptionLinkTwo": {
+  "memberDecryptionOptionTdeDescriptionLinkTwo": {
+    "message": "politica SSO obbligatorio",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+  },
+  "memberDecryptionOptionTdeDescriptionPartThree": {
+    "message": ", e la",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+  },
+  "memberDecryptionOptionTdeDescriptionLinkThree": {
     "message": "politica amministrazione del recupero dell'account",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
   },
-  "memberDecryptionTdeDescriptionPartThree": {
+  "memberDecryptionOptionTdeDescriptionPartFour": {
     "message": "con registrazione automatica si attiverà quando questa opzione è usata.",
-    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Once authenticated, members will decrypt vault data using a key stored on their device. The single organization policy, SSO required policy, and account recovery administration policy with automatic enrollment will turn on when this option is used.'"
   },
   "notFound": {
     "message": "$RESOURCE$ non trovato",
@@ -6934,6 +7059,27 @@
   "removeMembersWithoutMasterPasswordWarning": {
     "message": "Rimuovere membri che non hanno una password principali senza impostarne una per loro potrebbe limitare l'accesso al loro account completo."
   },
+  "approvedAuthRequest": {
+    "message": "Dispositivo approvato per $ID$.",
+    "placeholders": {
+      "id": {
+        "content": "$1",
+        "example": "First 8 Character of a GUID"
+      }
+    }
+  },
+  "rejectedAuthRequest": {
+    "message": "Dispositivo rifiutato per $ID$.",
+    "placeholders": {
+      "id": {
+        "content": "$1",
+        "example": "First 8 Character of a GUID"
+      }
+    }
+  },
+  "requestedDeviceApproval": {
+    "message": "Approvazione del dispositivo richiesta."
+  },
   "startYour7DayFreeTrialOfBitwardenFor": {
     "message": "Inizia la tua prova gratis di 7 giorni di Bitwarden per $ORG$",
     "placeholders": {
@@ -6946,14 +7092,32 @@
   "next": {
     "message": "Avanti"
   },
-  "usFlag": {
-    "message": "Bandiera degli Stati Uniti"
-  },
-  "euFlag": {
-    "message": "Bandiera dell'Europa"
-  },
   "selectedRegionFlag": {
     "message": "Bandiera della regione selezionata"
+  },
+  "accountSuccessfullyCreated": {
+    "message": "Account creato!"
+  },
+  "adminApprovalRequested": {
+    "message": "Approvazione dell'amministratore richiesta"
+  },
+  "adminApprovalRequestSentToAdmins": {
+    "message": "La tua richiesta è stata inviata al tuo amministratore."
+  },
+  "youWillBeNotifiedOnceApproved": {
+    "message": "Riceverai una notifica una volta approvato."
+  },
+  "troubleLoggingIn": {
+    "message": "Problemi ad accedere?"
+  },
+  "loginApproved": {
+    "message": "Accesso approvato"
+  },
+  "userEmailMissing": {
+    "message": "Email utente mancante"
+  },
+  "deviceTrusted": {
+    "message": "Dispositivo fidato"
   },
   "sendsNoItemsTitle": {
     "message": "Nessun Send attivo",
@@ -6976,7 +7140,7 @@
     }
   },
   "secretsManagerForPlanDesc": {
-    "message": "Per i team di ingegneria e DevOps per gestire i segreti durante l'intero ciclo di vita dello sviluppo del software."
+    "message": "Per gestire i segreti dei team di software engineering e DevOps durante l'intero ciclo di sviluppo del software."
   },
   "free2PersonOrganization": {
     "message": "Organizzazioni gratis per 2 persone"
@@ -7014,8 +7178,8 @@
       }
     }
   },
-  "addSecretsManager": {
-    "message": "Aggiungi Gestore dei Segreti"
+  "subscribeToSecretsManager": {
+    "message": "Iscriviti al Gestore dei Segreti"
   },
   "addSecretsManagerUpgradeDesc": {
     "message": "Aggiungi il Gestore dei Segreti al tuo piano aggiornato per mantenere l'accesso a tutti i secret creati con il tuo piano precedente."
@@ -7023,15 +7187,20 @@
   "additionalServiceAccounts": {
     "message": "Account di servizio aggiuntivi"
   },
-  "additionalServiceAccountsDesc": {
-    "message": "Il tuo piano include $COUNT$ account di servizio. Puoi aggiungere più account di servizio a $COST$ al mese.",
+  "includedServiceAccounts": {
+    "message": "Il tuo piano include $COUNT$ account di servizio.",
     "placeholders": {
       "count": {
         "content": "$1",
         "example": "50"
-      },
+      }
+    }
+  },
+  "addAdditionalServiceAccounts": {
+    "message": "Puoi aggiungere più account di servizio a $COST$ al mese.",
+    "placeholders": {
       "cost": {
-        "content": "$2",
+        "content": "$1",
         "example": "$0.50"
       }
     }
@@ -7059,5 +7228,42 @@
   },
   "maxServiceAccountCost": {
     "message": "Costo massimo potenziale dell'account di servizio"
+  },
+  "loggedInExclamation": {
+    "message": "Accesso effettuato!"
+  },
+  "smBetaEndedDesc": {
+    "message": "La beta del Gestore dei Segreti è terminata in $BETA_ENDING_DATE$. Ti rimangono $DAYS$ giorni per aggiungere il Gestore dei Segreti al tuo abbonamento a pagamento e mantenere l'accesso ai dati del Gestore dei Segreti. Contatta l'assistenza per aggiungere il Gestore dei Segreti al tuo abbonamento.",
+    "placeholders": {
+      "beta_ending_date": {
+        "content": "$1",
+        "example": "August 1, 2023"
+      },
+      "days": {
+        "content": "$2",
+        "example": "11"
+      }
+    }
+  },
+  "betaEnding": {
+    "message": "Termine della beta"
+  },
+  "beta": {
+    "message": "Beta"
+  },
+  "baseUrl": {
+    "message": "URL del server"
+  },
+  "aliasDomain": {
+    "message": "Dominio alias"
+  },
+  "alreadyHaveAccount": {
+    "message": "Hai già un account?"
+  },
+  "customBillingStart": {
+    "message": "La fatturazione personalizzata non è riflessa. Visita la "
+  },
+  "customBillingEnd": {
+    "message": " pagina per l'ultima fatturazione."
   }
 }

@@ -62,6 +62,7 @@ import {
   PasswordDragonXmlImporter,
   PasswordSafeXmlImporter,
   PasswordWalletTxtImporter,
+  ProtonPassJsonImporter,
   PsonoJsonImporter,
   RememBearCsvImporter,
   RoboFormCsvImporter,
@@ -202,6 +203,7 @@ export class ImportService implements ImportServiceAbstraction {
         return new BitwardenPasswordProtectedImporter(
           this.cryptoService,
           this.i18nService,
+          this.cipherService,
           promptForPassword_callback
         );
       case "lastpasscsv":
@@ -319,6 +321,8 @@ export class ImportService implements ImportServiceAbstraction {
         return new PsonoJsonImporter();
       case "passkyjson":
         return new PasskyJsonImporter();
+      case "protonpass":
+        return new ProtonPassJsonImporter(this.i18nService);
       default:
         return null;
     }

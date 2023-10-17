@@ -24,7 +24,6 @@ import { TwoFactorOptionsComponent } from "../auth/two-factor-options.component"
 import { TwoFactorComponent } from "../auth/two-factor.component";
 import { UpdateTempPasswordComponent } from "../auth/update-temp-password.component";
 import { PremiumComponent } from "../vault/app/accounts/premium.component";
-import { PasswordRepromptComponent } from "../vault/app/components/password-reprompt.component";
 import { AddEditCustomFieldsComponent } from "../vault/app/vault/add-edit-custom-fields.component";
 import { AddEditComponent } from "../vault/app/vault/add-edit.component";
 import { AttachmentsComponent } from "../vault/app/vault/attachments.component";
@@ -53,7 +52,6 @@ import { ExportComponent } from "./tools/export/export.component";
 import { GeneratorComponent } from "./tools/generator.component";
 import { PasswordGeneratorHistoryComponent } from "./tools/password-generator-history.component";
 import { AddEditComponent as SendAddEditComponent } from "./tools/send/add-edit.component";
-import { EffluxDatesComponent as SendEffluxDatesComponent } from "./tools/send/efflux-dates.component";
 import { SendComponent } from "./tools/send/send.component";
 
 @NgModule({
@@ -80,14 +78,12 @@ import { SendComponent } from "./tools/send/send.component";
     GeneratorComponent,
     PasswordGeneratorHistoryComponent,
     PasswordHistoryComponent,
-    PasswordRepromptComponent,
     PremiumComponent,
     RegisterComponent,
     RemovePasswordComponent,
     SearchComponent,
     SendAddEditComponent,
     SendComponent,
-    SendEffluxDatesComponent,
     SetPasswordComponent,
     SetPinComponent,
     SettingsComponent,

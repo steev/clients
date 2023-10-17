@@ -1,11 +1,16 @@
 import { NgModule } from "@angular/core";
 import { Route, RouterModule, Routes } from "@angular/router";
 
-import { AuthGuard } from "@bitwarden/angular/auth/guards/auth.guard";
-import { LockGuard } from "@bitwarden/angular/auth/guards/lock.guard";
-import { UnauthGuard } from "@bitwarden/angular/auth/guards/unauth.guard";
+import {
+  AuthGuard,
+  lockGuard,
+  redirectGuard,
+  tdeDecryptionRequiredGuard,
+  UnauthGuard,
+} from "@bitwarden/angular/auth/guards";
+import { canAccessFeature } from "@bitwarden/angular/guard/feature-flag.guard";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
-import { SubscriptionRoutingModule } from "../app/billing/settings/subscription-routing.module";
 import { flagEnabled, Flags } from "../utils/flags";
 
 import { AcceptFamilySponsorshipComponent } from "./admin-console/organizations/sponsorships/accept-family-sponsorship.component";
@@ -16,6 +21,7 @@ import { AcceptEmergencyComponent } from "./auth/accept-emergency.component";
 import { AcceptOrganizationComponent } from "./auth/accept-organization.component";
 import { HintComponent } from "./auth/hint.component";
 import { LockComponent } from "./auth/lock.component";
+import { LoginDecryptionOptionsComponent } from "./auth/login/login-decryption-options/login-decryption-options.component";
 import { LoginWithDeviceComponent } from "./auth/login/login-with-device.component";
 import { LoginComponent } from "./auth/login/login.component";
 import { RecoverDeleteComponent } from "./auth/recover-delete.component";
@@ -31,7 +37,6 @@ import { UpdatePasswordComponent } from "./auth/update-password.component";
 import { UpdateTempPasswordComponent } from "./auth/update-temp-password.component";
 import { VerifyEmailTokenComponent } from "./auth/verify-email-token.component";
 import { VerifyRecoverDeleteComponent } from "./auth/verify-recover-delete.component";
-import { HomeGuard } from "./guards/home.guard";
 import { FrontendLayoutComponent } from "./layouts/frontend-layout.component";
 import { UserLayoutComponent } from "./layouts/user-layout.component";
 import { ReportsModule } from "./reports";
@@ -56,7 +61,7 @@ const routes: Routes = [
         path: "",
         pathMatch: "full",
         children: [], // Children lets us have an empty component.
-        canActivate: [HomeGuard], // Redirects either to vault, login or lock page.
+        canActivate: [redirectGuard()], // Redirects either to vault, login, or lock page.
       },
       { path: "login", component: LoginComponent, canActivate: [UnauthGuard] },
       {
@@ -64,7 +69,20 @@ const routes: Routes = [
         component: LoginWithDeviceComponent,
         data: { titleId: "loginWithDevice" },
       },
+      {
+        path: "admin-approval-requested",
+        component: LoginWithDeviceComponent,
+        data: { titleId: "loginWithDevice" },
+      },
       { path: "2fa", component: TwoFactorComponent, canActivate: [UnauthGuard] },
+      {
+        path: "login-initiated",
+        component: LoginDecryptionOptionsComponent,
+        canActivate: [
+          tdeDecryptionRequiredGuard(),
+          canAccessFeature(FeatureFlag.TrustedDeviceEncryption),
+        ],
+      },
       {
         path: "register",
         component: TrialInitiationComponent,
@@ -96,7 +114,7 @@ const routes: Routes = [
       {
         path: "lock",
         component: LockComponent,
-        canActivate: [LockGuard],
+        canActivate: [lockGuard()],
       },
       { path: "verify-email", component: VerifyEmailTokenComponent },
       {
@@ -156,6 +174,13 @@ const routes: Routes = [
         canActivate: [AuthGuard],
         data: { titleId: "removeMasterPassword" },
       },
+      {
+        path: "migrate-legacy-encryption",
+        loadComponent: () =>
+          import("./auth/migrate-encryption/migrate-legacy-encryption.component").then(
+            (mod) => mod.MigrateFromLegacyEncryptionComponent
+          ),
+      },
     ],
   },
   {
@@ -195,7 +220,10 @@ const routes: Routes = [
           },
           {
             path: "subscription",
-            loadChildren: () => SubscriptionRoutingModule,
+            loadChildren: () =>
+              import("./billing/individual/individual-billing.module").then(
+                (m) => m.IndividualBillingModule
+              ),
           },
           {
             path: "emergency-access",
@@ -226,11 +254,13 @@ const routes: Routes = [
         children: [
           { path: "", pathMatch: "full", redirectTo: "generator" },
           {
-            path: "",
+            path: "import",
+            loadChildren: () => import("./tools/import/import.module").then((m) => m.ImportModule),
+          },
+          {
+            path: "export",
             loadChildren: () =>
-              import("./tools/import-export/import-export.module").then(
-                (m) => m.ImportExportModule
-              ),
+              import("./tools/vault-export/export.module").then((m) => m.ExportModule),
           },
           {
             path: "generator",

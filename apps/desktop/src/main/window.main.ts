@@ -143,6 +143,7 @@ export class WindowMain {
       backgroundColor: await this.getBackgroundColor(),
       alwaysOnTop: this.enableAlwaysOnTop,
       webPreferences: {
+        // preload: path.join(__dirname, "preload.js"),
         spellcheck: false,
         nodeIntegration: true,
         backgroundThrottling: false,
@@ -236,7 +237,7 @@ export class WindowMain {
       case "light":
         return "#ededed";
       case "dark":
-        return "#222222";
+        return "#15181e";
       case "nord":
         return "#3b4252";
     }

@@ -1,11 +1,9 @@
 import { APP_INITIALIZER, InjectionToken, NgModule } from "@angular/core";
 
-import { DialogServiceAbstraction } from "@bitwarden/angular/services/dialog";
 import {
   SECURE_STORAGE,
   STATE_FACTORY,
   STATE_SERVICE_USE_CACHE,
-  CLIENT_TYPE,
   LOCALES_DIRECTORY,
   SYSTEM_LANGUAGE,
   MEMORY_STORAGE,
@@ -16,7 +14,6 @@ import { PolicyService as PolicyServiceAbstraction } from "@bitwarden/common/adm
 import { AuthService as AuthServiceAbstraction } from "@bitwarden/common/auth/abstractions/auth.service";
 import { LoginService as LoginServiceAbstraction } from "@bitwarden/common/auth/abstractions/login.service";
 import { LoginService } from "@bitwarden/common/auth/services/login.service";
-import { ClientType } from "@bitwarden/common/enums";
 import { BroadcasterService as BroadcasterServiceAbstraction } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { CryptoFunctionService as CryptoFunctionServiceAbstraction } from "@bitwarden/common/platform/abstractions/crypto-function.service";
 import { CryptoService as CryptoServiceAbstraction } from "@bitwarden/common/platform/abstractions/crypto.service";
@@ -29,7 +26,6 @@ import {
 } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService as MessagingServiceAbstraction } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { PlatformUtilsService as PlatformUtilsServiceAbstraction } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { StateMigrationService as StateMigrationServiceAbstraction } from "@bitwarden/common/platform/abstractions/state-migration.service";
 import { StateService as StateServiceAbstraction } from "@bitwarden/common/platform/abstractions/state.service";
 import { AbstractStorageService } from "@bitwarden/common/platform/abstractions/storage.service";
 import { SystemService as SystemServiceAbstraction } from "@bitwarden/common/platform/abstractions/system.service";
@@ -39,7 +35,7 @@ import { MemoryStorageService } from "@bitwarden/common/platform/services/memory
 import { SystemService } from "@bitwarden/common/platform/services/system.service";
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
 import { CipherService as CipherServiceAbstraction } from "@bitwarden/common/vault/abstractions/cipher.service";
-import { PasswordRepromptService as PasswordRepromptServiceAbstraction } from "@bitwarden/common/vault/abstractions/password-reprompt.service";
+import { DialogService } from "@bitwarden/components";
 
 import { LoginGuard } from "../../auth/guards/login.guard";
 import { Account } from "../../models/account";
@@ -52,11 +48,9 @@ import { ElectronRendererStorageService } from "../../platform/services/electron
 import { ElectronStateService } from "../../platform/services/electron-state.service";
 import { ElectronStateService as ElectronStateServiceAbstraction } from "../../platform/services/electron-state.service.abstraction";
 import { I18nService } from "../../platform/services/i18n.service";
-import { ElectronDialogService } from "../../services/electron-dialog.service";
 import { EncryptedMessageHandlerService } from "../../services/encrypted-message-handler.service";
 import { NativeMessageHandlerService } from "../../services/native-message-handler.service";
 import { NativeMessagingService } from "../../services/native-messaging.service";
-import { PasswordRepromptService } from "../../vault/services/password-reprompt.service";
 import { SearchBarService } from "../layout/search/search-bar.service";
 
 import { DesktopFileDownloadService } from "./desktop-file-download.service";
@@ -73,6 +67,7 @@ const RELOAD_CALLBACK = new InjectionToken<() => any>("RELOAD_CALLBACK");
     NativeMessagingService,
     SearchBarService,
     LoginGuard,
+    DialogService,
     {
       provide: APP_INITIALIZER,
       useFactory: (initService: InitService) => initService.init(),
@@ -84,10 +79,6 @@ const RELOAD_CALLBACK = new InjectionToken<() => any>("RELOAD_CALLBACK");
       useValue: new StateFactory(GlobalState, Account),
     },
     {
-      provide: CLIENT_TYPE,
-      useValue: ClientType.Desktop,
-    },
-    {
       provide: RELOAD_CALLBACK,
       useValue: null,
     },
@@ -95,12 +86,7 @@ const RELOAD_CALLBACK = new InjectionToken<() => any>("RELOAD_CALLBACK");
     {
       provide: PlatformUtilsServiceAbstraction,
       useClass: ElectronPlatformUtilsService,
-      deps: [
-        I18nServiceAbstraction,
-        MessagingServiceAbstraction,
-        CLIENT_TYPE,
-        StateServiceAbstraction,
-      ],
+      deps: [I18nServiceAbstraction, MessagingServiceAbstraction],
     },
     {
       provide: I18nServiceAbstraction,
@@ -125,7 +111,6 @@ const RELOAD_CALLBACK = new InjectionToken<() => any>("RELOAD_CALLBACK");
         StateServiceAbstraction,
       ],
     },
-    { provide: PasswordRepromptServiceAbstraction, useClass: PasswordRepromptService },
     {
       provide: StateServiceAbstraction,
       useClass: ElectronStateService,
@@ -134,7 +119,6 @@ const RELOAD_CALLBACK = new InjectionToken<() => any>("RELOAD_CALLBACK");
         SECURE_STORAGE,
         MEMORY_STORAGE,
         LogService,
-        StateMigrationServiceAbstraction,
         STATE_FACTORY,
         STATE_SERVICE_USE_CACHE,
       ],
@@ -171,16 +155,13 @@ const RELOAD_CALLBACK = new InjectionToken<() => any>("RELOAD_CALLBACK");
         MessagingServiceAbstraction,
         I18nServiceAbstraction,
         EncryptedMessageHandlerService,
+        DialogService,
       ],
     },
     {
       provide: LoginServiceAbstraction,
       useClass: LoginService,
       deps: [StateServiceAbstraction],
-    },
-    {
-      provide: DialogServiceAbstraction,
-      useClass: ElectronDialogService,
     },
     {
       provide: CryptoServiceAbstraction,

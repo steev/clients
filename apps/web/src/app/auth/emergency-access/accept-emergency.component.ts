@@ -1,17 +1,17 @@
 import { Component } from "@angular/core";
 import { ActivatedRoute, Params, Router } from "@angular/router";
 
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 
 import { BaseAcceptComponent } from "../../common/base.accept.component";
-import { StateService } from "../../core";
-import { I18nService } from "../../core/i18n.service";
 import { SharedModule } from "../../shared";
-import { EmergencyAccessService } from "../core";
+import { EmergencyAccessModule, EmergencyAccessService } from "../core";
 
 @Component({
   standalone: true,
-  imports: [SharedModule],
+  imports: [SharedModule, EmergencyAccessModule],
   templateUrl: "accept-emergency.component.html",
 })
 export class AcceptEmergencyComponent extends BaseAcceptComponent {

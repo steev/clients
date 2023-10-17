@@ -35,6 +35,7 @@ import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
 
 import { MigrateFromLegacyEncryptionService } from "./migrate-legacy-encryption.service";
+import { EmergencyAccessApiService } from "../core/services/emergency-access/emergency-access-api.service";
 
 describe("migrateFromLegacyEncryptionService", () => {
   let migrateFromLegacyEncryptionService: MigrateFromLegacyEncryptionService;
@@ -42,6 +43,7 @@ describe("migrateFromLegacyEncryptionService", () => {
   const organizationService = mock<OrganizationService>();
   const organizationApiService = mock<OrganizationApiService>();
   const organizationUserService = mock<OrganizationUserService>();
+  const emergencyAccessApiService = mock<EmergencyAccessApiService>();
   const apiService = mock<ApiService>();
   const encryptService = mock<EncryptService>();
   const cryptoService = mock<CryptoService>();
@@ -60,6 +62,7 @@ describe("migrateFromLegacyEncryptionService", () => {
       organizationService,
       organizationApiService,
       organizationUserService,
+      emergencyAccessApiService,
       apiService,
       cryptoService,
       encryptService,
@@ -211,7 +214,7 @@ describe("migrateFromLegacyEncryptionService", () => {
           createMockEmergencyAccess("4", "EA 4", EmergencyAccessStatusType.RecoveryApproved),
         ],
       } as ListResponse<EmergencyAccessGranteeDetailsResponse>;
-      apiService.getEmergencyAccessTrusted.mockResolvedValue(mockEmergencyAccess);
+      emergencyAccessApiService.getEmergencyAccessTrusted.mockResolvedValue(mockEmergencyAccess);
       apiService.getUserPublicKey.mockResolvedValue({
         userId: "mockUserId",
         publicKey: "mockPublicKey",
@@ -227,11 +230,11 @@ describe("migrateFromLegacyEncryptionService", () => {
     it("Only updates emergency accesses with allowed statuses", async () => {
       await migrateFromLegacyEncryptionService.updateEmergencyAccesses(mockUserKey);
 
-      expect(apiService.putEmergencyAccess).not.toHaveBeenCalledWith(
+      expect(emergencyAccessApiService.putEmergencyAccess).not.toHaveBeenCalledWith(
         "0",
         expect.any(EmergencyAccessUpdateRequest)
       );
-      expect(apiService.putEmergencyAccess).not.toHaveBeenCalledWith(
+      expect(emergencyAccessApiService.putEmergencyAccess).not.toHaveBeenCalledWith(
         "1",
         expect.any(EmergencyAccessUpdateRequest)
       );

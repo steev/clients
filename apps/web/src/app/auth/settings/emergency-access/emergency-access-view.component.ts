@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 
 import { ModalService } from "@bitwarden/angular/services/modal.service";
-import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { EmergencyAccessViewResponse } from "@bitwarden/common/auth/models/response/emergency-access.response";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import {
@@ -13,6 +12,7 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import { CipherData } from "@bitwarden/common/vault/models/data/cipher.data";
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
+import { EmergencyAccessApiService } from "../../core/services/emergency-access/emergency-access-api.service";
 
 import { EmergencyAccessAttachmentsComponent } from "./emergency-access-attachments.component";
 import { EmergencyAddEditComponent } from "./emergency-add-edit.component";
@@ -38,7 +38,7 @@ export class EmergencyAccessViewComponent implements OnInit {
     private modalService: ModalService,
     private router: Router,
     private route: ActivatedRoute,
-    private apiService: ApiService
+    private emergencyAccessApiService: EmergencyAccessApiService
   ) {}
 
   ngOnInit() {
@@ -69,7 +69,7 @@ export class EmergencyAccessViewComponent implements OnInit {
   }
 
   async load() {
-    const response = await this.apiService.postEmergencyAccessView(this.id);
+    const response = await this.emergencyAccessApiService.postEmergencyAccessView(this.id);
     this.ciphers = await this.getAllCiphers(response);
     this.loaded = true;
   }

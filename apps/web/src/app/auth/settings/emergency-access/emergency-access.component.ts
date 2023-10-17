@@ -19,6 +19,7 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { DialogService } from "@bitwarden/components";
+import { EmergencyAccessApiService } from "../../core/services/emergency-access/emergency-access-api.service";
 
 import { EmergencyAccessAddEditComponent } from "./emergency-access-add-edit.component";
 import { EmergencyAccessConfirmComponent } from "./emergency-access-confirm.component";
@@ -46,6 +47,7 @@ export class EmergencyAccessComponent implements OnInit {
   isOrganizationOwner: boolean;
 
   constructor(
+    private emergencyAccessApiService: EmergencyAccessApiService,
     private apiService: ApiService,
     private i18nService: I18nService,
     private modalService: ModalService,
@@ -67,8 +69,8 @@ export class EmergencyAccessComponent implements OnInit {
   }
 
   async load() {
-    this.trustedContacts = (await this.apiService.getEmergencyAccessTrusted()).data;
-    this.grantedContacts = (await this.apiService.getEmergencyAccessGranted()).data;
+    this.trustedContacts = (await this.emergencyAccessApiService.getEmergencyAccessTrusted()).data;
+    this.grantedContacts = (await this.emergencyAccessApiService.getEmergencyAccessGranted()).data;
     this.loaded = true;
   }
 
@@ -109,7 +111,7 @@ export class EmergencyAccessComponent implements OnInit {
     if (this.actionPromise != null) {
       return;
     }
-    this.actionPromise = this.apiService.postEmergencyAccessReinvite(contact.id);
+    this.actionPromise = this.emergencyAccessApiService.postEmergencyAccessReinvite(contact.id);
     await this.actionPromise;
     this.platformUtilsService.showToast(
       "success",
@@ -182,7 +184,7 @@ export class EmergencyAccessComponent implements OnInit {
     }
 
     try {
-      await this.apiService.deleteEmergencyAccess(details.id);
+      await this.emergencyAccessApiService.deleteEmergencyAccess(details.id);
       this.platformUtilsService.showToast(
         "success",
         null,
@@ -214,7 +216,7 @@ export class EmergencyAccessComponent implements OnInit {
       return false;
     }
 
-    await this.apiService.postEmergencyAccessInitiate(details.id);
+    await this.emergencyAccessApiService.postEmergencyAccessInitiate(details.id);
 
     details.status = EmergencyAccessStatusType.RecoveryInitiated;
     this.platformUtilsService.showToast(
@@ -243,7 +245,7 @@ export class EmergencyAccessComponent implements OnInit {
       return false;
     }
 
-    await this.apiService.postEmergencyAccessApprove(details.id);
+    await this.emergencyAccessApiService.postEmergencyAccessApprove(details.id);
     details.status = EmergencyAccessStatusType.RecoveryApproved;
 
     this.platformUtilsService.showToast(
@@ -254,7 +256,7 @@ export class EmergencyAccessComponent implements OnInit {
   }
 
   async reject(details: EmergencyAccessGranteeDetailsResponse) {
-    await this.apiService.postEmergencyAccessReject(details.id);
+    await this.emergencyAccessApiService.postEmergencyAccessReject(details.id);
     details.status = EmergencyAccessStatusType.Confirmed;
 
     this.platformUtilsService.showToast(
@@ -321,6 +323,6 @@ export class EmergencyAccessComponent implements OnInit {
     const encryptedKey = await this.cryptoService.rsaEncrypt(userKey.key, publicKey);
     const request = new EmergencyAccessConfirmRequest();
     request.key = encryptedKey.encryptedString;
-    await this.apiService.postEmergencyAccessConfirm(details.id, request);
+    await this.emergencyAccessApiService.postEmergencyAccessConfirm(details.id, request);
   }
 }

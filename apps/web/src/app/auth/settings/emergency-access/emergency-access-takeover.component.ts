@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angu
 import { takeUntil } from "rxjs";
 
 import { ChangePasswordComponent } from "@bitwarden/angular/auth/components/change-password.component";
-import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyData } from "@bitwarden/common/admin-console/models/data/policy.data";
 import { Policy } from "@bitwarden/common/admin-console/models/domain/policy";
@@ -22,6 +21,7 @@ import {
 } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
 import { DialogService } from "@bitwarden/components";
+import { EmergencyAccessApiService } from "../../core/services/emergency-access/emergency-access-api.service";
 
 @Component({
   selector: "emergency-access-takeover",
@@ -49,7 +49,7 @@ export class EmergencyAccessTakeoverComponent
     passwordGenerationService: PasswordGenerationServiceAbstraction,
     platformUtilsService: PlatformUtilsService,
     policyService: PolicyService,
-    private apiService: ApiService,
+    private emergencyAccessApiService: EmergencyAccessApiService,
     private logService: LogService,
     dialogService: DialogService
   ) {
@@ -66,7 +66,9 @@ export class EmergencyAccessTakeoverComponent
   }
 
   async ngOnInit() {
-    const response = await this.apiService.getEmergencyGrantorPolicies(this.emergencyAccessId);
+    const response = await this.emergencyAccessApiService.getEmergencyGrantorPolicies(
+      this.emergencyAccessId
+    );
     if (response.data != null && response.data.length > 0) {
       const policies = response.data.map(
         (policyResponse: PolicyResponse) => new Policy(new PolicyData(policyResponse))
@@ -89,7 +91,7 @@ export class EmergencyAccessTakeoverComponent
       return;
     }
 
-    const takeoverResponse = await this.apiService.postEmergencyAccessTakeover(
+    const takeoverResponse = await this.emergencyAccessApiService.postEmergencyAccessTakeover(
       this.emergencyAccessId
     );
 
@@ -123,7 +125,7 @@ export class EmergencyAccessTakeoverComponent
     request.newMasterPasswordHash = masterKeyHash;
     request.key = encKey[1].encryptedString;
 
-    this.apiService.postEmergencyAccessPassword(this.emergencyAccessId, request);
+    this.emergencyAccessApiService.postEmergencyAccessPassword(this.emergencyAccessId, request);
 
     try {
       this.onDone.emit();

@@ -39,6 +39,7 @@ import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.serv
 import { CipherWithIdRequest } from "@bitwarden/common/vault/models/request/cipher-with-id.request";
 import { FolderWithIdRequest } from "@bitwarden/common/vault/models/request/folder-with-id.request";
 import { DialogService } from "@bitwarden/components";
+import { EmergencyAccessApiService } from "../core/services/emergency-access/emergency-access-api.service";
 
 @Component({
   selector: "app-change-password",
@@ -65,6 +66,7 @@ export class ChangePasswordComponent extends BaseChangePasswordComponent {
     private folderService: FolderService,
     private cipherService: CipherService,
     private syncService: SyncService,
+    private emergencyAccessApiService: EmergencyAccessApiService,
     private apiService: ApiService,
     private sendService: SendService,
     private organizationService: OrganizationService,
@@ -273,7 +275,7 @@ export class ChangePasswordComponent extends BaseChangePasswordComponent {
   }
 
   private async updateEmergencyAccesses(encKey: SymmetricCryptoKey) {
-    const emergencyAccess = await this.apiService.getEmergencyAccessTrusted();
+    const emergencyAccess = await this.emergencyAccessApiService.getEmergencyAccessTrusted();
     const allowedStatuses = [
       EmergencyAccessStatusType.Confirmed,
       EmergencyAccessStatusType.RecoveryInitiated,
@@ -293,7 +295,7 @@ export class ChangePasswordComponent extends BaseChangePasswordComponent {
       updateRequest.waitTimeDays = details.waitTimeDays;
       updateRequest.keyEncrypted = encryptedKey.encryptedString;
 
-      await this.apiService.putEmergencyAccess(details.id, updateRequest);
+      await this.emergencyAccessApiService.putEmergencyAccess(details.id, updateRequest);
     }
   }
 

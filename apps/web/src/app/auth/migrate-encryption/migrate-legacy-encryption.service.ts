@@ -22,6 +22,7 @@ import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folde
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { CipherWithIdRequest } from "@bitwarden/common/vault/models/request/cipher-with-id.request";
 import { FolderWithIdRequest } from "@bitwarden/common/vault/models/request/folder-with-id.request";
+import { EmergencyAccessApiService } from "../core/services/emergency-access/emergency-access-api.service";
 
 // TODO: PM-3797 - This service should be expanded and used for user key rotations in change-password.component.ts
 @Injectable()
@@ -30,6 +31,7 @@ export class MigrateFromLegacyEncryptionService {
     private organizationService: OrganizationService,
     private organizationApiService: OrganizationApiServiceAbstraction,
     private organizationUserService: OrganizationUserService,
+    private emergencyAccessApiService: EmergencyAccessApiService,
     private apiService: ApiService,
     private cryptoService: CryptoService,
     private encryptService: EncryptService,
@@ -103,7 +105,7 @@ export class MigrateFromLegacyEncryptionService {
    * @param newUserKey The new user key
    */
   async updateEmergencyAccesses(newUserKey: UserKey) {
-    const emergencyAccess = await this.apiService.getEmergencyAccessTrusted();
+    const emergencyAccess = await this.emergencyAccessApiService.getEmergencyAccessTrusted();
     // Any Invited or Accepted requests won't have the key yet, so we don't need to update them
     const allowedStatuses = new Set([
       EmergencyAccessStatusType.Confirmed,
@@ -125,7 +127,7 @@ export class MigrateFromLegacyEncryptionService {
       updateRequest.waitTimeDays = details.waitTimeDays;
       updateRequest.keyEncrypted = encryptedKey.encryptedString;
 
-      await this.apiService.putEmergencyAccess(details.id, updateRequest);
+      await this.emergencyAccessApiService.putEmergencyAccess(details.id, updateRequest);
     }
   }
 

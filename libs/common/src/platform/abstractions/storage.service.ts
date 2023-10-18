@@ -1,6 +1,18 @@
+import { Subject } from "rxjs";
+
 import { MemoryStorageOptions, StorageOptions } from "../models/domain/storage-options";
 
+export type StorageUpdateType = "save" | "remove";
+
 export abstract class AbstractStorageService {
+  protected readonly updatesSubject = new Subject<{
+    key: string;
+    value: unknown;
+    updateType: StorageUpdateType;
+  }>();
+  get updates$() {
+    return this.updatesSubject.asObservable();
+  }
   abstract get<T>(key: string, options?: StorageOptions): Promise<T>;
   abstract has(key: string, options?: StorageOptions): Promise<boolean>;
   abstract save<T>(key: string, obj: T, options?: StorageOptions): Promise<void>;

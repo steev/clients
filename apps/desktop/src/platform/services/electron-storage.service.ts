@@ -33,10 +33,11 @@ interface SaveOptions extends BaseOptions<"save"> {
 
 type Options = BaseOptions<"get"> | BaseOptions<"has"> | SaveOptions | BaseOptions<"remove">;
 
-export class ElectronStorageService implements AbstractStorageService {
+export class ElectronStorageService extends AbstractStorageService {
   private store: ElectronStore;
 
   constructor(dir: string, defaults = {}) {
+    super();
     if (!fs.existsSync(dir)) {
       NodeUtils.mkdirpSync(dir, "700");
     }
@@ -75,11 +76,13 @@ export class ElectronStorageService implements AbstractStorageService {
       obj = Array.from(obj);
     }
     this.store.set(key, obj);
+    this.updatesSubject.next({ key, value: obj, updateType: "save" });
     return Promise.resolve();
   }
 
   remove(key: string): Promise<void> {
     this.store.delete(key);
+    this.updatesSubject.next({ key, value: null, updateType: "remove" });
     return Promise.resolve();
   }
 }

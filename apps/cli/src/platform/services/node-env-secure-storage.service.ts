@@ -5,12 +5,14 @@ import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { EncArrayBuffer } from "@bitwarden/common/platform/models/domain/enc-array-buffer";
 import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
 
-export class NodeEnvSecureStorageService implements AbstractStorageService {
+export class NodeEnvSecureStorageService extends AbstractStorageService {
   constructor(
     private storageService: AbstractStorageService,
     private logService: LogService,
     private cryptoService: () => CryptoService
-  ) {}
+  ) {
+    super();
+  }
 
   async get<T>(key: string): Promise<T> {
     const value = await this.storageService.get<string>(this.makeProtectedStorageKey(key));
@@ -25,7 +27,7 @@ export class NodeEnvSecureStorageService implements AbstractStorageService {
     return (await this.get(key)) != null;
   }
 
-  async save(key: string, obj: any): Promise<any> {
+  async save(key: string, obj: any): Promise<void> {
     if (obj == null) {
       return this.remove(key);
     }
@@ -35,10 +37,13 @@ export class NodeEnvSecureStorageService implements AbstractStorageService {
     }
     const protectedObj = await this.encrypt(obj);
     await this.storageService.save(this.makeProtectedStorageKey(key), protectedObj);
+    this.updatesSubject.next({ key, value: obj, updateType: "save" });
   }
 
-  remove(key: string): Promise<any> {
-    return this.storageService.remove(this.makeProtectedStorageKey(key));
+  async remove(key: string): Promise<void> {
+    await this.storageService.remove(this.makeProtectedStorageKey(key));
+    this.updatesSubject.next({ key, value: null, updateType: "remove" });
+    return;
   }
 
   private async encrypt(plainValue: string): Promise<string> {

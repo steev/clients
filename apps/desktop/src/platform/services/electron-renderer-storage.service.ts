@@ -2,7 +2,7 @@ import { ipcRenderer } from "electron";
 
 import { AbstractStorageService } from "@bitwarden/common/platform/abstractions/storage.service";
 
-export class ElectronRendererStorageService implements AbstractStorageService {
+export class ElectronRendererStorageService extends AbstractStorageService {
   get<T>(key: string): Promise<T> {
     return ipcRenderer.invoke("storageService", {
       action: "get",
@@ -17,18 +17,20 @@ export class ElectronRendererStorageService implements AbstractStorageService {
     });
   }
 
-  save(key: string, obj: any): Promise<any> {
-    return ipcRenderer.invoke("storageService", {
+  async save<T>(key: string, obj: T): Promise<void> {
+    await ipcRenderer.invoke("storageService", {
       action: "save",
       key: key,
       obj: obj,
     });
+    this.updatesSubject.next({ key, value: obj, updateType: "save" });
   }
 
-  remove(key: string): Promise<any> {
-    return ipcRenderer.invoke("storageService", {
+  async remove(key: string): Promise<void> {
+    await ipcRenderer.invoke("storageService", {
       action: "remove",
       key: key,
     });
+    this.updatesSubject.next({ key, value: null, updateType: "remove" });
   }
 }

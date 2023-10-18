@@ -5,7 +5,7 @@ import { AbstractStorageService } from "@bitwarden/common/platform/abstractions/
 import { StorageOptions } from "@bitwarden/common/platform/models/domain/storage-options";
 
 @Injectable()
-export class HtmlStorageService implements AbstractStorageService {
+export class HtmlStorageService extends AbstractStorageService {
   get defaultOptions(): StorageOptions {
     return { htmlStorageLocation: HtmlStorageLocation.Session };
   }
@@ -52,6 +52,7 @@ export class HtmlStorageService implements AbstractStorageService {
         window.sessionStorage.setItem(key, json);
         break;
     }
+    this.updatesSubject.next({ key, value: obj, updateType: "save" });
     return Promise.resolve();
   }
 
@@ -65,6 +66,7 @@ export class HtmlStorageService implements AbstractStorageService {
         window.sessionStorage.removeItem(key);
         break;
     }
+    this.updatesSubject.next({ key, value: null, updateType: "remove" });
     return Promise.resolve();
   }
 }

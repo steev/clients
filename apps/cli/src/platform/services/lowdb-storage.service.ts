@@ -19,7 +19,7 @@ const retries: OperationOptions = {
   factor: 2,
 };
 
-export class LowdbStorageService implements AbstractStorageService {
+export class LowdbStorageService extends AbstractStorageService {
   protected dataFilePath: string;
   private db: lowdb.LowdbSync<any>;
   private defaults: any;
@@ -32,6 +32,7 @@ export class LowdbStorageService implements AbstractStorageService {
     private allowCache = false,
     private requireLock = false
   ) {
+    super();
     this.defaults = defaults;
   }
 
@@ -119,21 +120,23 @@ export class LowdbStorageService implements AbstractStorageService {
     return this.get(key).then((v) => v != null);
   }
 
-  async save(key: string, obj: any): Promise<any> {
+  async save(key: string, obj: any): Promise<void> {
     await this.waitForReady();
     return this.lockDbFile(() => {
       this.readForNoCache();
       this.db.set(key, obj).write();
+      this.updatesSubject.next({ key, value: obj, updateType: "save" });
       this.logService.debug(`Successfully wrote ${key} to db`);
       return;
     });
   }
 
-  async remove(key: string): Promise<any> {
+  async remove(key: string): Promise<void> {
     await this.waitForReady();
     return this.lockDbFile(() => {
       this.readForNoCache();
       this.db.unset(key).write();
+      this.updatesSubject.next({ key, value: null, updateType: "remove" });
       this.logService.debug(`Successfully removed ${key} from db`);
       return;
     });

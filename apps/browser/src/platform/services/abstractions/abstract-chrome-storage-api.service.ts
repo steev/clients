@@ -1,7 +1,36 @@
-import { AbstractStorageService } from "@bitwarden/common/platform/abstractions/storage.service";
+import { Observable, mergeMap } from "rxjs";
 
-export default abstract class AbstractChromeStorageService implements AbstractStorageService {
-  protected abstract chromeStorageApi: chrome.storage.StorageArea;
+import {
+  AbstractStorageService,
+  StorageUpdateType,
+} from "@bitwarden/common/platform/abstractions/storage.service";
+
+import { fromChromeEvent } from "../../browser/from-chrome-event";
+
+export default abstract class AbstractChromeStorageService extends AbstractStorageService {
+  constructor(protected chromeStorageApi: chrome.storage.StorageArea) {
+    super();
+  }
+
+  override get updates$(): Observable<{
+    key: string;
+    value: unknown;
+    updateType: StorageUpdateType;
+  }> {
+    return fromChromeEvent(this.chromeStorageApi.onChanged).pipe(
+      mergeMap(([changes]) => {
+        return Object.entries(changes).map(([key, change]) => {
+          const newValue = change.newValue;
+          // I'm not sure the != null is the greatest determinator of if it's a remove
+          return {
+            key: key,
+            value: newValue,
+            updateType: (newValue != null ? "save" : "remove") as StorageUpdateType,
+          };
+        });
+      })
+    );
+  }
 
   async get<T>(key: string): Promise<T> {
     return new Promise((resolve) => {
@@ -22,11 +51,7 @@ export default abstract class AbstractChromeStorageService implements AbstractSt
   async save(key: string, obj: any): Promise<void> {
     if (obj == null) {
       // Fix safari not liking null in set
-      return new Promise<void>((resolve) => {
-        this.chromeStorageApi.remove(key, () => {
-          resolve();
-        });
-      });
+      return this.remove(key);
     }
 
     if (obj instanceof Set) {

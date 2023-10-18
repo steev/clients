@@ -14,9 +14,9 @@ import { EmergencyAccessStatusType } from "../../core/enums/emergency-access-sta
 import { EmergencyAccessType } from "../../core/enums/emergency-access-type";
 import { EmergencyAccessService } from "../../emergency-access";
 import {
-  EmergencyAccessGranteeView,
-  EmergencyAccessGrantorView,
-} from "../../emergency-access/views/emergency-access.view";
+  GranteeEmergencyAccess,
+  GrantorEmergencyAccess,
+} from "../../emergency-access/models/emergency-access";
 
 import { EmergencyAccessConfirmComponent } from "./confirm/emergency-access-confirm.component";
 import { EmergencyAccessAddEditComponent } from "./emergency-access-add-edit.component";
@@ -36,8 +36,8 @@ export class EmergencyAccessComponent implements OnInit {
 
   loaded = false;
   canAccessPremium: boolean;
-  trustedContacts: EmergencyAccessGranteeView[];
-  grantedContacts: EmergencyAccessGrantorView[];
+  trustedContacts: GranteeEmergencyAccess[];
+  grantedContacts: GrantorEmergencyAccess[];
   emergencyAccessType = EmergencyAccessType;
   emergencyAccessStatusType = EmergencyAccessStatusType;
   actionPromise: Promise<any>;
@@ -76,7 +76,7 @@ export class EmergencyAccessComponent implements OnInit {
     }
   }
 
-  async edit(details: EmergencyAccessGranteeView) {
+  async edit(details: GranteeEmergencyAccess) {
     const [modal] = await this.modalService.openViewRef(
       EmergencyAccessAddEditComponent,
       this.addEditModalRef,
@@ -102,7 +102,7 @@ export class EmergencyAccessComponent implements OnInit {
     this.edit(null);
   }
 
-  async reinvite(contact: EmergencyAccessGranteeView) {
+  async reinvite(contact: GranteeEmergencyAccess) {
     if (this.actionPromise != null) {
       return;
     }
@@ -116,7 +116,7 @@ export class EmergencyAccessComponent implements OnInit {
     this.actionPromise = null;
   }
 
-  async confirm(contact: EmergencyAccessGranteeView) {
+  async confirm(contact: GranteeEmergencyAccess) {
     function updateUser() {
       contact.status = EmergencyAccessStatusType.Confirmed;
     }
@@ -165,7 +165,7 @@ export class EmergencyAccessComponent implements OnInit {
     this.actionPromise = null;
   }
 
-  async remove(details: EmergencyAccessGranteeView | EmergencyAccessGrantorView) {
+  async remove(details: GranteeEmergencyAccess | GrantorEmergencyAccess) {
     const confirmed = await this.dialogService.openSimpleDialog({
       title: this.userNamePipe.transform(details),
       content: { key: "removeUserConfirmation" },
@@ -184,7 +184,7 @@ export class EmergencyAccessComponent implements OnInit {
         this.i18nService.t("removedUserId", this.userNamePipe.transform(details))
       );
 
-      if (details instanceof EmergencyAccessGranteeView) {
+      if (details instanceof GranteeEmergencyAccess) {
         this.removeGrantee(details);
       } else {
         this.removeGrantor(details);
@@ -194,7 +194,7 @@ export class EmergencyAccessComponent implements OnInit {
     }
   }
 
-  async requestAccess(details: EmergencyAccessGrantorView) {
+  async requestAccess(details: GrantorEmergencyAccess) {
     const confirmed = await this.dialogService.openSimpleDialog({
       title: this.userNamePipe.transform(details),
       content: {
@@ -219,7 +219,7 @@ export class EmergencyAccessComponent implements OnInit {
     );
   }
 
-  async approve(details: EmergencyAccessGranteeView) {
+  async approve(details: GranteeEmergencyAccess) {
     const type = this.i18nService.t(
       details.type === EmergencyAccessType.View ? "view" : "takeover"
     );
@@ -248,7 +248,7 @@ export class EmergencyAccessComponent implements OnInit {
     );
   }
 
-  async reject(details: EmergencyAccessGranteeView) {
+  async reject(details: GranteeEmergencyAccess) {
     await this.emergencyAccessService.reject(details.id);
     details.status = EmergencyAccessStatusType.Confirmed;
 
@@ -259,7 +259,7 @@ export class EmergencyAccessComponent implements OnInit {
     );
   }
 
-  async takeover(details: EmergencyAccessGrantorView) {
+  async takeover(details: GrantorEmergencyAccess) {
     const [modal] = await this.modalService.openViewRef(
       EmergencyAccessTakeoverComponent,
       this.takeoverModalRef,
@@ -281,14 +281,14 @@ export class EmergencyAccessComponent implements OnInit {
     );
   }
 
-  private removeGrantee(details: EmergencyAccessGranteeView) {
+  private removeGrantee(details: GranteeEmergencyAccess) {
     const index = this.trustedContacts.indexOf(details);
     if (index > -1) {
       this.trustedContacts.splice(index, 1);
     }
   }
 
-  private removeGrantor(details: EmergencyAccessGrantorView) {
+  private removeGrantor(details: GrantorEmergencyAccess) {
     const index = this.grantedContacts.indexOf(details);
     if (index > -1) {
       this.grantedContacts.splice(index, 1);

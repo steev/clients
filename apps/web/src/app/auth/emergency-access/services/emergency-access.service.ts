@@ -19,15 +19,12 @@ import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 
 import { EmergencyAccessStatusType } from "../../core/enums/emergency-access-status-type";
 import { EmergencyAccessType } from "../../core/enums/emergency-access-type";
+import { GranteeEmergencyAccess, GrantorEmergencyAccess } from "../models/emergency-access";
 import { EmergencyAccessAcceptRequest } from "../request/emergency-access-accept.request";
 import { EmergencyAccessConfirmRequest } from "../request/emergency-access-confirm.request";
 import { EmergencyAccessInviteRequest } from "../request/emergency-access-invite.request";
 import { EmergencyAccessPasswordRequest } from "../request/emergency-access-password.request";
 import { EmergencyAccessUpdateRequest } from "../request/emergency-access-update.request";
-import {
-  EmergencyAccessGranteeView,
-  EmergencyAccessGrantorView,
-} from "../views/emergency-access.view";
 
 import { EmergencyAccessApiService } from "./emergency-access-api.service";
 
@@ -46,21 +43,21 @@ export class EmergencyAccessService {
    * Gets an emergency access by id.
    * @param id emergency access id
    */
-  getEmergencyAccess(id: string): Promise<EmergencyAccessGranteeView> {
+  getEmergencyAccess(id: string): Promise<GranteeEmergencyAccess> {
     return this.emergencyAccessApiService.getEmergencyAccess(id);
   }
 
   /**
    * Gets all emergency access that the user has been granted.
    */
-  async getEmergencyAccessTrusted(): Promise<EmergencyAccessGranteeView[]> {
+  async getEmergencyAccessTrusted(): Promise<GranteeEmergencyAccess[]> {
     return (await this.emergencyAccessApiService.getEmergencyAccessTrusted()).data;
   }
 
   /**
    * Gets all emergency access that the user has granted.
    */
-  async getEmergencyAccessGranted(): Promise<EmergencyAccessGrantorView[]> {
+  async getEmergencyAccessGranted(): Promise<GrantorEmergencyAccess[]> {
     return (await this.emergencyAccessApiService.getEmergencyAccessGranted()).data;
   }
 

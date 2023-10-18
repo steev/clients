@@ -4,7 +4,7 @@ import { CipherResponse } from "@bitwarden/common/vault/models/response/cipher.r
 import { EmergencyAccessStatusType } from "../../core/enums/emergency-access-status-type";
 import { EmergencyAccessType } from "../../core/enums/emergency-access-type";
 
-export class EmergencyAccessGranteeView {
+export class GranteeEmergencyAccess {
   id: string;
   granteeId: string;
   name: string;
@@ -16,7 +16,7 @@ export class EmergencyAccessGranteeView {
   avatarColor: string;
 }
 
-export class EmergencyAccessGrantorView {
+export class GrantorEmergencyAccess {
   id: string;
   grantorId: string;
   name: string;
@@ -28,7 +28,7 @@ export class EmergencyAccessGrantorView {
   avatarColor: string;
 }
 
-export class EmergencyAccessTakeoverTypeView {
+export class TakeoverTypeEmergencyAccess {
   keyEncrypted: string;
   kdf: KdfType;
   kdfIterations: number;
@@ -36,7 +36,7 @@ export class EmergencyAccessTakeoverTypeView {
   kdfParallelism?: number;
 }
 
-export class EmergencyAccessViewTypeView {
+export class ViewTypeEmergencyAccess {
   keyEncrypted: string;
   ciphers: CipherResponse[] = [];
 }

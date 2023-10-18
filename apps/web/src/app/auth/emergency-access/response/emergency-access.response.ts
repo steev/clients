@@ -2,8 +2,8 @@ import { KdfType } from "@bitwarden/common/enums";
 import { BaseResponse } from "@bitwarden/common/models/response/base.response";
 import { CipherResponse } from "@bitwarden/common/vault/models/response/cipher.response";
 
-import { EmergencyAccessStatusType } from "../../core/enums/emergency-access-status-type";
-import { EmergencyAccessType } from "../../core/enums/emergency-access-type";
+import { EmergencyAccessStatusType } from "../enums/emergency-access-status-type";
+import { EmergencyAccessType } from "../enums/emergency-access-type";
 
 export class EmergencyAccessGranteeDetailsResponse extends BaseResponse {
   id: string;

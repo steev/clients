@@ -16,7 +16,7 @@ import {
 import { CsprngArray } from "@bitwarden/common/types/csprng";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 
-import { EmergencyAccessStatusType } from "../../core/enums/emergency-access-status-type";
+import { EmergencyAccessStatusType } from "../enums/emergency-access-status-type";
 import { EmergencyAccessUpdateRequest } from "../request/emergency-access-update.request";
 import {
   EmergencyAccessGranteeDetailsResponse,

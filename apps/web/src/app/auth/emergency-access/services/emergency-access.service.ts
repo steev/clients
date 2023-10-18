@@ -17,8 +17,8 @@ import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.servi
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 
-import { EmergencyAccessStatusType } from "../../core/enums/emergency-access-status-type";
-import { EmergencyAccessType } from "../../core/enums/emergency-access-type";
+import { EmergencyAccessStatusType } from "../enums/emergency-access-status-type";
+import { EmergencyAccessType } from "../enums/emergency-access-type";
 import { GranteeEmergencyAccess, GrantorEmergencyAccess } from "../models/emergency-access";
 import { EmergencyAccessAcceptRequest } from "../request/emergency-access-accept.request";
 import { EmergencyAccessConfirmRequest } from "../request/emergency-access-confirm.request";

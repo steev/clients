@@ -147,8 +147,8 @@ export class SendAddEditComponent extends BaseAddEditComponent {
 
   cancel() {
     // If true, the window was pop'd out on the add-send page. location.back will not work
-    if ((window as any).previousPopupUrl.startsWith("/add-send")) {
-      this.router.navigate(["tabs/send"]);
+    if ((window as any).previousPopupUrl == null) {
+      this.router.navigate(["/tabs/send"], { replaceUrl: true });
     } else {
       this.location.back();
     }

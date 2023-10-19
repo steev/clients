@@ -18,6 +18,7 @@ import {
   convertPotentialGranteesToApItemViewType,
   convertToAccessPolicyItemViews,
 } from "../../shared/access-policies/access-policy-selector/models/ap-item-view.type";
+import { ApPermissionEnum } from "../../shared/access-policies/access-policy-selector/models/enums/ap-permission.enum";
 import { AccessPolicyService } from "../../shared/access-policies/access-policy.service";
 
 @Component({
@@ -60,6 +61,7 @@ export class ServiceAccountPeopleComponent implements OnInit, OnDestroy {
 
   protected loading = true;
   protected potentialGrantees: ApItemViewType[];
+  protected staticPermission = ApPermissionEnum.CanReadWrite;
 
   constructor(
     private route: ActivatedRoute,

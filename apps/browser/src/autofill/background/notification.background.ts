@@ -23,6 +23,8 @@ import { BrowserApi } from "../../platform/browser/browser-api";
 import { BrowserStateService } from "../../platform/services/abstractions/browser-state.service";
 import { AutofillService } from "../services/abstractions/autofill.service";
 
+const NOTIFICATION_BAR_LIFESPAN_MS = 150000; // 150 seconds
+
 export default class NotificationBackground {
   private notificationQueue: (
     | AddLoginQueueMessage
@@ -121,6 +123,9 @@ export default class NotificationBackground {
       case "promptForLogin":
         await this.unlockVault(sender.tab);
         break;
+      case "pageChanged":
+        await this.checkNotificationQueue(sender.tab);
+        break;
       default:
         break;
     }
@@ -148,7 +153,7 @@ export default class NotificationBackground {
         this.notificationQueue.splice(i, 1);
       }
     }
-    setTimeout(() => this.cleanupNotificationQueue(), 2 * 60 * 1000); // check every 2 minutes
+    setTimeout(() => this.cleanupNotificationQueue(), 30000); // check every 30 seconds
   }
 
   private async doNotificationQueueCheck(tab: chrome.tabs.Tab): Promise<void> {
@@ -285,7 +290,7 @@ export default class NotificationBackground {
       domain: loginDomain,
       uri: loginInfo.url,
       tabId: tab.id,
-      expires: new Date(new Date().getTime() + 5 * 60000), // 5 minutes
+      expires: new Date(new Date().getTime() + NOTIFICATION_BAR_LIFESPAN_MS),
       wasVaultLocked: isVaultLocked,
     };
     this.notificationQueue.push(message);
@@ -349,7 +354,7 @@ export default class NotificationBackground {
       newPassword: newPassword,
       domain: loginDomain,
       tabId: tab.id,
-      expires: new Date(new Date().getTime() + 5 * 60000), // 5 minutes
+      expires: new Date(new Date().getTime() + NOTIFICATION_BAR_LIFESPAN_MS),
       wasVaultLocked: isVaultLocked,
     };
     this.notificationQueue.push(message);

@@ -327,7 +327,7 @@ async function loadNotificationBar() {
       observeDom();
 
       sendPlatformMessage({
-        command: "pageChanged",
+        command: "checkNotificationQueue",
       });
     }
 

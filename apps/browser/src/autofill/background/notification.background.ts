@@ -21,9 +21,8 @@ import LockedVaultPendingNotificationsItem from "../../background/models/lockedV
 import { NotificationQueueMessageType } from "../../background/models/notificationQueueMessageType";
 import { BrowserApi } from "../../platform/browser/browser-api";
 import { BrowserStateService } from "../../platform/services/abstractions/browser-state.service";
+import { NOTIFICATION_BAR_LIFESPAN_MS } from "../constants";
 import { AutofillService } from "../services/abstractions/autofill.service";
-
-const NOTIFICATION_BAR_LIFESPAN_MS = 150000; // 150 seconds
 
 export default class NotificationBackground {
   private notificationQueue: (
@@ -123,7 +122,7 @@ export default class NotificationBackground {
       case "promptForLogin":
         await this.unlockVault(sender.tab);
         break;
-      case "pageChanged":
+      case "checkNotificationQueue":
         await this.checkNotificationQueue(sender.tab);
         break;
       default:

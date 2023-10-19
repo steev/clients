@@ -150,6 +150,7 @@ export default class NotificationBackground {
   private cleanupNotificationQueue() {
     for (let i = this.notificationQueue.length - 1; i >= 0; i--) {
       if (this.notificationQueue[i].expires < new Date()) {
+        BrowserApi.tabSendMessageData(this.notificationQueue[i].tab, "closeNotificationBar");
         this.notificationQueue.splice(i, 1);
       }
     }
@@ -168,7 +169,7 @@ export default class NotificationBackground {
 
     for (let i = 0; i < this.notificationQueue.length; i++) {
       if (
-        this.notificationQueue[i].tabId !== tab.id ||
+        this.notificationQueue[i].tab.id !== tab.id ||
         this.notificationQueue[i].domain !== tabDomain
       ) {
         continue;
@@ -220,7 +221,7 @@ export default class NotificationBackground {
 
   private removeTabFromNotificationQueue(tab: chrome.tabs.Tab) {
     for (let i = this.notificationQueue.length - 1; i >= 0; i--) {
-      if (this.notificationQueue[i].tabId === tab.id) {
+      if (this.notificationQueue[i].tab.id === tab.id) {
         this.notificationQueue.splice(i, 1);
       }
     }
@@ -289,7 +290,7 @@ export default class NotificationBackground {
       password: loginInfo.password,
       domain: loginDomain,
       uri: loginInfo.url,
-      tabId: tab.id,
+      tab: tab,
       expires: new Date(new Date().getTime() + NOTIFICATION_BAR_LIFESPAN_MS),
       wasVaultLocked: isVaultLocked,
     };
@@ -353,7 +354,7 @@ export default class NotificationBackground {
       cipherId: cipherId,
       newPassword: newPassword,
       domain: loginDomain,
-      tabId: tab.id,
+      tab: tab,
       expires: new Date(new Date().getTime() + NOTIFICATION_BAR_LIFESPAN_MS),
       wasVaultLocked: isVaultLocked,
     };
@@ -366,7 +367,7 @@ export default class NotificationBackground {
     const message: AddUnlockVaultQueueMessage = {
       type: NotificationQueueMessageType.UnlockVault,
       domain: loginDomain,
-      tabId: tab.id,
+      tab: tab,
       expires: new Date(new Date().getTime() + 0.5 * 60000), // 30 seconds
       wasVaultLocked: true,
     };
@@ -378,7 +379,7 @@ export default class NotificationBackground {
   private async saveOrUpdateCredentials(tab: chrome.tabs.Tab, edit: boolean, folderId?: string) {
     for (let i = this.notificationQueue.length - 1; i >= 0; i--) {
       const queueMessage = this.notificationQueue[i];
-      if (queueMessage.tabId !== tab.id || !(queueMessage.type in NotificationQueueMessageType)) {
+      if (queueMessage.tab.id !== tab.id || !(queueMessage.type in NotificationQueueMessageType)) {
         continue;
       }
 
@@ -478,7 +479,7 @@ export default class NotificationBackground {
     for (let i = this.notificationQueue.length - 1; i >= 0; i--) {
       const queueMessage = this.notificationQueue[i];
       if (
-        queueMessage.tabId !== tab.id ||
+        queueMessage.tab.id !== tab.id ||
         queueMessage.type !== NotificationQueueMessageType.AddLogin
       ) {
         continue;

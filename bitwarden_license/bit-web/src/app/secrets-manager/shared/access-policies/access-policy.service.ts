@@ -2,7 +2,6 @@ import { Injectable } from "@angular/core";
 import { Subject } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { ListResponse } from "@bitwarden/common/models/response/list.response";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
@@ -25,7 +24,6 @@ import { AccessPoliciesCreateRequest } from "../../shared/access-policies/models
 import { PeopleAccessPoliciesRequest } from "../../shared/access-policies/models/requests/people-access-policies.request";
 import { ProjectAccessPoliciesResponse } from "../../shared/access-policies/models/responses/project-access-policies.response";
 
-import { AccessSelectorRowView } from "./access-selector.component";
 import { AccessPolicyUpdateRequest } from "./models/requests/access-policy-update.request";
 import { AccessPolicyRequest } from "./models/requests/access-policy.request";
 import { GrantedPolicyRequest } from "./models/requests/granted-policy.request";
@@ -62,7 +60,6 @@ export class AccessPolicyService {
 
   constructor(
     private cryptoService: CryptoService,
-    private organizationService: OrganizationService,
     protected apiService: ApiService,
     protected encryptService: EncryptService
   ) {}
@@ -225,36 +222,6 @@ export class AccessPolicyService {
     );
   }
 
-  async needToShowAccessRemovalWarning(
-    organizationId: string,
-    policy: AccessSelectorRowView,
-    currentPolicies: AccessSelectorRowView[]
-  ): Promise<boolean> {
-    const organization = this.organizationService.get(organizationId);
-    if (organization.isOwner || organization.isAdmin) {
-      return false;
-    }
-    const currentUserId = organization.userId;
-    const readWriteGroupPolicies = currentPolicies
-      .filter((x) => x.accessPolicyId != policy.accessPolicyId)
-      .filter((x) => x.currentUserInGroup && x.read && x.write).length;
-    const readWriteUserPolicies = currentPolicies
-      .filter((x) => x.accessPolicyId != policy.accessPolicyId)
-      .filter((x) => x.userId == currentUserId && x.read && x.write).length;
-
-    if (policy.type === "user" && policy.userId == currentUserId && readWriteGroupPolicies == 0) {
-      return true;
-    } else if (
-      policy.type === "group" &&
-      policy.currentUserInGroup &&
-      readWriteUserPolicies == 0 &&
-      readWriteGroupPolicies == 0
-    ) {
-      return true;
-    }
-    return false;
-  }
-
   private async createProjectAccessPoliciesView(
     organizationId: string,
     projectAccessPoliciesResponse: ProjectAccessPoliciesResponse
@@ -392,10 +359,12 @@ export class AccessPolicyService {
             organizationKey
           )
         : null,
-      serviceAccountName: await this.encryptService.decryptToUtf8(
-        new EncString(response.serviceAccountName),
-        organizationKey
-      ),
+      serviceAccountName: response.serviceAccountName
+        ? await this.encryptService.decryptToUtf8(
+            new EncString(response.serviceAccountName),
+            organizationKey
+          )
+        : null,
     };
   }
 
@@ -511,7 +480,9 @@ export class AccessPolicyService {
         view.currentUserInGroup = r.currentUserInGroup;
 
         if (r.type === "serviceAccount" || r.type === "project") {
-          view.name = await this.encryptService.decryptToUtf8(new EncString(r.name), orgKey);
+          view.name = r.name
+            ? await this.encryptService.decryptToUtf8(new EncString(r.name), orgKey)
+            : null;
         } else {
           view.name = r.name;
         }

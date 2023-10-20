@@ -63,6 +63,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
   restorePromise: Promise<any>;
   checkPasswordPromise: Promise<number>;
   showPassword = false;
+  showTotpSeed = false;
   showCardNumber = false;
   showCardCode = false;
   cipherType = CipherType;
@@ -495,6 +496,17 @@ export class AddEditComponent implements OnInit, OnDestroy {
     if (this.editMode && this.showPassword) {
       this.eventCollectionService.collect(
         EventType.Cipher_ClientToggledPasswordVisible,
+        this.cipherId
+      );
+    }
+  }
+
+  toggleTotpSeed() {
+    this.showTotpSeed = !this.showTotpSeed;
+    document.getElementById("loginTotp").focus();
+    if (this.editMode && this.showTotpSeed) {
+      this.eventCollectionService.collect(
+        EventType.Cipher_ClientToggledTOTPSeedVisible,
         this.cipherId
       );
     }

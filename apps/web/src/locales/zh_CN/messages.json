@@ -603,13 +603,79 @@
     "message": "登录或者创建一个账户来访问您的安全密码库。"
   },
   "loginWithDevice": {
-    "message": "设备登录"
+    "message": "使用设备登录"
   },
   "loginWithDeviceEnabledNote": {
     "message": "设备登录必须在 Bitwarden 应用程序的设置中启用。需要其他登录选项吗？"
   },
   "loginWithMasterPassword": {
-    "message": "主密码登录"
+    "message": "使用主密码登录"
+  },
+  "loginWithPasskey": {
+    "message": "使用通行密钥登录"
+  },
+  "loginWithPasskeyInfo": {
+    "message": "使用已生成的通行密钥，无需密码即可自动登录。生物识别（例如面部识别或指纹）或其他 FIDO2 安全方法将用于验证您的身份。"
+  },
+  "newPasskey": {
+    "message": "新增通行密钥"
+  },
+  "learnMoreAboutPasswordless": {
+    "message": "了解更多关于无密码登录的信息"
+  },
+  "passkeyEnterMasterPassword": {
+    "message": "输入您的主密码以修改通行密钥登录设置。"
+  },
+  "creatingPasskeyLoading": {
+    "message": "正在创建通行密钥..."
+  },
+  "creatingPasskeyLoadingInfo": {
+    "message": "保持此窗口打开然后按照浏览器的提示操作。"
+  },
+  "errorCreatingPasskey": {
+    "message": "创建通行密钥时出错"
+  },
+  "errorCreatingPasskeyInfo": {
+    "message": "创建通行密钥时出现问题。"
+  },
+  "passkeySuccessfullyCreated": {
+    "message": "通行密钥创建成功！"
+  },
+  "customName": {
+    "message": "自定义名称"
+  },
+  "customPasskeyNameInfo": {
+    "message": "为您的通行密钥命名以帮助您识别它。"
+  },
+  "encryptionNotSupported": {
+    "message": "不支持加密"
+  },
+  "loginWithPasskeyEnabled": {
+    "message": "已启用通行密钥登录"
+  },
+  "passkeySaved": {
+    "message": "$NAME$ 已保存",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Personal yubikey"
+      }
+    }
+  },
+  "passkeyRemoved": {
+    "message": "通行密钥已移除"
+  },
+  "removePasskey": {
+    "message": "移除通行密钥"
+  },
+  "removePasskeyInfo": {
+    "message": "如果所有通行密钥被移除，不使用主密码您将无法登录新的设备。"
+  },
+  "passkeyLimitReachedInfo": {
+    "message": "通行密钥已达上限。移除一个通行密钥以添加另一个。"
+  },
+  "tryAgain": {
+    "message": "再试一次"
   },
   "createAccount": {
     "message": "创建账户"
@@ -666,7 +732,7 @@
     "message": "密码提示"
   },
   "enterEmailToGetHint": {
-    "message": "请输入您账户的电子邮件地址来接收主密码提示。"
+    "message": "输入您账户的电子邮件地址来接收主密码提示。"
   },
   "getMasterPasswordHint": {
     "message": "获取主密码提示"
@@ -785,7 +851,7 @@
     }
   },
   "enterVerificationCodeApp": {
-    "message": "请输入验证器应用程序中的 6 位验证码。"
+    "message": "请输入您的验证器应用中的 6 位数验证码。"
   },
   "enterVerificationCodeEmail": {
     "message": "请输入发送给电子邮件 $EMAIL$ 的 6 位数验证码。",
@@ -1273,7 +1339,7 @@
     "message": "数据导出成功"
   },
   "importWarning": {
-    "message": "您正在将数据导入到 $ORGANIZATION$。您的数据可能会与此组织中的成员共享。是否继续？",
+    "message": "您正在将数据导入到 $ORGANIZATION$。您的数据可能会与此组织中的成员共享。要继续吗？",
     "placeholders": {
       "organization": {
         "content": "$1",
@@ -1282,7 +1348,7 @@
     }
   },
   "importFormatError": {
-    "message": "数据格式不正确。请检查您的导入文件后重试。"
+    "message": "数据格式不正确。请检查您的导入文件然后重试。"
   },
   "importNothingError": {
     "message": "没有导入任何内容。"
@@ -1303,7 +1369,7 @@
     "message": "选择一个集合"
   },
   "importTargetHint": {
-    "message": "如果您希望将导入的文件内容移动到某个 $DESTINATION$，请选择此选项",
+    "message": "如果您希望将导入的文件内容移动到 $DESTINATION$，请选择此选项",
     "description": "Located as a hint under the import target. Will be appended by either folder or collection, depending if the user is importing into an individual or an organizational vault.",
     "placeholders": {
       "destination": {
@@ -1331,7 +1397,7 @@
     "message": "或复制/粘贴要导入的文件内容"
   },
   "instructionsFor": {
-    "message": "$NAME$ 文件说明",
+    "message": "$NAME$ 说明",
     "description": "The title for the import tool instructions.",
     "placeholders": {
       "name": {
@@ -1489,7 +1555,7 @@
     "message": "您的账户已启用此两步登录提供程序。"
   },
   "twoStepLoginAuthDesc": {
-    "message": "输入主密码以修改两步登录设置。"
+    "message": "输入您的主密码以修改两步登录设置。"
   },
   "twoStepAuthenticatorDesc": {
     "message": "按照以下步骤，使用验证器应用设置两步登录："
@@ -1519,7 +1585,7 @@
     "message": "密钥"
   },
   "twoStepAuthenticatorEnterCode": {
-    "message": "输入应用程序中的 6 位验证码"
+    "message": "输入应用程序中的 6 位数验证码"
   },
   "twoStepAuthenticatorReaddDesc": {
     "message": "如果您要把它添加到另一个设备，下面是您的验证器应用所需要的二维码（或密钥）。"
@@ -1615,7 +1681,7 @@
     "message": "输入您希望接收验证码的电子邮件"
   },
   "twoFactorEmailEnterCode": {
-    "message": "输入电子邮件中的 6 位验证码"
+    "message": "输入电子邮件中的 6 位数验证码"
   },
   "sendEmail": {
     "message": "发送电子邮件"
@@ -3572,6 +3638,18 @@
   "organizationIsDisabled": {
     "message": "组织已停用"
   },
+  "secretsAccessSuspended": {
+    "message": "无法访问已停用的组织。请联系您的组织所有者获取协助。"
+  },
+  "secretsCannotCreate": {
+    "message": "无法在已停用的组织中创建机密。请联系您的组织所有者获取协助。"
+  },
+  "projectsCannotCreate": {
+    "message": "无法在已停用的组织中创建工程。请联系您的组织所有者获取协助。"
+  },
+  "serviceAccountsCannotCreate": {
+    "message": "无法在已停用的组织中创建服务账户。请联系您的组织所有者获取协助。"
+  },
   "disabledOrganizationFilterError": {
     "message": "无法访问已停用组织中的项目。请联系您的组织所有者获取协助。"
   },
@@ -3917,8 +3995,9 @@
   "ssoIdentifier": {
     "message": "SSO 标识符"
   },
-  "ssoIdentifierHint": {
-    "message": "提供此 ID 给您的成员以使用 SSO 登录。"
+  "ssoIdentifierHintPartOne": {
+    "message": "将此 ID 提供给您的成员以供 SSO 登录使用。要绕过此步骤，请设置 ",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Provide this ID to your members to login with SSO. To bypass this step, set up Domain verification'"
   },
   "unlinkSso": {
     "message": "取消链接 SSO"
@@ -5406,6 +5485,19 @@
   "required": {
     "message": "必填"
   },
+  "charactersCurrentAndMaximum": {
+    "message": "$CURRENT$ / 最大字符数 $MAX$",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "0"
+      },
+      "max": {
+        "content": "$2",
+        "example": "100"
+      }
+    }
+  },
   "characterMaximum": {
     "message": "最多 $MAX$ 个字符",
     "placeholders": {
@@ -5754,6 +5846,9 @@
   "on": {
     "message": "开启"
   },
+  "off": {
+    "message": "关闭"
+  },
   "members": {
     "message": "成员"
   },
@@ -5913,7 +6008,7 @@
     "description": "A machine user which can be used to automate processes and access secrets in the system."
   },
   "serviceAccounts": {
-    "message": "服务帐户",
+    "message": "服务账户",
     "description": "The title for the section that deals with service accounts."
   },
   "secrets": {
@@ -7096,8 +7191,8 @@
       }
     }
   },
-  "addSecretsManager": {
-    "message": "添加机密管理器"
+  "subscribeToSecretsManager": {
+    "message": "订阅机密管理器"
   },
   "addSecretsManagerUpgradeDesc": {
     "message": "将机密管理器添加到升级后的计划中，以保留对使用之前的计划创建的所有机密的访问权限。"
@@ -7177,5 +7272,20 @@
   },
   "alreadyHaveAccount": {
     "message": "已经有一个账户？"
+  },
+  "customBillingStart": {
+    "message": "未返回自定义费用记录。请访问 "
+  },
+  "customBillingEnd": {
+    "message": " 页面获取最新的账单。"
+  },
+  "typePasskey": {
+    "message": "通行密钥"
+  },
+  "passkeyNotCopied": {
+    "message": "通行密钥不会被复制"
+  },
+  "passkeyNotCopiedAlert": {
+    "message": "通行密钥将不会被复制到克隆的项目。要继续克隆这个项目吗？"
   }
 }

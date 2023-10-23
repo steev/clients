@@ -25,7 +25,6 @@ import { RecoverTwoFactorComponent } from "../auth/recover-two-factor.component"
 import { RegisterFormModule } from "../auth/register-form/register-form.module";
 import { RemovePasswordComponent } from "../auth/remove-password.component";
 import { SetPasswordComponent } from "../auth/set-password.component";
-import { ChangePasswordComponent } from "../auth/settings/change-password.component";
 import { DeauthorizeSessionsComponent } from "../auth/settings/deauthorize-sessions.component";
 import { EmergencyAccessAddEditComponent } from "../auth/settings/emergency-access/emergency-access-add-edit.component";
 import { EmergencyAccessAttachmentsComponent } from "../auth/settings/emergency-access/emergency-access-attachments.component";
@@ -51,7 +50,6 @@ import { UpdatePasswordComponent } from "../auth/update-password.component";
 import { UpdateTempPasswordComponent } from "../auth/update-temp-password.component";
 import { VerifyEmailTokenComponent } from "../auth/verify-email-token.component";
 import { VerifyRecoverDeleteComponent } from "../auth/verify-recover-delete.component";
-import { BillingSharedModule } from "../billing/shared";
 import { DynamicAvatarComponent } from "../components/dynamic-avatar.component";
 import { SelectableAvatarComponent } from "../components/selectable-avatar.component";
 import { FooterComponent } from "../layouts/footer.component";
@@ -111,11 +109,6 @@ import { SharedModule } from "./shared.module";
     OrganizationBadgeModule,
     PipesModule,
     PasswordCalloutComponent,
-
-    // Temporary export to be removed in AC-1453
-    // Import PaymentComponent and TaxInfoComponent directly into TrialIniationComponent
-    // and remove BillingSharedModule here
-    BillingSharedModule,
   ],
   declarations: [
     AcceptEmergencyComponent,
@@ -129,7 +122,6 @@ import { SharedModule } from "./shared.module";
     ApiKeyComponent,
     AttachmentsComponent,
     ChangeEmailComponent,
-    ChangePasswordComponent,
     CollectionsComponent,
     DeauthorizeSessionsComponent,
     DeleteAccountComponent,
@@ -214,7 +206,6 @@ import { SharedModule } from "./shared.module";
     ApiKeyComponent,
     AttachmentsComponent,
     ChangeEmailComponent,
-    ChangePasswordComponent,
     CollectionsComponent,
     DeauthorizeSessionsComponent,
     DeleteAccountComponent,
@@ -286,11 +277,6 @@ import { SharedModule } from "./shared.module";
     VerifyEmailTokenComponent,
     VerifyRecoverDeleteComponent,
     LowKdfComponent,
-
-    // Temporary export to be removed in AC-1453
-    // Import PaymentComponent and TaxInfoComponent directly into TrialIniationComponent
-    // and remove BillingSharedModule here
-    BillingSharedModule,
   ],
 })
 export class LooseComponentsModule {}

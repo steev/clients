@@ -611,6 +611,72 @@
   "loginWithMasterPassword": {
     "message": "Bejelentkezés mesterjelszóval"
   },
+  "loginWithPasskey": {
+    "message": "Bejelentkezés jelszóval"
+  },
+  "loginWithPasskeyInfo": {
+    "message": "Használjunk generált jelszót, amely automatikusan, jelszó nélkül bejelentkeztet. A biometrikus adatok, például az arcfelismerés vagy az ujjlenyomat, vagy más FIDO2 biztonsági módszer igazolja személyazonosságot."
+  },
+  "newPasskey": {
+    "message": "Új jelszó"
+  },
+  "learnMoreAboutPasswordless": {
+    "message": "További információ a jelszó nélküli használatról"
+  },
+  "passkeyEnterMasterPassword": {
+    "message": "Adjuk meg a mesterjelszót a belépési jelszó beállításainak módosításához."
+  },
+  "creatingPasskeyLoading": {
+    "message": "Jelszó létrehozása..."
+  },
+  "creatingPasskeyLoadingInfo": {
+    "message": "Tartsuk nyitva ezt az ablakot és kövessük a böngésző utasításait."
+  },
+  "errorCreatingPasskey": {
+    "message": "Hiba történt a jelszó létrehozásakor."
+  },
+  "errorCreatingPasskeyInfo": {
+    "message": "Probléma merült fel a jelszó létrehozásakor."
+  },
+  "passkeySuccessfullyCreated": {
+    "message": "A jelszó sikeresen létrehozásra került!"
+  },
+  "customName": {
+    "message": "Egyedi név"
+  },
+  "customPasskeyNameInfo": {
+    "message": "Nevezzük el a jelszót a könnyebb azonosítshoz."
+  },
+  "encryptionNotSupported": {
+    "message": "A titkosítás nem támogatott."
+  },
+  "loginWithPasskeyEnabled": {
+    "message": "Jelentkezzünk be bekapcsolt jelszóval"
+  },
+  "passkeySaved": {
+    "message": "$NAME$ mentésre került.",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Personal yubikey"
+      }
+    }
+  },
+  "passkeyRemoved": {
+    "message": "A jelszó eltávolításra került."
+  },
+  "removePasskey": {
+    "message": "Jelszó eltávolítása"
+  },
+  "removePasskeyInfo": {
+    "message": "Ha az összes jelszót eltávolítjuk, nem tudunk bejelentkezni az új eszközökre a mesterjelszó nélkül."
+  },
+  "passkeyLimitReachedInfo": {
+    "message": "Elértük a jelszó korlátot. Távolítsunk el egy jelszót egy másik hozzáadásához."
+  },
+  "tryAgain": {
+    "message": "Próbáluk újra"
+  },
   "createAccount": {
     "message": "Fiók létrehozása"
   },
@@ -3572,6 +3638,18 @@
   "organizationIsDisabled": {
     "message": "A szervezet letiltásra került."
   },
+  "secretsAccessSuspended": {
+    "message": "A felfüggesztett szervezetekhez nem lehet hozzáférni. Segítségért forduljunk a szervezet tulajdonosához."
+  },
+  "secretsCannotCreate": {
+    "message": "A felfüggesztett szervezetekben nem hozhatók létre titkos kódok. Segítségért forduljunk a szervezet tulajdonosához."
+  },
+  "projectsCannotCreate": {
+    "message": "A felfüggesztett szervezetekben nem hozhatók létre projektek. Segítségért forduljunk a szervezet tulajdonosához."
+  },
+  "serviceAccountsCannotCreate": {
+    "message": "A felfüggesztett szervezetekben nem hozhatók létre szolgáltatásfiókok. Segítségért forduljunk a szervezet tulajdonosához."
+  },
   "disabledOrganizationFilterError": {
     "message": "A letiltott szervezetek elemei nem érhetők el. Vegyük fel a kapcsolatot a szervezet tulajdonosával segítségért."
   },
@@ -3917,8 +3995,9 @@
   "ssoIdentifier": {
     "message": "Egyszeri azonosító"
   },
-  "ssoIdentifierHint": {
-    "message": "Adjuk meg ezt az azonosítót a tagoknak az egyszeri azonosítóval történő bejelentkezéshez."
+  "ssoIdentifierHintPartOne": {
+    "message": "Adjuk meg ezt az azonosítót a tagoknak a bejelentkezéshez SSO-val. A lépés megkerüléséhez üzemeljük be ",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Provide this ID to your members to login with SSO. To bypass this step, set up Domain verification'"
   },
   "unlinkSso": {
     "message": "SSO szétkapcsolása"
@@ -5406,6 +5485,19 @@
   "required": {
     "message": "kötelező"
   },
+  "charactersCurrentAndMaximum": {
+    "message": "Maximálisan $CURRENT$/$MAX$ karakter",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "0"
+      },
+      "max": {
+        "content": "$2",
+        "example": "100"
+      }
+    }
+  },
   "characterMaximum": {
     "message": "maximálisan $MAX$ karakter",
     "placeholders": {
@@ -5753,6 +5845,9 @@
   },
   "on": {
     "message": "Be"
+  },
+  "off": {
+    "message": "Ki"
   },
   "members": {
     "message": "Tagok"
@@ -7096,8 +7191,8 @@
       }
     }
   },
-  "addSecretsManager": {
-    "message": "Titkos kódkezelő hozzáadása"
+  "subscribeToSecretsManager": {
+    "message": "Feliratkozás a Titkos kód kezelés szolgáltatásra"
   },
   "addSecretsManagerUpgradeDesc": {
     "message": "Titkkos kód kezelő hozzáadása a felminősített csomaghoz, hogy az előző csomaggal létrehozott titkos kódok megtartásához."
@@ -7177,5 +7272,20 @@
   },
   "alreadyHaveAccount": {
     "message": "Van már saját fiók?"
+  },
+  "customBillingStart": {
+    "message": "Az egyedi számlázás nem jelenik meg. Kerssük fel "
+  },
+  "customBillingEnd": {
+    "message": " oldalt a legújabb számlázásért."
+  },
+  "typePasskey": {
+    "message": "Hozzáférési kulcs"
+  },
+  "passkeyNotCopied": {
+    "message": "A hozzáférési kulcs nem kerül másolásra."
+  },
+  "passkeyNotCopiedAlert": {
+    "message": "A hozzáférési kulcs nem kerül másolásra a klónozott elembe. Folytatjuk ennek az elemnek a klónozását?"
   }
 }

@@ -1,4 +1,11 @@
 import { NgModule } from "@angular/core";
 
-@NgModule({})
+import { AccountRecoveryService } from "./services/account-recovery/account-recovery.service";
+
+@NgModule({
+  imports: [],
+  declarations: [AccountRecoveryService],
+  providers: [],
+  exports: [AccountRecoveryService],
+})
 export class CoreOrganizationModule {}

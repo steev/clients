@@ -77,7 +77,6 @@
                 name="Login.Password"
                 [(ngModel)]="cipher.login.password"
                 appInputVerbatim
-                [disabled]="false"
                 [readonly]="!cipher.edit && editMode"
               />
               <div *ngIf="!showPassword" class="monospaced">
@@ -156,7 +155,6 @@
                 class="monospaced"
                 [(ngModel)]="cipher.login.totp"
                 appInputVerbatim
-                [disabled]="false"
                 [readonly]="!cipher.edit && editMode"
               />
               <div *ngIf="!showTotpSeed" class="monospaced">

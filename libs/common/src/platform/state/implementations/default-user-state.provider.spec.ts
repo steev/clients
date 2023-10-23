@@ -1,4 +1,4 @@
-import { mock } from "jest-mock-extended";
+import { any, mock } from "jest-mock-extended";
 import { BehaviorSubject } from "rxjs";
 import { Jsonify } from "type-fest";
 
@@ -118,5 +118,14 @@ describe("DefaultStateProvider", () => {
     expect(emissions[2]).toBeTruthy();
     expect(emissions[2].array).toHaveLength(1);
     expect(new Date(emissions[2].date).getUTCFullYear()).toBe(2021);
+
+    // Should only be called twice to get state, once for each user
+    expect(diskStorageService.mock.get).toHaveBeenCalledTimes(2);
+    expect(diskStorageService.mock.get).toHaveBeenNthCalledWith(1, "fake_1_fake", any());
+    expect(diskStorageService.mock.get).toHaveBeenNthCalledWith(2, "fake_2_fake", any());
+
+    // Should only have saved data for the first user
+    expect(diskStorageService.mock.save).toHaveBeenCalledTimes(1);
+    expect(diskStorageService.mock.save).toHaveBeenNthCalledWith(1, "fake_1_fake", any());
   });
 });

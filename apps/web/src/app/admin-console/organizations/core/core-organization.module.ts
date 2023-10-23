@@ -4,8 +4,8 @@ import { AccountRecoveryService } from "./services/account-recovery/account-reco
 
 @NgModule({
   imports: [],
-  declarations: [AccountRecoveryService],
-  providers: [],
-  exports: [AccountRecoveryService],
+  declarations: [],
+  providers: [AccountRecoveryService],
+  exports: [],
 })
 export class CoreOrganizationModule {}

@@ -69,9 +69,6 @@ export function trackEmissions<T>(observable: Observable<T>): T[] {
       case "boolean":
         emissions.push(value);
         break;
-      case "object":
-        emissions.push({ ...value });
-        break;
       default:
         emissions.push(JSON.parse(JSON.stringify(value)));
     }

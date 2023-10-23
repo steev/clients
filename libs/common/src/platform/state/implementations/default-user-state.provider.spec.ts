@@ -1,11 +1,12 @@
-import { matches, mock } from "jest-mock-extended";
-import { BehaviorSubject, Subject } from "rxjs";
+import { mock } from "jest-mock-extended";
+import { BehaviorSubject } from "rxjs";
 import { Jsonify } from "type-fest";
 
+import { trackEmissions } from "../../../../spec";
+import { FakeStorageService } from "../../../../spec/fake-storage.service";
 import { AccountInfo, AccountService } from "../../../auth/abstractions/account.service";
 import { AuthenticationStatus } from "../../../auth/enums/authentication-status";
 import { UserId } from "../../../types/guid";
-import { AbstractStorageService, StorageUpdateType } from "../../abstractions/storage.service";
 import { KeyDefinition } from "../key-definition";
 import { StateDefinition } from "../state-definition";
 
@@ -14,7 +15,6 @@ import { DefaultUserStateProvider } from "./default-user-state.provider";
 class TestState {
   date: Date;
   array: string[];
-  // TODO: More complex data types
 
   static fromJSON(jsonState: Jsonify<TestState>) {
     if (jsonState == null) {
@@ -38,17 +38,16 @@ const testKeyDefinition = new KeyDefinition<TestState>(
 // TODO this class needs to be totally retested, it doesn't work like this anymore
 describe("DefaultStateProvider", () => {
   const accountService = mock<AccountService>();
-  const diskStorageService = mock<AbstractStorageService>();
-  const diskUpdates$ = new Subject<{ key: string; value: string; updateType: StorageUpdateType }>();
+  let diskStorageService: FakeStorageService;
 
   const activeAccountSubject = new BehaviorSubject<{ id: UserId } & AccountInfo>(undefined);
 
   let userStateProvider: DefaultUserStateProvider;
 
   beforeEach(() => {
-    (diskStorageService as any)["updates$"] = diskUpdates$; // hack to get around mock getters being broken in jest-mock-extended
     accountService.activeAccount$ = activeAccountSubject;
 
+    diskStorageService = new FakeStorageService();
     userStateProvider = new DefaultUserStateProvider(
       accountService,
       null, // Not testing derived state
@@ -63,58 +62,61 @@ describe("DefaultStateProvider", () => {
   });
 
   it("createUserState", async () => {
-    diskStorageService.get.mockImplementationOnce(() => {
-      return Promise.resolve({
-        date: "2023-09-21T13:14:17.648Z",
+    diskStorageService.internalUpdateStore({
+      fake_1_fake: {
+        date: "2022-09-21T13:14:17.648Z",
         array: ["value1", "value2"],
-      } as Jsonify<TestState>);
+      } as Jsonify<TestState>,
+      fake_2_fake: {
+        date: "2021-09-21T13:14:17.648Z",
+        array: ["user2_value"],
+      },
     });
 
     const fakeDomainState = userStateProvider.get(testKeyDefinition);
 
-    const subscribeCallback = jest.fn<void, [TestState]>();
-    const subscription = fakeDomainState.state$.subscribe(subscribeCallback);
+    const emissions = trackEmissions(fakeDomainState.state$);
 
     // User signs in
     activeAccountSubject.next({
       id: "1" as UserId,
       email: "useremail",
       name: "username",
-      status: AuthenticationStatus.Locked,
+      status: AuthenticationStatus.Unlocked,
     });
-    await new Promise<void>((resolve) => setTimeout(resolve, 10));
+    await new Promise<void>((resolve) => setTimeout(resolve, 1));
 
     // Service does an update
     await fakeDomainState.update((state) => {
       state.array.push("value3");
+      state.date = new Date(2023, 0);
       return state;
     });
-    await new Promise<void>((resolve) => setTimeout(resolve, 10));
+    await new Promise<void>((resolve) => setTimeout(resolve, 1));
 
-    subscription.unsubscribe();
+    // Emulate an account switch
+    activeAccountSubject.next({
+      id: "2" as UserId,
+      email: "second_email@example.com",
+      name: "User #2",
+      status: AuthenticationStatus.Unlocked,
+    });
 
-    // No user at the start, no data
-    expect(subscribeCallback).toHaveBeenNthCalledWith(1, null);
+    await new Promise<void>((resolve) => setTimeout(resolve, 1));
 
+    expect(emissions).toHaveLength(3);
     // Gotten starter user data
-    expect(subscribeCallback).toHaveBeenNthCalledWith(
-      2,
-      matches<TestState>((value) => {
-        return true;
-      })
-    );
+    expect(emissions[0]).toBeTruthy();
+    expect(emissions[0].array).toHaveLength(2);
 
-    // Gotten update callback data
-    expect(subscribeCallback).toHaveBeenNthCalledWith(
-      3,
-      matches<TestState>((value) => {
-        return (
-          value != null &&
-          typeof value.date == "object" &&
-          value.date.getFullYear() == 2023 &&
-          value.array.length == 3
-        );
-      })
-    );
+    // Gotten emission for the update call
+    expect(emissions[1]).toBeTruthy();
+    expect(emissions[1].array).toHaveLength(3);
+    expect(new Date(emissions[1].date).getUTCFullYear()).toBe(2023);
+
+    // The second users data
+    expect(emissions[2]).toBeTruthy();
+    expect(emissions[2].array).toHaveLength(1);
+    expect(new Date(emissions[2].date).getUTCFullYear()).toBe(2021);
   });
 });

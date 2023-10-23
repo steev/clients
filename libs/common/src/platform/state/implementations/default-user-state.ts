@@ -5,7 +5,6 @@ import {
   shareReplay,
   switchMap,
   tap,
-  share,
   defer,
   firstValueFrom,
   combineLatestWith,
@@ -69,18 +68,17 @@ export class DefaultUserState<T> implements UserState<T> {
     const activeAccountData$ = this.formattedKey$.pipe(
       switchMap(async (key) => {
         if (key == null) {
-          return null;
+          return FAKE_DEFAULT;
         }
         const jsonData = await this.chosenStorageLocation.get<Jsonify<T>>(key);
         const data = keyDefinition.deserializer(jsonData);
         return data;
       }),
       tap((data) => {
-        this.seededInitial = true;
         this.stateSubject.next(data);
       }),
       // Share the execution
-      share()
+      shareReplay({ refCount: false, bufferSize: 1 })
     );
 
     const storageUpdates$ = this.chosenStorageLocation.updates$.pipe(
@@ -141,7 +139,7 @@ export class DefaultUserState<T> implements UserState<T> {
       throw new Error("You cannot get data from state while there is no active user.");
     }
     const key = userKeyBuilder(activeUser.id, this.keyDefinition);
-    const data = (await this.chosenStorageLocation.get(key)) as Jsonify<T>;
+    const data = await this.chosenStorageLocation.get<Jsonify<T>>(key);
     return this.keyDefinition.deserializer(data);
   }
 
@@ -161,7 +159,7 @@ export class DefaultUserState<T> implements UserState<T> {
 
   protected async getGuaranteedState(key: string) {
     const currentValue = this.stateSubject.getValue();
-    return currentValue == FAKE_DEFAULT ? await this.seedInitial(key) : currentValue;
+    return currentValue === FAKE_DEFAULT ? await this.seedInitial(key) : currentValue;
   }
 
   private async seedInitial(key: string): Promise<T> {

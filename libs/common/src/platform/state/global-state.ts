@@ -10,7 +10,7 @@ export interface GlobalState<T> {
    * @param configureState callback for how you want manipulate this section of state
    * @returns A promise that must be awaited before your next action to ensure the update has been written to state.
    */
-  update: (configureState: (state: T) => void) => Promise<void>;
+  update: (configureState: (state: T) => T) => Promise<T>;
 
   /**
    * An observable stream of this state, the first emission of this will be the current state on disk

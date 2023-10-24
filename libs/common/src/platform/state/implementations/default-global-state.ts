@@ -46,12 +46,13 @@ export class DefaultGlobalState<T> implements GlobalState<T> {
     });
   }
 
-  async update(configureState: (state: T) => void): Promise<void> {
+  async update(configureState: (state: T) => T): Promise<T> {
     await this.seededPromise;
     const currentState = this.stateSubject.getValue();
-    configureState(currentState);
-    await this.chosenLocation.save(this.storageKey, currentState);
-    this.stateSubject.next(currentState);
+    const newState = configureState(currentState);
+    await this.chosenLocation.save(this.storageKey, newState);
+    this.stateSubject.next(newState);
+    return newState;
   }
 
   async getFromState(): Promise<T> {

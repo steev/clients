@@ -8,6 +8,7 @@ import { MessagingService } from "@bitwarden/common/platform/abstractions/messag
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 
 import { CoreOrganizationModule } from "../../admin-console/organizations/core";
+import { AccountRecoveryService } from "../../admin-console/organizations/core/services/account-recovery/account-recovery.service";
 import { SharedModule } from "../../shared";
 import { EmergencyAccessModule } from "../emergency-access";
 
@@ -18,7 +19,7 @@ import { MigrateFromLegacyEncryptionService } from "./migrate-legacy-encryption.
 @Component({
   standalone: true,
   imports: [SharedModule, EmergencyAccessModule, CoreOrganizationModule],
-  providers: [MigrateFromLegacyEncryptionService],
+  providers: [AccountRecoveryService, MigrateFromLegacyEncryptionService],
   templateUrl: "migrate-legacy-encryption.component.html",
 })
 export class MigrateFromLegacyEncryptionComponent {

@@ -60,6 +60,7 @@ export function convertToServiceAccountPeopleAccessPoliciesView(
       policyView.organizationUserId = filtered.id;
       policyView.read = ApPermissionEnumUtil.toRead(filtered.permission);
       policyView.write = ApPermissionEnumUtil.toWrite(filtered.permission);
+      policyView.currentUser = filtered.currentUser;
       return policyView;
     });
 

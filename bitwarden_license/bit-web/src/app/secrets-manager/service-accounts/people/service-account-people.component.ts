@@ -18,6 +18,7 @@ import {
   convertPotentialGranteesToApItemViewType,
   convertToAccessPolicyItemViews,
 } from "../../shared/access-policies/access-policy-selector/models/ap-item-view.type";
+import { ApItemEnum } from "../../shared/access-policies/access-policy-selector/models/enums/ap-item.enum";
 import { ApPermissionEnum } from "../../shared/access-policies/access-policy-selector/models/enums/ap-permission.enum";
 import { AccessPolicyService } from "../../shared/access-policies/access-policy.service";
 
@@ -153,6 +154,8 @@ export class ServiceAccountPeopleComponent implements OnInit, OnDestroy {
           type: m.type,
           id: m.id,
           permission: m.permission,
+          currentUser: m.type == ApItemEnum.User ? m.currentUser : null,
+          currentUserInGroup: m.type == ApItemEnum.Group ? m.currentUserInGroup : null,
         })),
       });
     }

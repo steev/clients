@@ -330,6 +330,7 @@ export class AccessPolicyService {
       organizationUserId: response.organizationUserId,
       organizationUserName: response.organizationUserName,
       userId: response.userId,
+      currentUser: response.currentUser,
     };
   }
 
@@ -377,6 +378,7 @@ export class AccessPolicyService {
       organizationUserId: response.organizationUserId,
       organizationUserName: response.organizationUserName,
       userId: response.userId,
+      currentUser: response.currentUser,
     };
   }
 

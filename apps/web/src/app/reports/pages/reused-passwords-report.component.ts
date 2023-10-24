@@ -41,7 +41,7 @@ export class ReusedPasswordsReportComponent extends CipherReportComponent implem
         login.password == null ||
         login.password === "" ||
         isDeleted ||
-        !edit ||
+        (!this.organization && !edit) ||
         !viewPassword
       ) {
         return;

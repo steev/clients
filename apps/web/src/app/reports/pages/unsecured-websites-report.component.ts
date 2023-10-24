@@ -37,7 +37,9 @@ export class UnsecuredWebsitesReportComponent extends CipherReportComponent impl
       }
       return c.login.uris.some((u) => u.uri != null && u.uri.indexOf("http://") === 0);
     });
-    this.ciphers = unsecuredCiphers.filter((c) => c.edit);
+    this.ciphers = unsecuredCiphers.filter(
+      (c) => (!this.organization && c.edit) || (this.organization && !c.edit)
+    );
   }
 
   protected getAllCiphers(): Promise<CipherView[]> {

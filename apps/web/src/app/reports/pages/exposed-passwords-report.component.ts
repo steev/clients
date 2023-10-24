@@ -43,7 +43,7 @@ export class ExposedPasswordsReportComponent extends CipherReportComponent imple
         login.password == null ||
         login.password === "" ||
         isDeleted ||
-        !edit ||
+        (!this.organization && !edit) ||
         !viewPassword
       ) {
         return;

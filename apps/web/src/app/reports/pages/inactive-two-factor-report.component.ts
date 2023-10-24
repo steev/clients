@@ -53,7 +53,7 @@ export class InactiveTwoFactorReportComponent extends CipherReportComponent impl
           (login.totp != null && login.totp !== "") ||
           !login.hasUris ||
           isDeleted ||
-          !edit
+          (!this.organization && !edit)
         ) {
           return;
         }

@@ -43,27 +43,28 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
   }
 
   protected findWeakPasswords(ciphers: any[]): void {
-    ciphers.forEach((c) => {
+    ciphers.forEach((ciph) => {
+      const { type, login, isDeleted, edit, viewPassword, id } = ciph;
       if (
-        c.type !== CipherType.Login ||
-        c.login.password == null ||
-        c.login.password === "" ||
-        c.isDeleted ||
-        !c.edit ||
-        !c.viewPassword
+        type !== CipherType.Login ||
+        login.password == null ||
+        login.password === "" ||
+        isDeleted ||
+        (!this.organization && !edit) ||
+        !viewPassword
       ) {
         return;
       }
-      const hasUserName = this.isUserNameNotEmpty(c);
-      const cacheKey = this.getCacheKey(c);
+      const hasUserName = this.isUserNameNotEmpty(ciph);
+      const cacheKey = this.getCacheKey(ciph);
       if (!this.passwordStrengthCache.has(cacheKey)) {
         let userInput: string[] = [];
         if (hasUserName) {
-          const atPosition = c.login.username.indexOf("@");
+          const atPosition = login.username.indexOf("@");
           if (atPosition > -1) {
             userInput = userInput
               .concat(
-                c.login.username
+                login.username
                   .substr(0, atPosition)
                   .trim()
                   .toLowerCase()
@@ -71,7 +72,7 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
               )
               .filter((i) => i.length >= 3);
           } else {
-            userInput = c.login.username
+            userInput = login.username
               .trim()
               .toLowerCase()
               .split(/[^A-Za-z0-9]/)
@@ -79,7 +80,7 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
           }
         }
         const result = this.passwordStrengthService.getPasswordStrength(
-          c.login.password,
+          login.password,
           null,
           userInput.length > 0 ? userInput : null
         );
@@ -87,8 +88,8 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
       }
       const score = this.passwordStrengthCache.get(cacheKey);
       if (score != null && score <= 2) {
-        this.passwordStrengthMap.set(c.id, this.scoreKey(score));
-        this.weakPasswordCiphers.push(c);
+        this.passwordStrengthMap.set(id, this.scoreKey(score));
+        this.weakPasswordCiphers.push(ciph);
       }
     });
     this.weakPasswordCiphers.sort((a, b) => {

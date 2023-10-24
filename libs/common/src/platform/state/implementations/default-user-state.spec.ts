@@ -57,13 +57,14 @@ describe("DefaultUserState", () => {
     );
   });
 
-  const changeActiveUser = (id: string) => {
+  const changeActiveUser = async (id: string) => {
     activeAccountSubject.next({
       id: id as UserId,
       email: `test${id}@example.com`,
       name: `Test User ${id}`,
       status: AuthenticationStatus.Unlocked,
     });
+    await new Promise((resolve) => setTimeout(resolve, 1));
   };
 
   afterEach(() => {
@@ -97,9 +98,7 @@ describe("DefaultUserState", () => {
     await new Promise<void>((resolve) => setTimeout(resolve, 1));
 
     // Emulate an account switch
-    changeActiveUser("2");
-
-    await new Promise<void>((resolve) => setTimeout(resolve, 1));
+    await changeActiveUser("2");
 
     expect(emissions).toHaveLength(3);
     // Gotten starter user data
@@ -130,7 +129,7 @@ describe("DefaultUserState", () => {
     let resolvedValue: TestState | undefined = undefined;
     let rejectedError: Error | undefined = undefined;
 
-    const promise = firstValueFrom(userState.state$.pipe(timeout(500)))
+    const promise = firstValueFrom(userState.state$.pipe(timeout(20)))
       .then((value) => {
         resolvedValue = value;
       })
@@ -157,14 +156,14 @@ describe("DefaultUserState", () => {
       } as Jsonify<TestState>,
     });
 
-    const promise = firstValueFrom(userState.state$.pipe(timeout(500)))
+    const promise = firstValueFrom(userState.state$.pipe(timeout(20)))
       .then((value) => {
         resolvedValue = value;
       })
       .catch((err) => {
         rejectedError = err;
       });
-    changeActiveUser("1");
+    await changeActiveUser("1");
     await promise;
 
     expect(diskStorageService.mock.get).toHaveBeenCalledTimes(1);
@@ -175,7 +174,7 @@ describe("DefaultUserState", () => {
     expect(rejectedError).toBeFalsy();
   });
 
-  test.skip("should make a late subscriber wait for data if there is no active user", async () => {
+  it("test_thing", async () => {
     diskStorageService.internalUpdateStore({
       user_1_fake_fake: {
         date: "2020-09-21T13:14:17.648Z",
@@ -192,14 +191,14 @@ describe("DefaultUserState", () => {
     const emissions = trackEmissions(userState.state$);
 
     // Change to a user with data
-    changeActiveUser("1");
+    await changeActiveUser("1");
 
     // This should always return a value right await
     const value = await firstValueFrom(userState.state$);
     expect(value).toBeTruthy();
 
     // Make it such that there is no active user
-    changeActiveUser(undefined);
+    await changeActiveUser(undefined);
 
     let resolvedValue: TestState | undefined = undefined;
     let rejectedError: Error | undefined = undefined;
@@ -207,7 +206,7 @@ describe("DefaultUserState", () => {
     // Even if the observable has previously emitted a value it shouldn't have
     // a value for the user subscribing to it because there isn't an active user
     // to get data for.
-    await firstValueFrom(userState.state$.pipe(timeout(500)))
+    await firstValueFrom(userState.state$.pipe(timeout(20)))
       .then((value) => {
         resolvedValue = value;
       })

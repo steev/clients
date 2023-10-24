@@ -68,9 +68,6 @@ export class DefaultUserState<T> implements UserState<T> {
         const data = keyDefinition.deserializer(jsonData);
         return data;
       }),
-      tap((data) => {
-        this.stateSubject.next(data);
-      }),
       // Share the execution
       shareReplay({ refCount: false, bufferSize: 1 })
     );
@@ -86,7 +83,9 @@ export class DefaultUserState<T> implements UserState<T> {
     // Whomever subscribes to this data, should be notified of updated data
     // if someone calls my update() method, or the active user changes.
     this.state$ = defer(() => {
-      const accountChangeSubscription = activeAccountData$.subscribe();
+      const accountChangeSubscription = activeAccountData$.subscribe((data) => {
+        this.stateSubject.next(data);
+      });
       const storageUpdateSubscription = storageUpdates$.subscribe((data) => {
         this.stateSubject.next(data);
       });

@@ -84,6 +84,10 @@ export class AcceptOrganizationComponent extends BaseAcceptComponent {
 
   async unauthedHandler(qParams: Params): Promise<void> {
     await this.prepareOrganizationInvitation(qParams);
+
+    // In certain scenarios, we want to accelerate the user through the accept org invite process
+    // For example, if the user has a BW account already, we want them to be taken to login instead of creation.
+    await this.accelerateInviteAcceptIfPossible(qParams);
   }
 
   private async acceptInitOrganizationFlow(qParams: Params): Promise<any> {
@@ -185,5 +189,55 @@ export class AcceptOrganizationComponent extends BaseAcceptComponent {
       this.orgName = this.orgName.replace(/\+/g, " ");
     }
     await this.stateService.setOrganizationInvitation(qParams);
+  }
+
+  private async accelerateInviteAcceptIfPossible(qParams: Params): Promise<void> {
+    // Extract the query params we need to make routing acceleration decisions
+    const orgSsoIdentifier = qParams.orgSsoIdentifier;
+    const orgSsoEnabled = this.stringToNullOrBool(qParams.orgSsoEnabled);
+    const orgSsoLoginRequiredPolicyEnabled = this.stringToNullOrBool(
+      qParams.orgSsoLoginRequiredPolicyEnabled
+    );
+    const orgUserHasExistingUser = this.stringToNullOrBool(qParams.orgUserHasExistingUser);
+
+    // if any of the above are null, short circuit for backwards compatibility w/ older servers
+    if (
+      orgSsoIdentifier == null ||
+      orgSsoEnabled == null ||
+      orgSsoLoginRequiredPolicyEnabled == null ||
+      orgUserHasExistingUser == null
+    ) {
+      return;
+    }
+
+    // if user exists, send user to login
+    if (orgUserHasExistingUser) {
+      this.router.navigate(["/login"]);
+      return;
+    }
+
+    // no user exists; so either register or sign in via SSO and JIT provision one.
+    // if SSO is disabled OR if sso is enabled but the SSO login required policy is not enabled
+    // then send user to create account
+    if (!orgSsoEnabled || !orgSsoLoginRequiredPolicyEnabled) {
+      this.router.navigate(["/register"], {
+        queryParams: { email: qParams.email, fromOrgInvite: true },
+      });
+      return;
+    }
+
+    if (orgSsoEnabled && orgSsoLoginRequiredPolicyEnabled) {
+      this.router.navigate(["/sso"], {
+        queryParams: { email: qParams.email, identifier: orgSsoIdentifier },
+      });
+      return;
+    }
+  }
+
+  private stringToNullOrBool(s: string | undefined): boolean | null {
+    if (s === undefined) {
+      return null;
+    }
+    return s.toLowerCase() === "true";
   }
 }

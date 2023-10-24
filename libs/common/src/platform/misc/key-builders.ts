@@ -9,9 +9,9 @@ export function userKeyBuilder(userId: UserId, keyDefinition: KeyDefinition<unkn
   if (userId == null) {
     throw new Error("You cannot build a user key without");
   }
-  return `${keyDefinition.stateDefinition.name}_${userId}_${keyDefinition.key}` as StorageKey;
+  return `user_${userId}_${keyDefinition.stateDefinition.name}_${keyDefinition.key}` as StorageKey;
 }
 
 export function globalKeyBuilder(keyDefinition: KeyDefinition<unknown>): StorageKey {
-  return `${keyDefinition.stateDefinition.name}_global_${keyDefinition.key}` as StorageKey;
+  return `global_${keyDefinition.stateDefinition.name}_${keyDefinition.key}` as StorageKey;
 }

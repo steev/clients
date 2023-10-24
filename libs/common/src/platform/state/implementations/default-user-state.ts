@@ -26,14 +26,9 @@ import { KeyDefinition } from "../key-definition";
 import { StorageLocation } from "../state-definition";
 import { UserState } from "../user-state";
 
-const FAKE_DEFAULT = Symbol.for("fakeDefault");
+const FAKE_DEFAULT = Symbol("fakeDefault");
 
-// TODO: Update storage services to emit when any key is updated
-// Then listen to that observable here to emit on `state$` when the `formattedKey$`
-// is reported updated by the storage service;
 export class DefaultUserState<T> implements UserState<T> {
-  private seededInitial = false;
-
   private formattedKey$: Observable<string>;
   private chosenStorageLocation: AbstractStorageService;
 
@@ -55,7 +50,6 @@ export class DefaultUserState<T> implements UserState<T> {
     this.chosenStorageLocation = this.chooseStorage(
       this.keyDefinition.stateDefinition.storageLocation
     );
-    // startWith?
     this.formattedKey$ = this.accountService.activeAccount$.pipe(
       map((account) =>
         account != null && account.id != null
@@ -83,7 +77,7 @@ export class DefaultUserState<T> implements UserState<T> {
 
     const storageUpdates$ = this.chosenStorageLocation.updates$.pipe(
       combineLatestWith(this.formattedKey$),
-      filter(([update, key]) => update.key === key),
+      filter(([update, key]) => key !== null && update.key === key),
       map(([update]) => {
         return keyDefinition.deserializer(update.value as Jsonify<T>);
       })

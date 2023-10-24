@@ -34,22 +34,23 @@ export class ReusedPasswordsReportComponent extends CipherReportComponent implem
     const allCiphers = await this.getAllCiphers();
     const ciphersWithPasswords: CipherView[] = [];
     this.passwordUseMap = new Map<string, number>();
-    allCiphers.forEach((c) => {
+    allCiphers.forEach((ciph) => {
+      const { type, login, isDeleted, edit, viewPassword } = ciph;
       if (
-        c.type !== CipherType.Login ||
-        c.login.password == null ||
-        c.login.password === "" ||
-        c.isDeleted ||
-        !c.edit ||
-        !c.viewPassword
+        type !== CipherType.Login ||
+        login.password == null ||
+        login.password === "" ||
+        isDeleted ||
+        !edit ||
+        !viewPassword
       ) {
         return;
       }
-      ciphersWithPasswords.push(c);
-      if (this.passwordUseMap.has(c.login.password)) {
-        this.passwordUseMap.set(c.login.password, this.passwordUseMap.get(c.login.password) + 1);
+      ciphersWithPasswords.push(ciph);
+      if (this.passwordUseMap.has(login.password)) {
+        this.passwordUseMap.set(login.password, this.passwordUseMap.get(login.password) + 1);
       } else {
-        this.passwordUseMap.set(c.login.password, 1);
+        this.passwordUseMap.set(login.password, 1);
       }
     });
     const reusedPasswordCiphers = ciphersWithPasswords.filter(
@@ -59,7 +60,7 @@ export class ReusedPasswordsReportComponent extends CipherReportComponent implem
     this.ciphers = reusedPasswordCiphers;
   }
 
-  getAllCiphers(): Promise<CipherView[]> {
+  protected getAllCiphers(): Promise<CipherView[]> {
     return this.cipherService.getAllDecrypted();
   }
 

@@ -67,7 +67,7 @@ describe("ExposedPasswordsReportComponent", () => {
     const expectedIdTwo = "cbea34a8-bde4-46ad-9d19-b05001228cd3";
 
     jest.spyOn(auditService, "passwordLeaked").mockReturnValue(Promise.resolve<any>(1234));
-    jest.spyOn(component, "getAllCiphers").mockReturnValue(Promise.resolve<any>(cipherData));
+    jest.spyOn(component as any, "getAllCiphers").mockReturnValue(Promise.resolve<any>(cipherData));
     await component.setCiphers();
 
     expect(component.ciphers.length).toEqual(2);

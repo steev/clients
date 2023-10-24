@@ -44,39 +44,39 @@ export class InactiveTwoFactorReportComponent extends CipherReportComponent impl
     if (this.services.size > 0) {
       const allCiphers = await this.getAllCiphers();
       const inactive2faCiphers: CipherView[] = [];
-      const promises: Promise<void>[] = [];
       const docs = new Map<string, string>();
 
-      allCiphers.forEach((c) => {
+      allCiphers.forEach((ciph) => {
+        const { type, login, isDeleted, edit, id } = ciph;
         if (
-          c.type !== CipherType.Login ||
-          (c.login.totp != null && c.login.totp !== "") ||
-          !c.login.hasUris ||
-          c.isDeleted
+          type !== CipherType.Login ||
+          (login.totp != null && login.totp !== "") ||
+          !login.hasUris ||
+          isDeleted ||
+          !edit
         ) {
           return;
         }
-        for (let i = 0; i < c.login.uris.length; i++) {
-          const u = c.login.uris[i];
+        for (let i = 0; i < login.uris.length; i++) {
+          const u = login.uris[i];
           if (u.uri != null && u.uri !== "") {
             const uri = u.uri.replace("www.", "");
             const domain = Utils.getDomain(uri);
             if (domain != null && this.services.has(domain)) {
               if (this.services.get(domain) != null) {
-                docs.set(c.id, this.services.get(domain));
+                docs.set(id, this.services.get(domain));
               }
-              inactive2faCiphers.push(c);
+              inactive2faCiphers.push(ciph);
             }
           }
         }
       });
-      await Promise.all(promises);
-      this.ciphers = inactive2faCiphers.filter((c) => c.edit);
+      this.ciphers = [...inactive2faCiphers];
       this.cipherDocs = docs;
     }
   }
 
-  getAllCiphers(): Promise<CipherView[]> {
+  protected getAllCiphers(): Promise<CipherView[]> {
     return this.cipherService.getAllDecrypted();
   }
 

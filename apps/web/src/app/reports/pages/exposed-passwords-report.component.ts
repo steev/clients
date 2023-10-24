@@ -36,28 +36,31 @@ export class ExposedPasswordsReportComponent extends CipherReportComponent imple
     const allCiphers = await this.getAllCiphers();
     const exposedPasswordCiphers: CipherView[] = [];
     const promises: Promise<void>[] = [];
-    allCiphers.forEach((c) => {
+    allCiphers.forEach((ciph) => {
+      const { type, login, isDeleted, edit, viewPassword, id } = ciph;
       if (
-        c.type !== CipherType.Login ||
-        c.login.password == null ||
-        c.login.password === "" ||
-        c.isDeleted
+        type !== CipherType.Login ||
+        login.password == null ||
+        login.password === "" ||
+        isDeleted ||
+        !edit ||
+        !viewPassword
       ) {
         return;
       }
-      const promise = this.auditService.passwordLeaked(c.login.password).then((exposedCount) => {
+      const promise = this.auditService.passwordLeaked(login.password).then((exposedCount) => {
         if (exposedCount > 0) {
-          exposedPasswordCiphers.push(c);
-          this.exposedPasswordMap.set(c.id, exposedCount);
+          exposedPasswordCiphers.push(ciph);
+          this.exposedPasswordMap.set(id, exposedCount);
         }
       });
       promises.push(promise);
     });
     await Promise.all(promises);
-    this.ciphers = exposedPasswordCiphers.filter((c) => c.edit && c.viewPassword);
+    this.ciphers = [...exposedPasswordCiphers];
   }
 
-  getAllCiphers(): Promise<CipherView[]> {
+  protected getAllCiphers(): Promise<CipherView[]> {
     return this.cipherService.getAllDecrypted();
   }
 

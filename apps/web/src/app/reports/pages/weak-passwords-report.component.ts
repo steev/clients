@@ -48,7 +48,9 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
         c.type !== CipherType.Login ||
         c.login.password == null ||
         c.login.password === "" ||
-        c.isDeleted
+        c.isDeleted ||
+        !c.edit ||
+        !c.viewPassword
       ) {
         return;
       }
@@ -95,11 +97,10 @@ export class WeakPasswordsReportComponent extends CipherReportComponent implemen
         this.passwordStrengthCache.get(this.getCacheKey(b))
       );
     });
-
-    this.ciphers = this.weakPasswordCiphers.filter((c) => c.edit && c.viewPassword);
+    this.ciphers = [...this.weakPasswordCiphers];
   }
 
-  getAllCiphers(): Promise<CipherView[]> {
+  protected getAllCiphers(): Promise<CipherView[]> {
     return this.cipherService.getAllDecrypted();
   }
 

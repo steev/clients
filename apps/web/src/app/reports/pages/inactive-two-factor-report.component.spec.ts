@@ -72,7 +72,7 @@ describe("InactiveTwoFactorReportComponent", () => {
       "https://www.123formbuilder.com/docs/multi-factor-authentication-login"
     );
 
-    jest.spyOn(component, "getAllCiphers").mockReturnValue(Promise.resolve<any>(cipherData));
+    jest.spyOn(component as any, "getAllCiphers").mockReturnValue(Promise.resolve<any>(cipherData));
     await component.setCiphers();
 
     expect(component.ciphers.length).toEqual(2);

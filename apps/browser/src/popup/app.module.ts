@@ -16,6 +16,7 @@ import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { ColorPasswordCountPipe } from "@bitwarden/angular/pipes/color-password-count.pipe";
 import { ColorPasswordPipe } from "@bitwarden/angular/pipes/color-password.pipe";
 
+import { SetPinComponent } from "../auth/popup/components/set-pin.component";
 import { EnvironmentComponent } from "../auth/popup/environment.component";
 import { HintComponent } from "../auth/popup/hint.component";
 import { HomeComponent } from "../auth/popup/home.component";
@@ -30,6 +31,7 @@ import { SsoComponent } from "../auth/popup/sso.component";
 import { TwoFactorOptionsComponent } from "../auth/popup/two-factor-options.component";
 import { TwoFactorComponent } from "../auth/popup/two-factor.component";
 import { UpdateTempPasswordComponent } from "../auth/popup/update-temp-password.component";
+import { FilePopoutCalloutComponent } from "../tools/popup/components/file-popout-callout.component";
 import { GeneratorComponent } from "../tools/popup/generator/generator.component";
 import { PasswordGeneratorHistoryComponent } from "../tools/popup/generator/password-generator-history.component";
 import { SendListComponent } from "../tools/popup/send/components/send-list.component";
@@ -60,7 +62,6 @@ import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { PopOutComponent } from "./components/pop-out.component";
 import { PrivateModeWarningComponent } from "./components/private-mode-warning.component";
-import { SetPinComponent } from "./components/set-pin.component";
 import { UserVerificationComponent } from "./components/user-verification.component";
 import { ServicesModule } from "./services/services.module";
 import { AutofillComponent } from "./settings/autofill.component";
@@ -98,6 +99,7 @@ import "../platform/popup/locales";
     ScrollingModule,
     ServicesModule,
     DialogModule,
+    FilePopoutCalloutComponent,
   ],
   declarations: [
     ActionButtonsComponent,

@@ -58,8 +58,9 @@ describe("DefaultUserState", () => {
   });
 
   const changeActiveUser = async (id: string) => {
+    const userId = id != null ? `00000000-0000-1000-a000-00000000000${id}` : undefined;
     activeAccountSubject.next({
-      id: id as UserId,
+      id: userId as UserId,
       email: `test${id}@example.com`,
       name: `Test User ${id}`,
       status: AuthenticationStatus.Unlocked,
@@ -73,11 +74,11 @@ describe("DefaultUserState", () => {
 
   it("emits updates for each user switch and update", async () => {
     diskStorageService.internalUpdateStore({
-      user_1_fake_fake: {
+      "user_00000000-0000-1000-a000-000000000001_fake_fake": {
         date: "2022-09-21T13:14:17.648Z",
         array: ["value1", "value2"],
       } as Jsonify<TestState>,
-      user_2_fake_fake: {
+      "user_00000000-0000-1000-a000-000000000002_fake_fake": {
         date: "2021-09-21T13:14:17.648Z",
         array: ["user2_value"],
       },
@@ -117,12 +118,24 @@ describe("DefaultUserState", () => {
 
     // Should only be called twice to get state, once for each user
     expect(diskStorageService.mock.get).toHaveBeenCalledTimes(2);
-    expect(diskStorageService.mock.get).toHaveBeenNthCalledWith(1, "user_1_fake_fake", any());
-    expect(diskStorageService.mock.get).toHaveBeenNthCalledWith(2, "user_2_fake_fake", any());
+    expect(diskStorageService.mock.get).toHaveBeenNthCalledWith(
+      1,
+      "user_00000000-0000-1000-a000-000000000001_fake_fake",
+      any()
+    );
+    expect(diskStorageService.mock.get).toHaveBeenNthCalledWith(
+      2,
+      "user_00000000-0000-1000-a000-000000000002_fake_fake",
+      any()
+    );
 
     // Should only have saved data for the first user
     expect(diskStorageService.mock.save).toHaveBeenCalledTimes(1);
-    expect(diskStorageService.mock.save).toHaveBeenNthCalledWith(1, "user_1_fake_fake", any());
+    expect(diskStorageService.mock.save).toHaveBeenNthCalledWith(
+      1,
+      "user_00000000-0000-1000-a000-000000000001_fake_fake",
+      any()
+    );
   });
 
   it("will not emit any value if there isn't an active user", async () => {
@@ -150,7 +163,7 @@ describe("DefaultUserState", () => {
     let rejectedError: Error | undefined = undefined;
 
     diskStorageService.internalUpdateStore({
-      user_1_fake_fake: {
+      "user_00000000-0000-1000-a000-000000000001_fake_fake": {
         date: "2020-09-21T13:14:17.648Z",
         array: ["testValue"],
       } as Jsonify<TestState>,
@@ -176,11 +189,11 @@ describe("DefaultUserState", () => {
 
   it("test_thing", async () => {
     diskStorageService.internalUpdateStore({
-      user_1_fake_fake: {
+      "user_00000000-0000-1000-a000-000000000001_fake_fake": {
         date: "2020-09-21T13:14:17.648Z",
         array: ["value"],
       } as Jsonify<TestState>,
-      user_2_fake_fake: {
+      "user_00000000-0000-1000-a000-000000000002_fake_fake": {
         date: "2020-09-21T13:14:17.648Z",
         array: [],
       } as Jsonify<TestState>,

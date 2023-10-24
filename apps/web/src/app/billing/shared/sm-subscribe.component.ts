@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Subject, startWith, takeUntil } from "rxjs";
 
 import { ControlsOf } from "@bitwarden/angular/types/controls-of";
+import { BillingCustomerDiscount } from "@bitwarden/common/billing/models/response/organization-subscription.response";
 import { PlanResponse } from "@bitwarden/common/billing/models/response/plan.response";
 import { ProductType } from "@bitwarden/common/enums";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -36,6 +37,7 @@ export class SecretsManagerSubscribeComponent implements OnInit, OnDestroy {
   @Input() upgradeOrganization: boolean;
   @Input() showSubmitButton = false;
   @Input() selectedPlan: PlanResponse;
+  @Input() customerDiscount: BillingCustomerDiscount;
 
   logo = SecretsManagerLogo;
   productTypes = ProductType;
@@ -63,6 +65,15 @@ export class SecretsManagerSubscribeComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  discountPrice = (price: number) => {
+    const discount =
+      !!this.customerDiscount && this.customerDiscount.active
+        ? price * (this.customerDiscount.percentOff / 100)
+        : 0;
+
+    return price - discount;
+  };
+
   get product() {
     return this.selectedPlan.product;
   }
@@ -79,26 +90,26 @@ export class SecretsManagerSubscribeComponent implements OnInit, OnDestroy {
   }
 
   get serviceAccountsIncluded() {
-    return this.selectedPlan.baseServiceAccount;
+    return this.selectedPlan.SecretsManager.baseServiceAccount;
   }
 
   get monthlyCostPerServiceAccount() {
     return this.selectedPlan.isAnnual
-      ? this.selectedPlan.additionalPricePerServiceAccount / 12
-      : this.selectedPlan.additionalPricePerServiceAccount;
+      ? this.discountPrice(this.selectedPlan.SecretsManager.additionalPricePerServiceAccount) / 12
+      : this.discountPrice(this.selectedPlan.SecretsManager.additionalPricePerServiceAccount);
   }
 
   get maxUsers() {
-    return this.selectedPlan.maxUsers;
+    return this.selectedPlan.SecretsManager.maxSeats;
   }
 
   get maxProjects() {
-    return this.selectedPlan.maxProjects;
+    return this.selectedPlan.SecretsManager.maxProjects;
   }
 
   get monthlyCostPerUser() {
     return this.selectedPlan.isAnnual
-      ? this.selectedPlan.seatPrice / 12
-      : this.selectedPlan.seatPrice;
+      ? this.discountPrice(this.selectedPlan.SecretsManager.seatPrice) / 12
+      : this.discountPrice(this.selectedPlan.SecretsManager.seatPrice);
   }
 }

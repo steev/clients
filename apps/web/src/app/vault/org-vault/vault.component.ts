@@ -38,9 +38,11 @@ import { TotpService } from "@bitwarden/common/abstractions/totp.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { EventType } from "@bitwarden/common/enums";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ServiceUtils } from "@bitwarden/common/misc/serviceUtils";
 import { TreeNode } from "@bitwarden/common/models/domain/tree-node";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
+import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
@@ -126,6 +128,10 @@ export class VaultComponent implements OnInit, OnDestroy {
   protected isEmpty: boolean;
   protected showMissingCollectionPermissionMessage: boolean;
   protected currentSearchText$: Observable<string>;
+  protected showBulkEditCollectionAccess$ = this.configService.getFeatureFlag$(
+    FeatureFlag.BulkCollectionAccess,
+    false
+  );
 
   private searchText$ = new Subject<string>();
   private refresh$ = new BehaviorSubject<void>(null);
@@ -156,7 +162,8 @@ export class VaultComponent implements OnInit, OnDestroy {
     private logService: LogService,
     private eventCollectionService: EventCollectionService,
     private totpService: TotpService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    protected configService: ConfigServiceAbstraction
   ) {}
 
   async ngOnInit() {
@@ -650,6 +657,18 @@ export class VaultComponent implements OnInit, OnDestroy {
   }
 
   async cloneCipher(cipher: CipherView) {
+    if (cipher.login?.hasFido2Credentials) {
+      const confirmed = await this.dialogService.openSimpleDialog({
+        title: { key: "passkeyNotCopied" },
+        content: { key: "passkeyNotCopiedAlert" },
+        type: "info",
+      });
+
+      if (!confirmed) {
+        return false;
+      }
+    }
+
     const collections = (await firstValueFrom(this.vaultFilterService.filteredCollections$)).filter(
       (c) => !c.readOnly && c.id != Unassigned
     );

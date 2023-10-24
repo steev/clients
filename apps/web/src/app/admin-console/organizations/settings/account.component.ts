@@ -10,6 +10,8 @@ import { OrganizationCollectionManagementUpdateRequest } from "@bitwarden/common
 import { OrganizationKeysRequest } from "@bitwarden/common/admin-console/models/request/organization-keys.request";
 import { OrganizationUpdateRequest } from "@bitwarden/common/admin-console/models/request/organization-update.request";
 import { OrganizationResponse } from "@bitwarden/common/admin-console/models/response/organization.response";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
+import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -39,6 +41,10 @@ export class AccountComponent {
   canUseApi = false;
   org: OrganizationResponse;
   taxFormPromise: Promise<unknown>;
+  showCollectionManagementSettings$ = this.configService.getFeatureFlag$(
+    FeatureFlag.FlexibleCollections,
+    false
+  );
 
   // FormGroup validators taken from server Organization domain object
   protected formGroup = this.formBuilder.group({
@@ -78,7 +84,8 @@ export class AccountComponent {
     private organizationService: OrganizationService,
     private organizationApiService: OrganizationApiServiceAbstraction,
     private dialogService: DialogService,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private configService: ConfigServiceAbstraction
   ) {}
 
   async ngOnInit() {

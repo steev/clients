@@ -36,7 +36,7 @@
               {{ "moveSelected" | i18n }}
             </button>
             <button
-              *ngIf="showAdminActions"
+              *ngIf="showAdminActions && showBulkEditCollectionAccess"
               type="button"
               bitMenuItem
               (click)="bulkEditCollectionAccess()"
@@ -68,7 +68,7 @@
       </tr>
     </ng-container>
     <ng-template body let-rows$>
-      <ng-container *cdkVirtualFor="let item of rows$">
+      <ng-container *cdkVirtualFor="let item of rows$; templateCacheSize: 0">
         <tr
           *ngIf="item.collection"
           bitRow
@@ -100,10 +100,7 @@
           [showGroups]="showGroups"
           [showPremiumFeatures]="showPremiumFeatures"
           [useEvents]="useEvents"
-          [cloneable]="
-            (item.cipher.organizationId && cloneableOrganizationCiphers) ||
-            item.cipher.organizationId == null
-          "
+          [cloneable]="canClone(item)"
           [organizations]="allOrganizations"
           [collections]="allCollections"
           [checked]="selection.isSelected(item)"

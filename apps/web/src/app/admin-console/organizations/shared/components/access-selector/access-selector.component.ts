@@ -121,8 +121,11 @@ export class AccessSelectorComponent implements ControlValueAccessor, OnInit, On
     { perm: CollectionPermission.ViewExceptPass, labelId: "canViewExceptPass" },
     { perm: CollectionPermission.Edit, labelId: "canEdit" },
     { perm: CollectionPermission.EditExceptPass, labelId: "canEditExceptPass" },
-    { perm: CollectionPermission.Manage, labelId: "canManage" },
   ];
+  private canManagePermissionListItem = {
+    perm: CollectionPermission.Manage,
+    labelId: "canManage",
+  };
   protected initialPermission = CollectionPermission.View;
 
   disabled: boolean;
@@ -193,6 +196,11 @@ export class AccessSelectorComponent implements ControlValueAccessor, OnInit, On
    */
   @Input() showGroupColumn: boolean;
 
+  /**
+   * Enable Flexible Collections changes (feature flag)
+   */
+  @Input() flexibleCollectionsEnabled: boolean;
+
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly i18nService: I18nService
@@ -255,7 +263,7 @@ export class AccessSelectorComponent implements ControlValueAccessor, OnInit, On
     this.pauseChangeNotification = false;
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     // Watch the internal formArray for changes and propagate them
     this.selectionList.formArray.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((v) => {
       if (!this.notifyOnChange || this.pauseChangeNotification) {
@@ -269,6 +277,10 @@ export class AccessSelectorComponent implements ControlValueAccessor, OnInit, On
       }
       this.notifyOnChange(v);
     });
+
+    if (this.flexibleCollectionsEnabled) {
+      this.permissionList.push(this.canManagePermissionListItem);
+    }
   }
 
   ngOnDestroy() {

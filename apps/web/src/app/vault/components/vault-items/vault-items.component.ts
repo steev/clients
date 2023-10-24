@@ -42,6 +42,7 @@ export class VaultItemsComponent {
   @Input() allCollections: CollectionView[] = [];
   @Input() allGroups: GroupView[] = [];
   @Input() orgVault = false;
+  @Input() showBulkEditCollectionAccess = false;
 
   private _ciphers?: CipherView[] = [];
   @Input() get ciphers(): CipherView[] {
@@ -149,6 +150,13 @@ export class VaultItemsComponent {
       type: "delete",
       items: this.selection.selected,
     });
+  }
+
+  protected canClone(vaultItem: VaultItem) {
+    return (
+      (vaultItem.cipher.organizationId && this.cloneableOrganizationCiphers) ||
+      vaultItem.cipher.organizationId == null
+    );
   }
 
   private refreshItems() {

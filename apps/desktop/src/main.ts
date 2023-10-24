@@ -2,6 +2,7 @@ import * as path from "path";
 
 import { app } from "electron";
 
+import { AccountServiceImplementation } from "@bitwarden/common/auth/services/account.service";
 import { StateFactory } from "@bitwarden/common/platform/factories/state-factory";
 import { GlobalState } from "@bitwarden/common/platform/models/domain/global-state";
 import { MemoryStorageService } from "@bitwarden/common/platform/services/memory-storage.service";
@@ -93,6 +94,7 @@ export class Main {
       this.memoryStorageService,
       this.logService,
       new StateFactory(GlobalState, Account),
+      new AccountServiceImplementation(null, this.logService), // will not broadcast logouts. This is a hack until we can remove messaging dependency
       false // Do not use disk caching because this will get out of sync with the renderer service
     );
 
@@ -216,9 +218,16 @@ export class Main {
         const url = new URL(s);
         const code = url.searchParams.get("code");
         const receivedState = url.searchParams.get("state");
-        if (code != null && receivedState != null) {
-          this.messagingService.send("ssoCallback", { code: code, state: receivedState });
+
+        if (code == null || receivedState == null) {
+          return;
         }
+
+        const message =
+          s.indexOf("bitwarden://import-callback-lp") === 0
+            ? "importCallbackLastPass"
+            : "ssoCallback";
+        this.messagingService.send(message, { code: code, state: receivedState });
       });
   }
 }

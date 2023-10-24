@@ -45,16 +45,12 @@ export class VaultCollectionRowComponent implements OnInit {
 
   constructor(private router: Router, private activatedRoute: ActivatedRoute) {}
 
-  // we will have more permissions when this PR is merged
-  // https://github.com/bitwarden/clients/pull/6417
-
   ngOnInit() {
-    // change this to use new collection data
     if (
       this.organizations[0].type === OrganizationUserType.Owner ||
       this.organizations[0].type === OrganizationUserType.Manager
     ) {
-      this.permissionText = "canManage"; // how to bring this from json. maybe set the json key
+      this.permissionText = "canManage";
     } else if (this.organizations[0].type === OrganizationUserType.Admin) {
       this.permissionText = "canEdit";
     } else {

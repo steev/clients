@@ -1,18 +1,21 @@
+import * as papa from "papaparse";
+
 import { TokenService } from "@bitwarden/common/auth/abstractions/token.service";
 import { HttpStatusCode } from "@bitwarden/common/enums";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 
-import { Account } from "./account";
-import { Client } from "./client";
-import { ClientInfo } from "./client-info";
-import { CryptoUtils } from "./crypto-utils";
-import { FederatedUserContext } from "./federated-user-context";
-import { Parser } from "./parser";
-import { ParserOptions } from "./parser-options";
-import { RestClient } from "./rest-client";
+import { IdpProvider } from "./enums";
+import {
+  Account,
+  ClientInfo,
+  ExportedAccount,
+  FederatedUserContext,
+  ParserOptions,
+  UserTypeContext,
+} from "./models";
+import { Client, CryptoUtils, Parser, RestClient } from "./services";
 import { Ui } from "./ui";
-import { Provider, UserTypeContext } from "./user-type-context";
 
 export class Vault {
   accounts: Account[];
@@ -47,7 +50,7 @@ export class Vault {
     parserOptions: ParserOptions = ParserOptions.default
   ): Promise<void> {
     if (federatedUser == null) {
-      throw "Federated user context is not set.";
+      throw new Error("Federated user context is not set.");
     }
     const k1 = await this.getK1(federatedUser);
     const k2 = await this.getK2(federatedUser);
@@ -68,49 +71,65 @@ export class Vault {
     if (response.status === HttpStatusCode.Ok) {
       const json = await response.json();
       this.userType = new UserTypeContext();
-      this.userType.CompanyId = json.CompanyId;
-      this.userType.IdentityProviderGUID = json.IdentityProviderGUID;
-      this.userType.IdentityProviderURL = json.IdentityProviderURL;
-      this.userType.IsPasswordlessEnabled = json.IsPasswordlessEnabled;
-      this.userType.OpenIDConnectAuthority = json.OpenIDConnectAuthority;
-      this.userType.OpenIDConnectClientId = json.OpenIDConnectClientId;
-      this.userType.PkceEnabled = json.PkceEnabled;
-      this.userType.Provider = json.Provider;
+      this.userType.companyId = json.CompanyId;
+      this.userType.identityProviderGUID = json.IdentityProviderGUID;
+      this.userType.identityProviderURL = json.IdentityProviderURL;
+      this.userType.isPasswordlessEnabled = json.IsPasswordlessEnabled;
+      this.userType.openIDConnectAuthority = json.OpenIDConnectAuthority;
+      this.userType.openIDConnectClientId = json.OpenIDConnectClientId;
+      this.userType.pkceEnabled = json.PkceEnabled;
+      this.userType.provider = json.Provider;
       this.userType.type = json.type;
+      return;
     }
-    throw "Cannot determine LastPass user type.";
+    throw new Error("Cannot determine LastPass user type.");
+  }
+
+  accountsToExportedCsvString(skipShared = false): string {
+    if (this.accounts == null) {
+      throw new Error("Vault has not opened any accounts.");
+    }
+
+    const exportedAccounts = this.accounts
+      .filter((a) => !a.isShared || (a.isShared && !skipShared))
+      .map((a) => new ExportedAccount(a));
+
+    if (exportedAccounts.length === 0) {
+      throw new Error("No accounts to transform");
+    }
+    return papa.unparse(exportedAccounts);
   }
 
   private async getK1(federatedUser: FederatedUserContext): Promise<Uint8Array> {
     if (this.userType == null) {
-      throw "User type is not set.";
+      throw new Error("User type is not set.");
     }
 
     if (!this.userType.isFederated()) {
-      throw "Cannot get k1 for LastPass user that is not federated.";
+      throw new Error("Cannot get k1 for LastPass user that is not federated.");
     }
 
     if (federatedUser == null) {
-      throw "Federated user is not set.";
+      throw new Error("Federated user is not set.");
     }
 
     let k1: Uint8Array = null;
-    if (federatedUser.idpUserInfo?.LastPassK1 !== null) {
+    if (federatedUser.idpUserInfo?.LastPassK1 != null) {
       return Utils.fromByteStringToArray(federatedUser.idpUserInfo.LastPassK1);
-    } else if (this.userType.Provider === Provider.Azure) {
+    } else if (this.userType.provider === IdpProvider.Azure) {
       k1 = await this.getK1Azure(federatedUser);
-    } else if (this.userType.Provider === Provider.Google) {
+    } else if (this.userType.provider === IdpProvider.Google) {
       k1 = await this.getK1Google(federatedUser);
     } else {
-      const b64Encoded = this.userType.Provider === Provider.PingOne;
-      k1 = this.getK1FromAccessToken(federatedUser, b64Encoded);
+      const b64Encoded = this.userType.provider === IdpProvider.PingOne;
+      k1 = await this.getK1FromAccessToken(federatedUser, b64Encoded);
     }
 
-    if (k1 !== null) {
+    if (k1 != null) {
       return k1;
     }
 
-    throw "Cannot get k1.";
+    throw new Error("Cannot get k1.");
   }
 
   private async getK1Azure(federatedUser: FederatedUserContext) {
@@ -124,7 +143,7 @@ export class Vault {
     if (response.status === HttpStatusCode.Ok) {
       const json = await response.json();
       const k1 = json?.extensions?.LastPassK1 as string;
-      if (k1 !== null) {
+      if (k1 != null) {
         return Utils.fromB64ToArray(k1);
       }
     }
@@ -148,7 +167,7 @@ export class Vault {
     if (response.status === HttpStatusCode.Ok) {
       const json = await response.json();
       const files = json?.files as any[];
-      if (files !== null && files.length > 0 && files[0].id != null && files[0].name === "k1.lp") {
+      if (files != null && files.length > 0 && files[0].id != null && files[0].name === "k1.lp") {
         // Open the k1.lp file
         rest.baseUrl = "https://www.googleapis.com";
         const response = await rest.get(
@@ -164,10 +183,10 @@ export class Vault {
     return null;
   }
 
-  private getK1FromAccessToken(federatedUser: FederatedUserContext, b64: boolean) {
-    const decodedAccessToken = this.tokenService.decodeToken(federatedUser.accessToken);
+  private async getK1FromAccessToken(federatedUser: FederatedUserContext, b64: boolean) {
+    const decodedAccessToken = await this.tokenService.decodeToken(federatedUser.accessToken);
     const k1 = decodedAccessToken?.LastPassK1 as string;
-    if (k1 !== null) {
+    if (k1 != null) {
       return b64 ? Utils.fromB64ToArray(k1) : Utils.fromByteStringToArray(k1);
     }
     return null;
@@ -175,26 +194,26 @@ export class Vault {
 
   private async getK2(federatedUser: FederatedUserContext): Promise<Uint8Array> {
     if (this.userType == null) {
-      throw "User type is not set.";
+      throw new Error("User type is not set.");
     }
 
     if (!this.userType.isFederated()) {
-      throw "Cannot get k2 for LastPass user that is not federated.";
+      throw new Error("Cannot get k2 for LastPass user that is not federated.");
     }
 
     const rest = new RestClient();
-    rest.baseUrl = this.userType.IdentityProviderURL;
+    rest.baseUrl = this.userType.identityProviderURL;
     const response = await rest.postJson("federatedlogin/api/v1/getkey", {
-      company_id: this.userType.CompanyId,
+      company_id: this.userType.companyId,
       id_token: federatedUser.idToken,
     });
     if (response.status === HttpStatusCode.Ok) {
       const json = await response.json();
       const k2 = json?.k2 as string;
-      if (k2 !== null) {
+      if (k2 != null) {
         return Utils.fromB64ToArray(k2);
       }
     }
-    throw "Cannot get k2.";
+    throw new Error("Cannot get k2.");
   }
 }

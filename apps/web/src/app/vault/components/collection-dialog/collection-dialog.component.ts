@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from "@angula
 import { AbstractControl, FormBuilder, Validators } from "@angular/forms";
 import {
   combineLatest,
+  firstValueFrom,
   from,
   map,
   Observable,
@@ -16,6 +17,8 @@ import {
 import { OrganizationUserService } from "@bitwarden/common/abstractions/organization-user/organization-user.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
+import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
@@ -67,6 +70,11 @@ export enum CollectionDialogAction {
   templateUrl: "collection-dialog.component.html",
 })
 export class CollectionDialogComponent implements OnInit, OnDestroy {
+  protected flexibleCollectionsEnabled$ = this.configService.getFeatureFlag$(
+    FeatureFlag.FlexibleCollections,
+    false
+  );
+
   private destroy$ = new Subject<void>();
   protected organizations$: Observable<Organization[]>;
 
@@ -82,7 +90,7 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
     name: ["", [Validators.required, BitValidators.forbiddenCharacters(["/"])]],
     externalId: "",
     parent: undefined as string | undefined,
-    access: [[] as AccessItemValue[], [validateCanManagePermission]],
+    access: [[] as AccessItemValue[]],
     selectedOrg: "",
   });
   protected PermissionMode = PermissionMode;
@@ -98,7 +106,8 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
     private platformUtilsService: PlatformUtilsService,
     private organizationUserService: OrganizationUserService,
     private dialogService: DialogService,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private configService: ConfigServiceAbstraction
   ) {
     this.tabIndex = params.initialTab ?? CollectionDialogTabType.Info;
   }
@@ -124,6 +133,10 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
       this.formGroup.patchValue({ selectedOrg: this.params.organizationId });
       await this.loadOrg(this.params.organizationId, this.params.collectionIds);
     }
+
+    if (await firstValueFrom(this.flexibleCollectionsEnabled$)) {
+      this.formGroup.controls.access.addValidators(validateCanManagePermission);
+    }
   }
 
   async loadOrg(orgId: string, collectionIds: string[]) {
@@ -147,67 +160,72 @@ export class CollectionDialogComponent implements OnInit, OnDestroy {
         : of(null),
       groups: groups$,
       users: this.organizationUserService.getAllUsers(orgId),
+      flexibleCollections: this.flexibleCollectionsEnabled$,
     })
       .pipe(takeUntil(this.formGroup.controls.selectedOrg.valueChanges), takeUntil(this.destroy$))
-      .subscribe(({ organization, collections, collectionDetails, groups, users }) => {
-        this.organization = organization;
-        this.accessItems = [].concat(
-          groups.map(mapGroupToAccessItemView),
-          users.data.map(mapUserToAccessItemView)
-        );
+      .subscribe(
+        ({ organization, collections, collectionDetails, groups, users, flexibleCollections }) => {
+          this.organization = organization;
+          this.accessItems = [].concat(
+            groups.map(mapGroupToAccessItemView),
+            users.data.map(mapUserToAccessItemView)
+          );
 
-        // Force change detection to update the access selector's items
-        this.changeDetectorRef.detectChanges();
+          // Force change detection to update the access selector's items
+          this.changeDetectorRef.detectChanges();
 
-        if (collectionIds) {
-          collections = collections.filter((c) => collectionIds.includes(c.id));
-        }
-
-        if (this.params.collectionId) {
-          this.collection = collections.find((c) => c.id === this.collectionId);
-          this.nestOptions = collections.filter((c) => c.id !== this.collectionId);
-
-          if (!this.collection) {
-            throw new Error("Could not find collection to edit.");
+          if (collectionIds) {
+            collections = collections.filter((c) => collectionIds.includes(c.id));
           }
 
-          const { name, parent } = parseName(this.collection);
-          if (parent !== undefined && !this.nestOptions.find((c) => c.name === parent)) {
-            this.deletedParentName = parent;
+          if (this.params.collectionId) {
+            this.collection = collections.find((c) => c.id === this.collectionId);
+            this.nestOptions = collections.filter((c) => c.id !== this.collectionId);
+
+            if (!this.collection) {
+              throw new Error("Could not find collection to edit.");
+            }
+
+            const { name, parent } = parseName(this.collection);
+            if (parent !== undefined && !this.nestOptions.find((c) => c.name === parent)) {
+              this.deletedParentName = parent;
+            }
+
+            const accessSelections = mapToAccessSelections(collectionDetails);
+            this.formGroup.patchValue({
+              name,
+              externalId: this.collection.externalId,
+              parent,
+              access: accessSelections,
+            });
+          } else {
+            this.nestOptions = collections;
+            const parent = collections.find((c) => c.id === this.params.parentCollectionId);
+            const currentOrgUserId = users.data.find(
+              (u) => u.userId === this.organization?.userId
+            )?.id;
+            const initialSelection: AccessItemValue[] =
+              currentOrgUserId !== undefined
+                ? [
+                    {
+                      id: currentOrgUserId,
+                      type: AccessItemType.Member,
+                      permission: flexibleCollections
+                        ? CollectionPermission.Manage
+                        : CollectionPermission.Edit,
+                    },
+                  ]
+                : [];
+
+            this.formGroup.patchValue({
+              parent: parent?.name ?? undefined,
+              access: initialSelection,
+            });
           }
 
-          const accessSelections = mapToAccessSelections(collectionDetails);
-          this.formGroup.patchValue({
-            name,
-            externalId: this.collection.externalId,
-            parent,
-            access: accessSelections,
-          });
-        } else {
-          this.nestOptions = collections;
-          const parent = collections.find((c) => c.id === this.params.parentCollectionId);
-          const currentOrgUserId = users.data.find(
-            (u) => u.userId === this.organization?.userId
-          )?.id;
-          const initialSelection: AccessItemValue[] =
-            currentOrgUserId !== undefined
-              ? [
-                  {
-                    id: currentOrgUserId,
-                    type: AccessItemType.Member,
-                    permission: CollectionPermission.Manage,
-                  },
-                ]
-              : [];
-
-          this.formGroup.patchValue({
-            parent: parent?.name ?? undefined,
-            access: initialSelection,
-          });
+          this.loading = false;
         }
-
-        this.loading = false;
-      });
+      );
   }
 
   protected get collectionId() {

@@ -26,11 +26,9 @@ export class DerivedUserState<TFrom, TTo> {
   }
 
   async getFromState(): Promise<TTo> {
-    const encryptedFromState = await this.userState.getFromState();
-
+    const originalData = await this.userState.getFromState();
     const context = new DeriveContext(null, this.encryptService);
-
-    const decryptedData = await this.derivedStateDefinition.converter(encryptedFromState, context);
-    return decryptedData;
+    const convertedData = await this.derivedStateDefinition.converter(originalData, context);
+    return convertedData;
   }
 }

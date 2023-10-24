@@ -22,8 +22,8 @@ export class DefaultGlobalStateProvider implements GlobalStateProvider {
     const locationDomainKey = `${keyDefinition.stateDefinition.storageLocation}_${keyDefinition.stateDefinition.name}_${keyDefinition.key}`;
     const existingGlobalState = this.globalStateCache[locationDomainKey];
     if (existingGlobalState != null) {
-      // I have to cast out of the unknown generic but this should be safe if rules
-      // around domain token are made
+      // The cast into the actual generic is safe because of rules around key definitions
+      // being unique.
       return existingGlobalState as DefaultGlobalState<T>;
     }
 

@@ -1,4 +1,4 @@
 export { DerivedStateDefinition } from "./derived-state-definition";
 export { DerivedUserState } from "./derived-user-state";
-export { KeyDefinition } from "./key-definition";
-export { StorageLocation } from "./state-definition";
+export { GlobalState } from "./global-state";
+export { UserState } from "./user-state";

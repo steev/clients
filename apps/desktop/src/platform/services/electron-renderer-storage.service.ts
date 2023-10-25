@@ -1,36 +1,21 @@
-import { ipcRenderer } from "electron";
-
 import { AbstractStorageService } from "@bitwarden/common/platform/abstractions/storage.service";
 
 export class ElectronRendererStorageService extends AbstractStorageService {
   get<T>(key: string): Promise<T> {
-    return ipcRenderer.invoke("storageService", {
-      action: "get",
-      key: key,
-    });
+    return ipc.platform.storage.get(key);
   }
 
   has(key: string): Promise<boolean> {
-    return ipcRenderer.invoke("storageService", {
-      action: "has",
-      key: key,
-    });
+    return ipc.platform.storage.has(key);
   }
 
   async save<T>(key: string, obj: T): Promise<void> {
-    await ipcRenderer.invoke("storageService", {
-      action: "save",
-      key: key,
-      obj: obj,
-    });
+    await ipc.platform.storage.save(key, obj);
     this.updatesSubject.next({ key, value: obj, updateType: "save" });
   }
 
   async remove(key: string): Promise<void> {
-    await ipcRenderer.invoke("storageService", {
-      action: "remove",
-      key: key,
-    });
+    await ipc.platform.storage.remove(key);
     this.updatesSubject.next({ key, value: null, updateType: "remove" });
   }
 }

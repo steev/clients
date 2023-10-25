@@ -1,3 +1,5 @@
+@import "./reset.css";
+
 :root {
   --color-transparent-hover: rgb(0 0 0 / 0.03);
 
@@ -158,8 +160,8 @@
   --tw-ring-offset-color: #002b36;
 }
 
+@import "./popover/popover.component.css";
 @import "./search/search.component.css";
-@import "./table/table.component.css";
 
 /** 
  * tw-break-words does not work with table cells:

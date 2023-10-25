@@ -127,11 +127,7 @@ export class DefaultUserState<T> implements UserState<T> {
   }
 
   async getFromState(): Promise<T> {
-    const activeUser = await firstValueFrom(this.accountService.activeAccount$);
-    if (activeUser == null || activeUser.id == null) {
-      throw new Error("You cannot get data from state while there is no active user.");
-    }
-    const key = userKeyBuilder(activeUser.id, this.keyDefinition);
+    const key = await this.createKey();
     const data = await this.chosenStorageLocation.get<Jsonify<T>>(key);
     return this.keyDefinition.deserializer(data);
   }

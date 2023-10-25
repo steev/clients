@@ -286,6 +286,7 @@ describe("AutofillService", () => {
       autofillOptions.cipher.login.matchesUri = jest.fn().mockReturnValue(true);
       autofillOptions.cipher.login.username = "username";
       autofillOptions.cipher.login.password = "password";
+      jest.spyOn(BrowserApi, "getTab").mockResolvedValue(createChromeTabMock());
     });
 
     describe("given a set of autofill options that are incomplete", () => {
@@ -335,6 +336,36 @@ describe("AutofillService", () => {
 
       it("throws an error if an autofill did not occur for any of the passed pages", async () => {
         autofillOptions.tab.url = "https://a-different-url.com";
+
+        try {
+          await autofillService.doAutoFill(autofillOptions);
+          triggerTestFailure();
+        } catch (error) {
+          expect(error.message).toBe(didNotAutofillError);
+        }
+      });
+
+      it("throws an error if the tab to fill is not active", async () => {
+        jest.spyOn(BrowserApi, "getTab").mockResolvedValue(
+          createChromeTabMock({
+            active: false,
+          })
+        );
+
+        try {
+          await autofillService.doAutoFill(autofillOptions);
+          triggerTestFailure();
+        } catch (error) {
+          expect(error.message).toBe(didNotAutofillError);
+        }
+      });
+
+      it("throws an error if the tab to fill has changed urls", async () => {
+        jest.spyOn(BrowserApi, "getTab").mockResolvedValue(
+          createChromeTabMock({
+            url: "https://a-different-url.com",
+          })
+        );
 
         try {
           await autofillService.doAutoFill(autofillOptions);

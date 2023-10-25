@@ -5,6 +5,7 @@ type AutofillExtensionMessage = {
   tab?: chrome.tabs.Tab;
   sender?: string;
   fillScript?: AutofillScript;
+  url?: string;
 };
 
 type AutofillExtensionMessageHandlers = {

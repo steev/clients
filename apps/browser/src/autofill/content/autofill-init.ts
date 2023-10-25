@@ -17,7 +17,7 @@ class AutofillInit implements AutofillInitInterface {
   private readonly extensionMessageHandlers: AutofillExtensionMessageHandlers = {
     collectPageDetails: ({ message }) => this.collectPageDetails(message),
     collectPageDetailsImmediately: ({ message }) => this.collectPageDetails(message, true),
-    fillForm: ({ message }) => this.fillForm(message.fillScript),
+    fillForm: ({ message }) => this.fillForm(message.fillScript, message.url),
   };
 
   /**
@@ -76,10 +76,14 @@ class AutofillInit implements AutofillInitInterface {
 
   /**
    * Fills the form with the given fill script.
+   *
    * @param {AutofillScript} fillScript
-   * @private
+   * @param {string} urlToFill
    */
-  private fillForm(fillScript: AutofillScript) {
+  private fillForm(fillScript: AutofillScript, urlToFill: string) {
+    if (window.location.href !== urlToFill) {
+      return;
+    }
     this.insertAutofillContentService.fillForm(fillScript);
   }
 

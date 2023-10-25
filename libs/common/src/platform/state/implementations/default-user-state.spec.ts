@@ -51,8 +51,6 @@ describe("DefaultUserState", () => {
       testKeyDefinition,
       accountService,
       null, // Not testing anything with encrypt service
-      null, // Not testing memory storage
-      null, // Not testing secure storage
       diskStorageService
     );
   });

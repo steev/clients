@@ -2,6 +2,7 @@ import { Observable, mergeMap } from "rxjs";
 
 import {
   AbstractStorageService,
+  StorageUpdate,
   StorageUpdateType,
 } from "@bitwarden/common/platform/abstractions/storage.service";
 
@@ -12,11 +13,7 @@ export default abstract class AbstractChromeStorageService extends AbstractStora
     super();
   }
 
-  override get updates$(): Observable<{
-    key: string;
-    value: unknown;
-    updateType: StorageUpdateType;
-  }> {
+  override get updates$(): Observable<StorageUpdate> {
     return fromChromeEvent(this.chromeStorageApi.onChanged).pipe(
       mergeMap(([changes]) => {
         return Object.entries(changes).map(([key, change]) => {

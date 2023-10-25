@@ -1,7 +1,14 @@
-import { AbstractMemoryStorageService } from "../abstractions/storage.service";
+import { Subject } from "rxjs";
+
+import { AbstractMemoryStorageService, StorageUpdate } from "../abstractions/storage.service";
 
 export class MemoryStorageService extends AbstractMemoryStorageService {
   private store = new Map<string, unknown>();
+  private updatesSubject = new Subject<StorageUpdate>();
+
+  get updates$() {
+    return this.updatesSubject.asObservable();
+  }
 
   get<T>(key: string): Promise<T> {
     if (this.store.has(key)) {

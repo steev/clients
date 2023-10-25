@@ -20,12 +20,20 @@ export default abstract class AbstractChromeStorageService extends AbstractStora
     return fromChromeEvent(this.chromeStorageApi.onChanged).pipe(
       mergeMap(([changes]) => {
         return Object.entries(changes).map(([key, change]) => {
-          const newValue = change.newValue;
-          // I'm not sure the != null is the greatest determinator of if it's a remove
+          // The `newValue` property isn't on the StorageChange object
+          // when the change was from a remove. Similarly a check of the `oldValue`
+          // could be used to tell if the operation was the first creation of this key
+          // but we currently do not differentiate that.
+          // Ref: https://developer.chrome.com/docs/extensions/reference/storage/#type-StorageChange
+          // Ref: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/StorageChange
+          const updateType: StorageUpdateType = "newValue" in change ? "save" : "remove";
+
           return {
             key: key,
-            value: newValue,
-            updateType: (newValue != null ? "save" : "remove") as StorageUpdateType,
+            // For removes this property will not exist but then it will just be
+            // undefined which is fine.
+            value: change.newValue,
+            updateType: updateType,
           };
         });
       })

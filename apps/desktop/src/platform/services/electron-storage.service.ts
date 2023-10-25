@@ -1,9 +1,13 @@
 import * as fs from "fs";
 
 import { ipcMain } from "electron";
+import { Subject } from "rxjs";
 
 import { NodeUtils } from "@bitwarden/common/misc/nodeUtils";
-import { AbstractStorageService } from "@bitwarden/common/platform/abstractions/storage.service";
+import {
+  AbstractStorageService,
+  StorageUpdate,
+} from "@bitwarden/common/platform/abstractions/storage.service";
 
 // See: https://github.com/sindresorhus/electron-store/blob/main/index.d.ts
 interface ElectronStoreOptions {
@@ -33,11 +37,11 @@ interface SaveOptions extends BaseOptions<"save"> {
 
 type Options = BaseOptions<"get"> | BaseOptions<"has"> | SaveOptions | BaseOptions<"remove">;
 
-export class ElectronStorageService extends AbstractStorageService {
+export class ElectronStorageService implements AbstractStorageService {
   private store: ElectronStore;
+  private updatesSubject = new Subject<StorageUpdate>();
 
   constructor(dir: string, defaults = {}) {
-    super();
     if (!fs.existsSync(dir)) {
       NodeUtils.mkdirpSync(dir, "700");
     }
@@ -59,6 +63,10 @@ export class ElectronStorageService extends AbstractStorageService {
           return this.remove(options.key);
       }
     });
+  }
+
+  get updates$() {
+    return this.updatesSubject.asObservable();
   }
 
   get<T>(key: string): Promise<T> {

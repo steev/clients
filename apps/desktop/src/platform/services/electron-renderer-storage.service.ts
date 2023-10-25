@@ -1,6 +1,17 @@
-import { AbstractStorageService } from "@bitwarden/common/platform/abstractions/storage.service";
+import { Subject } from "rxjs";
 
-export class ElectronRendererStorageService extends AbstractStorageService {
+import {
+  AbstractStorageService,
+  StorageUpdate,
+} from "@bitwarden/common/platform/abstractions/storage.service";
+
+export class ElectronRendererStorageService implements AbstractStorageService {
+  private updatesSubject = new Subject<StorageUpdate>();
+
+  get updates$() {
+    return this.updatesSubject.asObservable();
+  }
+
   get<T>(key: string): Promise<T> {
     return ipc.platform.storage.get(key);
   }

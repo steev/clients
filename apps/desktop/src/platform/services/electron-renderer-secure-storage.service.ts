@@ -1,7 +1,18 @@
-import { AbstractStorageService } from "@bitwarden/common/platform/abstractions/storage.service";
+import { Subject } from "rxjs";
+
+import {
+  AbstractStorageService,
+  StorageUpdate,
+} from "@bitwarden/common/platform/abstractions/storage.service";
 import { StorageOptions } from "@bitwarden/common/platform/models/domain/storage-options";
 
-export class ElectronRendererSecureStorageService extends AbstractStorageService {
+export class ElectronRendererSecureStorageService implements AbstractStorageService {
+  private updatesSubject = new Subject<StorageUpdate>();
+
+  get updates$() {
+    return this.updatesSubject.asObservable();
+  }
+
   async get<T>(key: string, options?: StorageOptions): Promise<T> {
     const val = await ipc.platform.passwords.get(key, options?.keySuffix ?? "");
     return val != null ? (JSON.parse(val) as T) : null;

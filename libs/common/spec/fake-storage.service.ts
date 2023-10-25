@@ -1,10 +1,15 @@
 import { MockProxy, mock } from "jest-mock-extended";
+import { Subject } from "rxjs";
 
-import { AbstractStorageService } from "../src/platform/abstractions/storage.service";
+import {
+  AbstractStorageService,
+  StorageUpdate,
+} from "../src/platform/abstractions/storage.service";
 import { StorageOptions } from "../src/platform/models/domain/storage-options";
 
-export class FakeStorageService extends AbstractStorageService {
+export class FakeStorageService implements AbstractStorageService {
   private store: Record<string, unknown>;
+  private updatesSubject = new Subject<StorageUpdate>();
 
   /**
    * Returns a mock of a {@see AbstractStorageService} for asserting the expected
@@ -14,7 +19,6 @@ export class FakeStorageService extends AbstractStorageService {
   mock: MockProxy<AbstractStorageService>;
 
   constructor(initial?: Record<string, unknown>) {
-    super();
     this.store = initial ?? {};
     this.mock = mock<AbstractStorageService>();
   }
@@ -26,6 +30,10 @@ export class FakeStorageService extends AbstractStorageService {
    */
   internalUpdateStore(store: Record<string, unknown>) {
     this.store = store;
+  }
+
+  get updates$() {
+    return this.updatesSubject.asObservable();
   }
 
   get<T>(key: string, options?: StorageOptions): Promise<T> {

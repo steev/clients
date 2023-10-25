@@ -20,7 +20,7 @@ import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
 import { DialogService } from "@bitwarden/components";
 
-import { AccountRecoveryService } from "../../core/services/account-recovery/account-recovery.service";
+import { AccountRecoveryService } from "../services/account-recovery/account-recovery.service";
 
 @Component({
   selector: "app-reset-password",

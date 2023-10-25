@@ -23,7 +23,7 @@ import { Folder } from "@bitwarden/common/vault/models/domain/folder";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
 
-import { AccountRecoveryService } from "../../admin-console/organizations/core/services/account-recovery/account-recovery.service";
+import { AccountRecoveryService } from "../../admin-console/organizations/members/services/account-recovery/account-recovery.service";
 import { EmergencyAccessService } from "../emergency-access";
 
 import { MigrateFromLegacyEncryptionService } from "./migrate-legacy-encryption.service";

@@ -16,7 +16,7 @@ import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.serv
 import { CipherWithIdRequest } from "@bitwarden/common/vault/models/request/cipher-with-id.request";
 import { FolderWithIdRequest } from "@bitwarden/common/vault/models/request/folder-with-id.request";
 
-import { AccountRecoveryService } from "../../admin-console/organizations/core/services/account-recovery/account-recovery.service";
+import { AccountRecoveryService } from "../../admin-console/organizations/members/services/account-recovery/account-recovery.service";
 import { EmergencyAccessService } from "../emergency-access";
 
 // TODO: PM-3797 - This service should be expanded and used for user key rotations in change-password.component.ts

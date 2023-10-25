@@ -23,7 +23,7 @@ const retries: OperationOptions = {
   factor: 2,
 };
 
-export class LowdbStorageService extends AbstractStorageService {
+export class LowdbStorageService implements AbstractStorageService {
   protected dataFilePath: string;
   private db: lowdb.LowdbSync<any>;
   private defaults: any;

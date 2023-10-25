@@ -189,6 +189,11 @@ export default class AutofillService implements AutofillServiceInterface {
           return;
         }
 
+        /** TODO REMOVE BEFORE MERGING IN! */
+        const delay = new Promise((resolve) => setTimeout(resolve, 5000));
+        await delay;
+        /** TODO REMOVE BEFORE MERGING IN! */
+
         const tabToFill = await BrowserApi.getTab(tab.id);
         if (!tabToFill?.active || tabToFill?.url !== tab.url) {
           return;

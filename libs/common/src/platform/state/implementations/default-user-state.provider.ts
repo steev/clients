@@ -5,6 +5,7 @@ import {
   AbstractStorageService,
 } from "../../abstractions/storage.service";
 import { KeyDefinition } from "../key-definition";
+import { StorageLocation } from "../state-definition";
 import { UserState } from "../user-state";
 import { UserStateProvider } from "../user-state.provider";
 
@@ -40,9 +41,18 @@ export class DefaultUserStateProvider implements UserStateProvider {
       keyDefinition,
       this.accountService,
       this.encryptService,
-      this.memoryStorage,
-      this.secureStorage,
-      this.diskStorage
+      this.getLocation(keyDefinition.stateDefinition.storageLocation)
     );
+  }
+
+  private getLocation(location: StorageLocation) {
+    switch (location) {
+      case "disk":
+        return this.diskStorage;
+      case "secure":
+        return this.secureStorage;
+      case "memory":
+        return this.memoryStorage;
+    }
   }
 }

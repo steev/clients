@@ -15,22 +15,17 @@ import { Jsonify } from "type-fest";
 import { AccountService } from "../../../auth/abstractions/account.service";
 import { UserId } from "../../../types/guid";
 import { EncryptService } from "../../abstractions/encrypt.service";
-import {
-  AbstractStorageService,
-  AbstractMemoryStorageService,
-} from "../../abstractions/storage.service";
+import { AbstractStorageService } from "../../abstractions/storage.service";
 import { userKeyBuilder } from "../../misc/key-builders";
 import { DerivedStateDefinition } from "../derived-state-definition";
 import { DerivedUserState } from "../derived-user-state";
 import { KeyDefinition } from "../key-definition";
-import { StorageLocation } from "../state-definition";
 import { UserState } from "../user-state";
 
 const FAKE_DEFAULT = Symbol("fakeDefault");
 
 export class DefaultUserState<T> implements UserState<T> {
   private formattedKey$: Observable<string>;
-  private chosenStorageLocation: AbstractStorageService;
 
   protected stateSubject: BehaviorSubject<T | typeof FAKE_DEFAULT> = new BehaviorSubject<
     T | typeof FAKE_DEFAULT
@@ -43,13 +38,8 @@ export class DefaultUserState<T> implements UserState<T> {
     protected keyDefinition: KeyDefinition<T>,
     private accountService: AccountService,
     private encryptService: EncryptService,
-    private memoryStorageService: AbstractMemoryStorageService,
-    private secureStorageService: AbstractStorageService,
-    private diskStorageService: AbstractStorageService
+    private chosenStorageLocation: AbstractStorageService
   ) {
-    this.chosenStorageLocation = this.chooseStorage(
-      this.keyDefinition.stateDefinition.storageLocation
-    );
     this.formattedKey$ = this.accountService.activeAccount$.pipe(
       map((account) =>
         account != null && account.id != null
@@ -156,17 +146,6 @@ export class DefaultUserState<T> implements UserState<T> {
     const serializedData = this.keyDefinition.deserializer(data);
     this.stateSubject.next(serializedData);
     return serializedData;
-  }
-
-  private chooseStorage(storageLocation: StorageLocation): AbstractStorageService {
-    switch (storageLocation) {
-      case "disk":
-        return this.diskStorageService;
-      case "secure":
-        return this.secureStorageService;
-      case "memory":
-        return this.memoryStorageService;
-    }
   }
 
   protected saveToStorage(key: string, data: T): Promise<void> {

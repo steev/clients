@@ -35,7 +35,6 @@ const testKeyDefinition = new KeyDefinition<TestState>(
   TestState.fromJSON
 );
 
-// TODO this class needs to be totally retested, it doesn't work like this anymore
 describe("DefaultUserState", () => {
   const accountService = mock<AccountService>();
   let diskStorageService: FakeStorageService;
@@ -185,7 +184,7 @@ describe("DefaultUserState", () => {
     expect(rejectedError).toBeFalsy();
   });
 
-  it("test_thing", async () => {
+  it("should not emit a previous users value if that user is no longer active", async () => {
     diskStorageService.internalUpdateStore({
       "user_00000000-0000-1000-a000-000000000001_fake_fake": {
         date: "2020-09-21T13:14:17.648Z",

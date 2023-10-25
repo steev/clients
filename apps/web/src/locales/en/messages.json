@@ -7291,5 +7291,8 @@
   },
   "contactYourProvider": {
     "message": "Contact your provider to purchase additional seats."
+  },
+  "seatLimitReachedContactYourProvider": {
+    "message": "Seat limit has been reached. Contact your provider to purchase additional seats."
   }
 }

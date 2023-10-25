@@ -36,7 +36,7 @@ import {
 } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { OrganizationKeysRequest } from "@bitwarden/common/admin-console/models/request/organization-keys.request";
-import { ProductType, ProviderType } from "@bitwarden/common/enums";
+import { ProductType } from "@bitwarden/common/enums";
 import { ListResponse } from "@bitwarden/common/models/response/list.response";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -380,11 +380,7 @@ export class PeopleComponent
   }
 
   async edit(user: OrganizationUserView, initialTab: MemberDialogTab = MemberDialogTab.Role) {
-    if (
-      this.organization.hasProvider &&
-      this.organization.providerType === ProviderType.Reseller &&
-      this.organization.seats === this.confirmedCount
-    ) {
+    if (this.organization.hasReseller && this.organization.seats === this.confirmedCount) {
       this.platformUtilsService.showToast(
         "error",
         this.i18nService.t("seatLimitReached"),
@@ -415,6 +411,7 @@ export class PeopleComponent
         allOrganizationUserEmails: this.allUsers?.map((user) => user.email) ?? [],
         usesKeyConnector: user?.usesKeyConnector,
         initialTab: initialTab,
+        numConfirmedMembers: this.confirmedCount,
       },
     });
 

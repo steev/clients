@@ -50,6 +50,7 @@ export interface MemberDialogParams {
   allOrganizationUserEmails: string[];
   usesKeyConnector: boolean;
   initialTab?: MemberDialogTab;
+  numConfirmedMembers: number;
 }
 
 export enum MemberDialogResult {
@@ -363,6 +364,15 @@ export class MemberDialogComponent implements OnInit, OnDestroy {
       if (emails.length > 20) {
         this.formGroup.controls.emails.setErrors({
           tooManyEmails: { message: this.i18nService.t("tooManyEmails", 20) },
+        });
+        return;
+      }
+      if (
+        this.organization.hasReseller &&
+        this.params.numConfirmedMembers + emails.length > this.organization.seats
+      ) {
+        this.formGroup.controls.emails.setErrors({
+          tooManyEmails: { message: this.i18nService.t("seatLimitReachedContactYourProvider") },
         });
         return;
       }

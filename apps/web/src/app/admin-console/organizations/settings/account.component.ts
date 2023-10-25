@@ -1,7 +1,7 @@
 import { Component, ViewChild, ViewContainerRef } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { combineLatest, lastValueFrom, Subject, switchMap, takeUntil, from, of } from "rxjs";
+import { combineLatest, from, lastValueFrom, of, Subject, switchMap, takeUntil } from "rxjs";
 
 import { ModalService } from "@bitwarden/angular/services/modal.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
@@ -67,6 +67,7 @@ export class AccountComponent {
 
   protected collectionManagementFormGroup = this.formBuilder.group({
     limitCollectionCreationDeletion: [false],
+    allowAdminAccessToAllCollectionItems: [false],
   });
 
   protected organizationId: string;
@@ -135,6 +136,7 @@ export class AccountComponent {
         });
         this.collectionManagementFormGroup.patchValue({
           limitCollectionCreationDeletion: this.org.limitCollectionCreationDeletion,
+          allowAdminAccessToAllCollectionItems: this.org.allowAdminAccessToAllCollectionItems,
         });
 
         this.loading = false;
@@ -174,6 +176,8 @@ export class AccountComponent {
     const request = new OrganizationCollectionManagementUpdateRequest();
     request.limitCreateDeleteOwnerAdmin =
       this.collectionManagementFormGroup.value.limitCollectionCreationDeletion;
+    request.allowAdminAccessToAllCollectionItems =
+      this.collectionManagementFormGroup.value.allowAdminAccessToAllCollectionItems;
 
     await this.organizationApiService.updateCollectionManagement(this.organizationId, request);
 

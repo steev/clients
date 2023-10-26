@@ -8,12 +8,10 @@ import {
 
 import { fromChromeEvent } from "../../browser/from-chrome-event";
 
-export default abstract class AbstractChromeStorageService extends AbstractStorageService {
-  constructor(protected chromeStorageApi: chrome.storage.StorageArea) {
-    super();
-  }
+export default abstract class AbstractChromeStorageService implements AbstractStorageService {
+  constructor(protected chromeStorageApi: chrome.storage.StorageArea) {}
 
-  override get updates$(): Observable<StorageUpdate> {
+  get updates$(): Observable<StorageUpdate> {
     return fromChromeEvent(this.chromeStorageApi.onChanged).pipe(
       mergeMap(([changes]) => {
         return Object.entries(changes).map(([key, change]) => {

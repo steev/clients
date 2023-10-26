@@ -37,7 +37,6 @@ export class LowdbStorageService implements AbstractStorageService {
     private allowCache = false,
     private requireLock = false
   ) {
-    super();
     this.defaults = defaults;
   }
 

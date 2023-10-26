@@ -194,19 +194,10 @@ export class AcceptOrganizationComponent extends BaseAcceptComponent {
   private async accelerateInviteAcceptIfPossible(qParams: Params): Promise<void> {
     // Extract the query params we need to make routing acceleration decisions
     const orgSsoIdentifier = qParams.orgSsoIdentifier;
-    const orgSsoEnabled = this.stringToNullOrBool(qParams.orgSsoEnabled);
-    const orgSsoLoginRequiredPolicyEnabled = this.stringToNullOrBool(
-      qParams.orgSsoLoginRequiredPolicyEnabled
-    );
     const orgUserHasExistingUser = this.stringToNullOrBool(qParams.orgUserHasExistingUser);
 
-    // if any of the above are null, short circuit for backwards compatibility w/ older servers
-    if (
-      orgSsoIdentifier == null ||
-      orgSsoEnabled == null ||
-      orgSsoLoginRequiredPolicyEnabled == null ||
-      orgUserHasExistingUser == null
-    ) {
+    // if orgUserHasExistingUser is null, short circuit for backwards compatibility w/ older servers
+    if (orgUserHasExistingUser == null) {
       return;
     }
 
@@ -216,22 +207,22 @@ export class AcceptOrganizationComponent extends BaseAcceptComponent {
       return;
     }
 
-    // no user exists; so either register or sign in via SSO and JIT provision one.
-    // if SSO is disabled OR if sso is enabled but the SSO login required policy is not enabled
-    // then send user to create account
-    if (!orgSsoEnabled || !orgSsoLoginRequiredPolicyEnabled) {
-      this.router.navigate(["/register"], {
-        queryParams: { email: qParams.email, fromOrgInvite: true },
-      });
-      return;
-    }
+    // no user exists; so either sign in via SSO and JIT provision one or simply register.
 
-    if (orgSsoEnabled && orgSsoLoginRequiredPolicyEnabled) {
+    if (orgSsoIdentifier) {
+      // We only send sso org identifier if the org has SSO enabled and the SSO policy required.
       this.router.navigate(["/sso"], {
         queryParams: { email: qParams.email, identifier: orgSsoIdentifier },
       });
       return;
     }
+
+    // if SSO is disabled OR if sso is enabled but the SSO login required policy is not enabled
+    // then send user to create account
+    this.router.navigate(["/register"], {
+      queryParams: { email: qParams.email, fromOrgInvite: true },
+    });
+    return;
   }
 
   private stringToNullOrBool(s: string | undefined): boolean | null {

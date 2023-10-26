@@ -100,6 +100,17 @@
                   "./libs/importer/**/*",
                   "./libs/exporter/**/*"
                 ]
+              },
+              {
+                // avoid import of unexported state objects
+                "target": [
+                  "!(libs)/**/*",
+                  "libs/!(common)/**/*",
+                  "libs/common/!(src)/**/*",
+                  "libs/common/src/!(platform)/**/*",
+                  "libs/common/src/platform/!(state)/**/*"
+                ],
+                "from": ["./libs/common/src/platform/state/**/*"]
               }
             ]
           }

@@ -1,5 +1,3 @@
-// TODO: Make this not allowed to be able to be imported anywhere willy-nilly.
-
 export type StorageLocation = "disk" | "memory";
 
 /**

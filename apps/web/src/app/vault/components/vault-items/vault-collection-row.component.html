@@ -48,7 +48,8 @@
   ></app-group-badge>
 </td>
 <td bitCell [ngClass]="RowHeightClass" *ngIf="orgVault">
-  <p class="tw-mb-0 tw-text-muted">{{ permissionText | i18n }}</p>
+  <p class="tw-mb-0 tw-text-muted" *ngIf="!permissionText">-</p>
+  <p class="tw-mb-0 tw-text-muted" *ngIf="permissionText">{{ permissionText | i18n }}</p>
 </td>
 <td bitCell [ngClass]="RowHeightClass" class="tw-text-right">
   <button

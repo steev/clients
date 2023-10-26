@@ -43,6 +43,7 @@ export class VaultItemsComponent {
   @Input() allGroups: GroupView[] = [];
   @Input() orgVault = false;
   @Input() showBulkEditCollectionAccess = false;
+  @Input() isOrgOwner: boolean;
 
   private _ciphers?: CipherView[] = [];
   @Input() get ciphers(): CipherView[] {

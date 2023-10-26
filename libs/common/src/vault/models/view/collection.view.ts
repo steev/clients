@@ -42,12 +42,17 @@ export class CollectionView implements View, ITreeNodeObject {
   }
 
   // For deleting a collection, not the items within it.
-  canDelete(org: Organization): boolean {
+  canDelete(org: Organization, flexibleCollectionsEnabled: boolean): boolean {
     if (org.id !== this.organizationId) {
       throw new Error(
         "Id of the organization provided does not match the org id of the collection."
       );
     }
-    return org?.canDeleteAnyCollection || org?.canDeleteAssignedCollections;
+
+    if (flexibleCollectionsEnabled) {
+      return org?.canDeleteAnyCollection || (!org?.limitCollectionCreationDeletion && this.manage);
+    } else {
+      return org?.canDeleteAnyCollection || org?.canDeleteAssignedCollections;
+    }
   }
 }

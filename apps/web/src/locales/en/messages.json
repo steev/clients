@@ -7320,5 +7320,9 @@
         "example": "Master Password"
       }
     }
+  },  
+  "seeDetailedInstructions": {
+    "message": "See detailed instructions on our help site at",
+    "description": "This is followed a by a hyperlink to the help website."
   }
 }

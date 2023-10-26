@@ -1,16 +1,13 @@
-import { Subject } from "rxjs";
+import { throwError } from "rxjs";
 
-import {
-  AbstractStorageService,
-  StorageUpdate,
-} from "@bitwarden/common/platform/abstractions/storage.service";
+import { AbstractStorageService } from "@bitwarden/common/platform/abstractions/storage.service";
 import { StorageOptions } from "@bitwarden/common/platform/models/domain/storage-options";
 
 export class ElectronRendererSecureStorageService implements AbstractStorageService {
-  private updatesSubject = new Subject<StorageUpdate>();
-
   get updates$() {
-    return this.updatesSubject.asObservable();
+    return throwError(
+      () => new Error("Secure storage implementations cannot have their updates subscribed to.")
+    );
   }
 
   async get<T>(key: string, options?: StorageOptions): Promise<T> {
@@ -25,11 +22,9 @@ export class ElectronRendererSecureStorageService implements AbstractStorageServ
 
   async save<T>(key: string, obj: T, options?: StorageOptions): Promise<void> {
     await ipc.platform.passwords.set(key, options?.keySuffix ?? "", JSON.stringify(obj));
-    this.updatesSubject.next({ key, value: obj, updateType: "save" });
   }
 
   async remove(key: string, options?: StorageOptions): Promise<void> {
     await ipc.platform.passwords.delete(key, options?.keySuffix ?? "");
-    this.updatesSubject.next({ key, value: null, updateType: "remove" });
   }
 }

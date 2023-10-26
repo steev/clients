@@ -18,8 +18,7 @@ export class DefaultUserStateProvider implements UserStateProvider {
     protected accountService: AccountService, // Inject the lightest weight service that provides accountUserId$
     protected encryptService: EncryptService,
     protected memoryStorage: AbstractMemoryStorageService,
-    protected diskStorage: AbstractStorageService,
-    protected secureStorage: AbstractStorageService
+    protected diskStorage: AbstractStorageService
   ) {}
 
   get<T>(keyDefinition: KeyDefinition<T>): UserState<T> {
@@ -49,8 +48,6 @@ export class DefaultUserStateProvider implements UserStateProvider {
     switch (location) {
       case "disk":
         return this.diskStorage;
-      case "secure":
-        return this.secureStorage;
       case "memory":
         return this.memoryStorage;
     }

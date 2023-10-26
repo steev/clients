@@ -14,8 +14,7 @@ export class DefaultGlobalStateProvider implements GlobalStateProvider {
 
   constructor(
     private memoryStorage: AbstractMemoryStorageService,
-    private diskStorage: AbstractStorageService,
-    private secureStorage: AbstractStorageService
+    private diskStorage: AbstractStorageService
   ) {}
 
   get<T>(keyDefinition: KeyDefinition<T>): GlobalState<T> {
@@ -40,8 +39,6 @@ export class DefaultGlobalStateProvider implements GlobalStateProvider {
     switch (location) {
       case "disk":
         return this.diskStorage;
-      case "secure":
-        return this.secureStorage;
       case "memory":
         return this.memoryStorage;
     }

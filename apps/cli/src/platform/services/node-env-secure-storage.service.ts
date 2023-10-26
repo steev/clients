@@ -1,18 +1,13 @@
-import { Subject } from "rxjs";
+import { throwError } from "rxjs";
 
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
-import {
-  AbstractStorageService,
-  StorageUpdate,
-} from "@bitwarden/common/platform/abstractions/storage.service";
+import { AbstractStorageService } from "@bitwarden/common/platform/abstractions/storage.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { EncArrayBuffer } from "@bitwarden/common/platform/models/domain/enc-array-buffer";
 import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
 
 export class NodeEnvSecureStorageService implements AbstractStorageService {
-  private updatesSubject = new Subject<StorageUpdate>();
-
   constructor(
     private storageService: AbstractStorageService,
     private logService: LogService,
@@ -20,7 +15,9 @@ export class NodeEnvSecureStorageService implements AbstractStorageService {
   ) {}
 
   get updates$() {
-    return this.updatesSubject.asObservable();
+    return throwError(
+      () => new Error("Secure storage implementations cannot have their updates subscribed to.")
+    );
   }
 
   async get<T>(key: string): Promise<T> {
@@ -46,12 +43,10 @@ export class NodeEnvSecureStorageService implements AbstractStorageService {
     }
     const protectedObj = await this.encrypt(obj);
     await this.storageService.save(this.makeProtectedStorageKey(key), protectedObj);
-    this.updatesSubject.next({ key, value: obj, updateType: "save" });
   }
 
   async remove(key: string): Promise<void> {
     await this.storageService.remove(this.makeProtectedStorageKey(key));
-    this.updatesSubject.next({ key, value: null, updateType: "remove" });
     return;
   }
 

@@ -288,17 +288,18 @@ export class EnvironmentService implements EnvironmentServiceAbstraction {
   async getHost(userId?: string) {
     const region = await this.getRegion(userId ? userId : null);
 
-    let envUrls;
-
     switch (region) {
       case Region.US:
         return RegionDomain.US;
       case Region.EU:
         return RegionDomain.EU;
-      default:
-        // self-hosted host
-        envUrls = await this.stateService.getEnvironmentUrls(userId ? { userId: userId } : null);
+      default: {
+        // Environment is self-hosted
+        const envUrls = await this.stateService.getEnvironmentUrls(
+          userId ? { userId: userId } : null
+        );
         return Utils.getHost(envUrls.webVault || envUrls.base);
+      }
     }
   }
 

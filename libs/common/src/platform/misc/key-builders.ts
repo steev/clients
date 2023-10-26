@@ -1,6 +1,8 @@
 import { Opaque } from "type-fest";
 
 import { UserId } from "../../types/guid";
+// This is a helper to build official key strings based on the key definitions, usage is allowed here
+// eslint-disable-next-line import/no-restricted-paths
 import { KeyDefinition } from "../state/key-definition";
 
 import { Utils } from "./utils";

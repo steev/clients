@@ -1,32 +1,34 @@
-import { Directive, ElementRef, NgZone, OnInit, ViewChild } from "@angular/core";
+import { Directive, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { take } from "rxjs/operators";
+import { Subject } from "rxjs";
+import { take, takeUntil } from "rxjs/operators";
 
-import { AppIdService } from "@bitwarden/common/abstractions/appId.service";
-import { CryptoFunctionService } from "@bitwarden/common/abstractions/cryptoFunction.service";
-import { DevicesApiServiceAbstraction } from "@bitwarden/common/abstractions/devices/devices-api.service.abstraction";
-import { EnvironmentService } from "@bitwarden/common/abstractions/environment.service";
-import {
-  AllValidationErrors,
-  FormValidationErrorsService,
-} from "@bitwarden/common/abstractions/formValidationErrors.service";
-import { I18nService } from "@bitwarden/common/abstractions/i18n.service";
-import { LogService } from "@bitwarden/common/abstractions/log.service";
-import { PlatformUtilsService } from "@bitwarden/common/abstractions/platformUtils.service";
-import { StateService } from "@bitwarden/common/abstractions/state.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
+import { DevicesApiServiceAbstraction } from "@bitwarden/common/auth/abstractions/devices-api.service.abstraction";
 import { LoginService } from "@bitwarden/common/auth/abstractions/login.service";
 import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
 import { ForceResetPasswordReason } from "@bitwarden/common/auth/models/domain/force-reset-password-reason";
-import { PasswordLogInCredentials } from "@bitwarden/common/auth/models/domain/log-in-credentials";
-import { Utils } from "@bitwarden/common/misc/utils";
+import { PasswordLoginCredentials } from "@bitwarden/common/auth/models/domain/login-credentials";
+import { AppIdService } from "@bitwarden/common/platform/abstractions/app-id.service";
+import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
+import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
+import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
+
+import {
+  AllValidationErrors,
+  FormValidationErrorsService,
+} from "../../platform/abstractions/form-validation-errors.service";
 
 import { CaptchaProtectedComponent } from "./captcha-protected.component";
 
 @Directive()
-export class LoginComponent extends CaptchaProtectedComponent implements OnInit {
+export class LoginComponent extends CaptchaProtectedComponent implements OnInit, OnDestroy {
   @ViewChild("masterPasswordInput", { static: true }) masterPasswordInput: ElementRef;
 
   showPassword = false;
@@ -41,13 +43,18 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
 
   formGroup = this.formBuilder.group({
     email: ["", [Validators.required, Validators.email]],
-    masterPassword: ["", [Validators.required, Validators.minLength(8)]],
+    masterPassword: [
+      "",
+      [Validators.required, Validators.minLength(Utils.originalMinimumPasswordLength)],
+    ],
     rememberEmail: [false],
   });
 
   protected twoFactorRoute = "2fa";
   protected successRoute = "vault";
   protected forcePasswordResetRoute = "update-temp-password";
+
+  protected destroy$ = new Subject<void>();
 
   get loggedEmail() {
     return this.formGroup.value.email;
@@ -79,14 +86,17 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
   }
 
   async ngOnInit() {
-    this.route?.queryParams.subscribe((params) => {
-      if (params != null) {
-        const queryParamsEmail = params["email"];
-        if (queryParamsEmail != null && queryParamsEmail.indexOf("@") > -1) {
-          this.formGroup.get("email").setValue(queryParamsEmail);
-          this.loginService.setEmail(queryParamsEmail);
-          this.paramEmailSet = true;
-        }
+    this.route?.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      if (!params) {
+        return;
+      }
+
+      const queryParamsEmail = params.email;
+
+      if (queryParamsEmail != null && queryParamsEmail.indexOf("@") > -1) {
+        this.formGroup.get("email").setValue(queryParamsEmail);
+        this.loginService.setEmail(queryParamsEmail);
+        this.paramEmailSet = true;
       }
     });
     let email = this.loginService.getEmail();
@@ -103,6 +113,11 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
       rememberEmail = (await this.stateService.getRememberedEmail()) != null;
     }
     this.formGroup.get("rememberEmail")?.setValue(rememberEmail);
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   async submit(showToast = true) {
@@ -125,7 +140,7 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
     }
 
     try {
-      const credentials = new PasswordLogInCredentials(
+      const credentials = new PasswordLoginCredentials(
         data.email,
         data.masterPassword,
         this.captchaToken,
@@ -136,6 +151,8 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
       this.setFormValues();
       await this.loginService.saveEmailSettings();
       if (this.handleCaptchaRequired(response)) {
+        return;
+      } else if (this.handleMigrateEncryptionKey(response)) {
         return;
       } else if (response.requiresTwoFactor) {
         if (this.onSuccessfulLoginTwoFactorNavigate != null) {
@@ -175,7 +192,7 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
     }
   }
 
-  async startPasswordlessLogin() {
+  async startAuthRequestLogin() {
     this.formGroup.get("masterPassword")?.clearValidators();
     this.formGroup.get("masterPassword")?.updateValueAndValidity();
 
@@ -268,6 +285,21 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
     await this.loginService.saveEmailSettings();
   }
 
+  // Legacy accounts used the master key to encrypt data. Migration is required
+  // but only performed on web
+  protected handleMigrateEncryptionKey(result: AuthResult): boolean {
+    if (!result.requiresEncryptionKeyMigration) {
+      return false;
+    }
+
+    this.platformUtilsService.showToast(
+      "error",
+      this.i18nService.t("errorOccured"),
+      this.i18nService.t("encryptionKeyMigrationRequired")
+    );
+    return true;
+  }
+
   private getErrorToastMessage() {
     const error: AllValidationErrors = this.formValidationErrorService
       .getFormValidationErrors(this.formGroup.controls)
@@ -277,6 +309,8 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
       switch (error.errorName) {
         case "email":
           return this.i18nService.t("invalidEmail");
+        case "minlength":
+          return this.i18nService.t("masterPasswordMinlength", Utils.originalMinimumPasswordLength);
         default:
           return this.i18nService.t(this.errorTag(error));
       }

@@ -51,7 +51,6 @@
         [showBulkMove]="false"
         [showBulkTrashOptions]="filter.type === 'trash'"
         [useEvents]="organization?.useEvents"
-        [editableCollections]="true"
         [cloneableOrganizationCiphers]="true"
         (onEvent)="onVaultItemsEvent($event)"
       >
@@ -96,5 +95,4 @@
   <ng-template #attachments></ng-template>
   <ng-template #cipherAddEdit></ng-template>
   <ng-template #collectionsModal></ng-template>
-  <ng-template #eventsTemplate></ng-template>
 </div>

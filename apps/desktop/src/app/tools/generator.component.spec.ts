@@ -1,15 +1,13 @@
 import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ActivatedRoute } from "@angular/router";
-// eslint-disable-next-line no-restricted-imports
-import { Substitute } from "@fluffy-spoon/substitute";
 import { mock, MockProxy } from "jest-mock-extended";
 
-import { I18nPipe } from "@bitwarden/angular/pipes/i18n.pipe";
-import { I18nService } from "@bitwarden/common/abstractions/i18n.service";
-import { LogService } from "@bitwarden/common/abstractions/log.service";
-import { PlatformUtilsService } from "@bitwarden/common/abstractions/platformUtils.service";
-import { StateService } from "@bitwarden/common/abstractions/state.service";
+import { I18nPipe } from "@bitwarden/angular/platform/pipes/i18n.pipe";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
 import { UsernameGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/username";
 
@@ -28,15 +26,15 @@ describe("GeneratorComponent", () => {
       providers: [
         {
           provide: PasswordGenerationServiceAbstraction,
-          useClass: Substitute.for<PasswordGenerationServiceAbstraction>(),
+          useValue: mock<PasswordGenerationServiceAbstraction>(),
         },
         {
           provide: UsernameGenerationServiceAbstraction,
-          useClass: Substitute.for<UsernameGenerationServiceAbstraction>(),
+          useValue: mock<UsernameGenerationServiceAbstraction>(),
         },
         {
           provide: StateService,
-          useClass: Substitute.for<StateService>(),
+          useValue: mock<StateService>(),
         },
         {
           provide: PlatformUtilsService,
@@ -44,15 +42,15 @@ describe("GeneratorComponent", () => {
         },
         {
           provide: I18nService,
-          useClass: Substitute.for<I18nService>(),
+          useValue: mock<I18nService>(),
         },
         {
           provide: ActivatedRoute,
-          useClass: Substitute.for<ActivatedRoute>(),
+          useValue: mock<ActivatedRoute>(),
         },
         {
           provide: LogService,
-          useClass: Substitute.for<LogService>(),
+          useValue: mock<LogService>(),
         },
       ],
       schemas: [NO_ERRORS_SCHEMA],

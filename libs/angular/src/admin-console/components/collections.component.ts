@@ -1,13 +1,13 @@
 import { Directive, EventEmitter, Input, OnInit, Output } from "@angular/core";
 
-import { I18nService } from "@bitwarden/common/abstractions/i18n.service";
-import { LogService } from "@bitwarden/common/abstractions/log.service";
-import { PlatformUtilsService } from "@bitwarden/common/abstractions/platformUtils.service";
-import { CollectionService } from "@bitwarden/common/admin-console/abstractions/collection.service";
-import { CollectionView } from "@bitwarden/common/admin-console/models/view/collection.view";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
+import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
+import { CollectionView } from "@bitwarden/common/vault/models/view/collection.view";
 
 @Directive()
 export class CollectionsComponent implements OnInit {
@@ -37,7 +37,9 @@ export class CollectionsComponent implements OnInit {
   async load() {
     this.cipherDomain = await this.loadCipher();
     this.collectionIds = this.loadCipherCollections();
-    this.cipher = await this.cipherDomain.decrypt();
+    this.cipher = await this.cipherDomain.decrypt(
+      await this.cipherService.getKeyForCipherKeyDecryption(this.cipherDomain)
+    );
     this.collections = await this.loadCollections();
 
     this.collections.forEach((c) => ((c as any).checked = false));

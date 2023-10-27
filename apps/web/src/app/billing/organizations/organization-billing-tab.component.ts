@@ -2,11 +2,10 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { map, Observable, switchMap } from "rxjs";
 
-import { PlatformUtilsService } from "@bitwarden/common/abstractions/platformUtils.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 
 @Component({
-  selector: "app-org-billing-tab",
   templateUrl: "organization-billing-tab.component.html",
 })
 export class OrganizationBillingTabComponent implements OnInit {

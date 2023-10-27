@@ -9,7 +9,7 @@ import {
 } from "@angular/forms";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 
-import { I18nService } from "@bitwarden/common/abstractions/i18n.service";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 
 import { AsyncActionsModule } from "../async-actions";
 import { ButtonModule } from "../button";
@@ -151,6 +151,24 @@ export const Disabled: Story = {
       <bit-form-field>
         <bit-label>Label</bit-label>
         <input bitInput placeholder="Placeholder" disabled />
+      </bit-form-field>
+    `,
+  }),
+  args: {},
+};
+
+export const Readonly: Story = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <bit-form-field>
+        <bit-label>Input</bit-label>
+        <input bitInput value="Foobar" readonly />
+      </bit-form-field>
+
+      <bit-form-field>
+        <bit-label>Textarea</bit-label>
+        <textarea bitInput rows="4" readonly>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</textarea>
       </bit-form-field>
     `,
   }),

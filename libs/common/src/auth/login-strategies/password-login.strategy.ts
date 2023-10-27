@@ -1,30 +1,30 @@
 import { ApiService } from "../../abstractions/api.service";
-import { AppIdService } from "../../abstractions/appId.service";
-import { CryptoService } from "../../abstractions/crypto.service";
-import { LogService } from "../../abstractions/log.service";
-import { MessagingService } from "../../abstractions/messaging.service";
-import { PlatformUtilsService } from "../../abstractions/platformUtils.service";
-import { StateService } from "../../abstractions/state.service";
 import { PolicyService } from "../../admin-console/abstractions/policy/policy.service.abstraction";
 import { MasterPasswordPolicyOptions } from "../../admin-console/models/domain/master-password-policy-options";
 import { HashPurpose } from "../../enums";
-import { SymmetricCryptoKey } from "../../models/domain/symmetric-crypto-key";
-import { PasswordGenerationServiceAbstraction } from "../../tools/generator/password";
+import { AppIdService } from "../../platform/abstractions/app-id.service";
+import { CryptoService } from "../../platform/abstractions/crypto.service";
+import { LogService } from "../../platform/abstractions/log.service";
+import { MessagingService } from "../../platform/abstractions/messaging.service";
+import { PlatformUtilsService } from "../../platform/abstractions/platform-utils.service";
+import { StateService } from "../../platform/abstractions/state.service";
+import { MasterKey } from "../../platform/models/domain/symmetric-crypto-key";
+import { PasswordStrengthServiceAbstraction } from "../../tools/password-strength";
 import { AuthService } from "../abstractions/auth.service";
 import { TokenService } from "../abstractions/token.service";
 import { TwoFactorService } from "../abstractions/two-factor.service";
 import { AuthResult } from "../models/domain/auth-result";
 import { ForceResetPasswordReason } from "../models/domain/force-reset-password-reason";
-import { PasswordLogInCredentials } from "../models/domain/log-in-credentials";
+import { PasswordLoginCredentials } from "../models/domain/login-credentials";
 import { PasswordTokenRequest } from "../models/request/identity-token/password-token.request";
 import { TokenTwoFactorRequest } from "../models/request/identity-token/token-two-factor.request";
 import { IdentityCaptchaResponse } from "../models/response/identity-captcha.response";
 import { IdentityTokenResponse } from "../models/response/identity-token.response";
 import { IdentityTwoFactorResponse } from "../models/response/identity-two-factor.response";
 
-import { LogInStrategy } from "./login.strategy";
+import { LoginStrategy } from "./login.strategy";
 
-export class PasswordLogInStrategy extends LogInStrategy {
+export class PasswordLoginStrategy extends LoginStrategy {
   get email() {
     return this.tokenRequest.email;
   }
@@ -35,8 +35,8 @@ export class PasswordLogInStrategy extends LogInStrategy {
 
   tokenRequest: PasswordTokenRequest;
 
-  private localHashedPassword: string;
-  private key: SymmetricCryptoKey;
+  private localMasterKeyHash: string;
+  private masterKey: MasterKey;
 
   /**
    * Options to track if the user needs to update their password due to a password that does not meet an organization's
@@ -54,7 +54,7 @@ export class PasswordLogInStrategy extends LogInStrategy {
     logService: LogService,
     protected stateService: StateService,
     twoFactorService: TwoFactorService,
-    private passwordGenerationService: PasswordGenerationServiceAbstraction,
+    private passwordStrengthService: PasswordStrengthServiceAbstraction,
     private policyService: PolicyService,
     private authService: AuthService
   ) {
@@ -71,12 +71,7 @@ export class PasswordLogInStrategy extends LogInStrategy {
     );
   }
 
-  async setUserKey() {
-    await this.cryptoService.setKey(this.key);
-    await this.cryptoService.setKeyHash(this.localHashedPassword);
-  }
-
-  async logInTwoFactor(
+  override async logInTwoFactor(
     twoFactor: TokenTwoFactorRequest,
     captchaResponse: string
   ): Promise<AuthResult> {
@@ -96,28 +91,29 @@ export class PasswordLogInStrategy extends LogInStrategy {
     return result;
   }
 
-  async logIn(credentials: PasswordLogInCredentials) {
+  override async logIn(credentials: PasswordLoginCredentials) {
     const { email, masterPassword, captchaToken, twoFactor } = credentials;
 
-    this.key = await this.authService.makePreloginKey(masterPassword, email);
+    this.masterKey = await this.authService.makePreloginKey(masterPassword, email);
 
     // Hash the password early (before authentication) so we don't persist it in memory in plaintext
-    this.localHashedPassword = await this.cryptoService.hashPassword(
+    this.localMasterKeyHash = await this.cryptoService.hashMasterKey(
       masterPassword,
-      this.key,
+      this.masterKey,
       HashPurpose.LocalAuthorization
     );
-    const hashedPassword = await this.cryptoService.hashPassword(masterPassword, this.key);
+    const masterKeyHash = await this.cryptoService.hashMasterKey(masterPassword, this.masterKey);
 
     this.tokenRequest = new PasswordTokenRequest(
       email,
-      hashedPassword,
+      masterKeyHash,
       captchaToken,
       await this.buildTwoFactor(twoFactor),
       await this.buildDeviceRequest()
     );
 
     const [authResult, identityResponse] = await this.startLogIn();
+
     const masterPasswordPolicyOptions =
       this.getMasterPasswordPolicyOptionsFromResponse(identityResponse);
 
@@ -145,6 +141,35 @@ export class PasswordLogInStrategy extends LogInStrategy {
     return authResult;
   }
 
+  protected override async setMasterKey(response: IdentityTokenResponse) {
+    await this.cryptoService.setMasterKey(this.masterKey);
+    await this.cryptoService.setMasterKeyHash(this.localMasterKeyHash);
+  }
+
+  protected override async setUserKey(response: IdentityTokenResponse): Promise<void> {
+    // If migration is required, we won't have a user key to set yet.
+    if (this.encryptionKeyMigrationRequired(response)) {
+      return;
+    }
+    await this.cryptoService.setMasterKeyEncryptedUserKey(response.key);
+
+    const masterKey = await this.cryptoService.getMasterKey();
+    if (masterKey) {
+      const userKey = await this.cryptoService.decryptUserKeyWithMasterKey(masterKey);
+      await this.cryptoService.setUserKey(userKey);
+    }
+  }
+
+  protected override async setPrivateKey(response: IdentityTokenResponse): Promise<void> {
+    await this.cryptoService.setPrivateKey(
+      response.privateKey ?? (await this.createKeyPairForOldAccount())
+    );
+  }
+
+  protected override encryptionKeyMigrationRequired(response: IdentityTokenResponse): boolean {
+    return !response.key;
+  }
+
   private getMasterPasswordPolicyOptionsFromResponse(
     response: IdentityTokenResponse | IdentityTwoFactorResponse | IdentityCaptchaResponse
   ): MasterPasswordPolicyOptions {
@@ -155,10 +180,10 @@ export class PasswordLogInStrategy extends LogInStrategy {
   }
 
   private evaluateMasterPassword(
-    { masterPassword, email }: PasswordLogInCredentials,
+    { masterPassword, email }: PasswordLoginCredentials,
     options: MasterPasswordPolicyOptions
   ): boolean {
-    const passwordStrength = this.passwordGenerationService.passwordStrength(
+    const passwordStrength = this.passwordStrengthService.getPasswordStrength(
       masterPassword,
       email
     )?.score;

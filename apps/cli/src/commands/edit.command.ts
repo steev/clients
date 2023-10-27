@@ -1,14 +1,14 @@
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { CryptoService } from "@bitwarden/common/abstractions/crypto.service";
-import { CollectionRequest } from "@bitwarden/common/admin-console/models/request/collection.request";
 import { SelectionReadOnlyRequest } from "@bitwarden/common/admin-console/models/request/selection-read-only.request";
-import { Utils } from "@bitwarden/common/misc/utils";
 import { CipherExport } from "@bitwarden/common/models/export/cipher.export";
 import { CollectionExport } from "@bitwarden/common/models/export/collection.export";
 import { FolderExport } from "@bitwarden/common/models/export/folder.export";
+import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { FolderApiServiceAbstraction } from "@bitwarden/common/vault/abstractions/folder/folder-api.service.abstraction";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
+import { CollectionRequest } from "@bitwarden/common/vault/models/request/collection.request";
 
 import { OrganizationCollectionRequest } from "../admin-console/models/request/organization-collection.request";
 import { OrganizationCollectionResponse } from "../admin-console/models/response/organization-collection.response";
@@ -77,7 +77,9 @@ export class EditCommand {
       return Response.notFound();
     }
 
-    let cipherView = await cipher.decrypt();
+    let cipherView = await cipher.decrypt(
+      await this.cipherService.getKeyForCipherKeyDecryption(cipher)
+    );
     if (cipherView.isDeleted) {
       return Response.badRequest("You may not edit a deleted item. Use the restore command first.");
     }
@@ -86,7 +88,9 @@ export class EditCommand {
     try {
       await this.cipherService.updateWithServer(encCipher);
       const updatedCipher = await this.cipherService.get(cipher.id);
-      const decCipher = await updatedCipher.decrypt();
+      const decCipher = await updatedCipher.decrypt(
+        await this.cipherService.getKeyForCipherKeyDecryption(updatedCipher)
+      );
       const res = new CipherResponse(decCipher);
       return Response.success(res);
     } catch (e) {
@@ -109,7 +113,9 @@ export class EditCommand {
     try {
       await this.cipherService.saveCollectionsWithServer(cipher);
       const updatedCipher = await this.cipherService.get(cipher.id);
-      const decCipher = await updatedCipher.decrypt();
+      const decCipher = await updatedCipher.decrypt(
+        await this.cipherService.getKeyForCipherKeyDecryption(updatedCipher)
+      );
       const res = new CipherResponse(decCipher);
       return Response.success(res);
     } catch (e) {

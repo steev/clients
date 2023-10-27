@@ -67,13 +67,13 @@ const main = {
     ],
   },
   plugins: [
-    new CleanWebpackPlugin(),
     new CopyWebpackPlugin({
       patterns: [
         "./src/package.json",
         { from: "./src/images", to: "images" },
         { from: "./src/locales", to: "locales" },
         "../../node_modules/argon2-browser/dist/argon2.wasm",
+        "../../node_modules/argon2-browser/dist/argon2-simd.wasm",
       ],
     }),
     new EnvironmentPlugin({

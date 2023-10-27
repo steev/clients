@@ -13,11 +13,11 @@ import {
   share,
 } from "rxjs";
 
-import { DialogServiceAbstraction } from "@bitwarden/angular/services/dialog";
-import { I18nService } from "@bitwarden/common/abstractions/i18n.service";
-import { PlatformUtilsService } from "@bitwarden/common/abstractions/platformUtils.service";
-import { StateService } from "@bitwarden/common/abstractions/state.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
+import { DialogService } from "@bitwarden/components";
 
 import { ProjectListView } from "../models/view/project-list.view";
 import { SecretListView } from "../models/view/secret-list.view";
@@ -70,6 +70,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
   protected userIsAdmin: boolean;
   protected showOnboarding = false;
   protected loading = true;
+  protected organizationEnabled = false;
 
   protected view$: Observable<{
     allProjects: ProjectListView[];
@@ -84,7 +85,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
     private projectService: ProjectService,
     private secretService: SecretService,
     private serviceAccountService: ServiceAccountService,
-    private dialogService: DialogServiceAbstraction,
+    private dialogService: DialogService,
     private organizationService: OrganizationService,
     private stateService: StateService,
     private platformUtilsService: PlatformUtilsService,
@@ -107,6 +108,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
         this.organizationName = org.name;
         this.userIsAdmin = org.isAdmin;
         this.loading = true;
+        this.organizationEnabled = org.enabled;
       });
 
     const projects$ = combineLatest([
@@ -130,7 +132,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
       orgId$,
       this.serviceAccountService.serviceAccount$.pipe(startWith(null)),
     ]).pipe(
-      switchMap(([orgId]) => this.serviceAccountService.getServiceAccounts(orgId)),
+      switchMap(([orgId]) => this.serviceAccountService.getServiceAccounts(orgId, false)),
       share()
     );
 
@@ -208,6 +210,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
       data: {
         organizationId: this.organizationId,
         operation: OperationType.Edit,
+        organizationEnabled: this.organizationEnabled,
         projectId: projectId,
       },
     });
@@ -218,6 +221,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
       data: {
         organizationId: this.organizationId,
         operation: OperationType.Add,
+        organizationEnabled: this.organizationEnabled,
       },
     });
   }
@@ -227,6 +231,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
       data: {
         organizationId: this.organizationId,
         operation: OperationType.Add,
+        organizationEnabled: this.organizationEnabled,
       },
     });
   }
@@ -246,6 +251,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
       data: {
         organizationId: this.organizationId,
         operation: OperationType.Add,
+        organizationEnabled: this.organizationEnabled,
       },
     });
   }
@@ -256,6 +262,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
         organizationId: this.organizationId,
         operation: OperationType.Edit,
         secretId: secretId,
+        organizationEnabled: this.organizationEnabled,
       },
     });
   }
@@ -273,6 +280,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
       data: {
         organizationId: this.organizationId,
         operation: OperationType.Add,
+        organizationEnabled: this.organizationEnabled,
       },
     });
   }
@@ -288,6 +296,10 @@ export class OverviewComponent implements OnInit, OnDestroy {
       this.i18nService,
       this.secretService
     );
+  }
+
+  copySecretUuid(id: string) {
+    SecretsListComponent.copySecretUuid(id, this.platformUtilsService, this.i18nService);
   }
 
   protected hideOnboarding() {

@@ -1,19 +1,11 @@
-import { Component, NgZone, OnDestroy, OnInit } from "@angular/core";
+import { Component, NgZone, OnInit } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { Subject, takeUntil } from "rxjs";
+import { takeUntil } from "rxjs";
 import { first } from "rxjs/operators";
 
 import { LoginComponent as BaseLoginComponent } from "@bitwarden/angular/auth/components/login.component";
-import { AppIdService } from "@bitwarden/common/abstractions/appId.service";
-import { CryptoFunctionService } from "@bitwarden/common/abstractions/cryptoFunction.service";
-import { DevicesApiServiceAbstraction } from "@bitwarden/common/abstractions/devices/devices-api.service.abstraction";
-import { EnvironmentService } from "@bitwarden/common/abstractions/environment.service";
-import { FormValidationErrorsService } from "@bitwarden/common/abstractions/formValidationErrors.service";
-import { I18nService } from "@bitwarden/common/abstractions/i18n.service";
-import { LogService } from "@bitwarden/common/abstractions/log.service";
-import { MessagingService } from "@bitwarden/common/abstractions/messaging.service";
-import { PlatformUtilsService } from "@bitwarden/common/abstractions/platformUtils.service";
+import { FormValidationErrorsService } from "@bitwarden/angular/platform/abstractions/form-validation-errors.service";
 import { PolicyApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/policy/policy-api.service.abstraction";
 import { InternalPolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyData } from "@bitwarden/common/admin-console/models/data/policy.data";
@@ -21,9 +13,19 @@ import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/mod
 import { Policy } from "@bitwarden/common/admin-console/models/domain/policy";
 import { PolicyResponse } from "@bitwarden/common/admin-console/models/response/policy.response";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
+import { DevicesApiServiceAbstraction } from "@bitwarden/common/auth/abstractions/devices-api.service.abstraction";
 import { LoginService } from "@bitwarden/common/auth/abstractions/login.service";
+import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
 import { ListResponse } from "@bitwarden/common/models/response/list.response";
+import { AppIdService } from "@bitwarden/common/platform/abstractions/app-id.service";
+import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
+import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
+import { PasswordStrengthServiceAbstraction } from "@bitwarden/common/tools/password-strength";
 
 import { flagEnabled } from "../../../utils/flags";
 import { RouterService, StateService } from "../../core";
@@ -32,13 +34,12 @@ import { RouterService, StateService } from "../../core";
   selector: "app-login",
   templateUrl: "login.component.html",
 })
-export class LoginComponent extends BaseLoginComponent implements OnInit, OnDestroy {
+// eslint-disable-next-line rxjs-angular/prefer-takeuntil
+export class LoginComponent extends BaseLoginComponent implements OnInit {
   showResetPasswordAutoEnrollWarning = false;
   enforcedPasswordPolicyOptions: MasterPasswordPolicyOptions;
   policies: ListResponse<PolicyResponse>;
   showPasswordless = false;
-
-  private destroy$ = new Subject<void>();
 
   constructor(
     devicesApiService: DevicesApiServiceAbstraction,
@@ -50,6 +51,7 @@ export class LoginComponent extends BaseLoginComponent implements OnInit, OnDest
     platformUtilsService: PlatformUtilsService,
     environmentService: EnvironmentService,
     passwordGenerationService: PasswordGenerationServiceAbstraction,
+    private passwordStrengthService: PasswordStrengthServiceAbstraction,
     cryptoFunctionService: CryptoFunctionService,
     private policyApiService: PolicyApiServiceAbstraction,
     private policyService: InternalPolicyService,
@@ -143,17 +145,12 @@ export class LoginComponent extends BaseLoginComponent implements OnInit, OnDest
     }
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   async goAfterLogIn() {
     const masterPassword = this.formGroup.value.masterPassword;
 
     // Check master password against policy
     if (this.enforcedPasswordPolicyOptions != null) {
-      const strengthResult = this.passwordGenerationService.passwordStrength(
+      const strengthResult = this.passwordStrengthService.getPasswordStrength(
         masterPassword,
         this.formGroup.value.email
       );
@@ -207,5 +204,13 @@ export class LoginComponent extends BaseLoginComponent implements OnInit, OnDest
       await this.stateService.setRememberedEmail(null);
     }
     await super.submit(false);
+  }
+
+  protected override handleMigrateEncryptionKey(result: AuthResult): boolean {
+    if (!result.requiresEncryptionKeyMigration) {
+      return false;
+    }
+    this.router.navigate(["migrate-legacy-encryption"]);
+    return true;
   }
 }

@@ -1,21 +1,23 @@
 import { DatePipe, Location } from "@angular/common";
 import { Component } from "@angular/core";
+import { FormBuilder } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { first } from "rxjs/operators";
 
-import { DialogServiceAbstraction } from "@bitwarden/angular/services/dialog";
 import { AddEditComponent as BaseAddEditComponent } from "@bitwarden/angular/tools/send/add-edit.component";
-import { EnvironmentService } from "@bitwarden/common/abstractions/environment.service";
-import { I18nService } from "@bitwarden/common/abstractions/i18n.service";
-import { LogService } from "@bitwarden/common/abstractions/log.service";
-import { MessagingService } from "@bitwarden/common/abstractions/messaging.service";
-import { PlatformUtilsService } from "@bitwarden/common/abstractions/platformUtils.service";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
+import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { SendApiService } from "@bitwarden/common/tools/send/services/send-api.service.abstraction";
 import { SendService } from "@bitwarden/common/tools/send/services/send.service.abstraction";
+import { DialogService } from "@bitwarden/components";
 
+import { BrowserStateService } from "../../../platform/services/abstractions/browser-state.service";
 import { PopupUtilsService } from "../../../popup/services/popup-utils.service";
-import { BrowserStateService } from "../../../services/abstractions/browser-state.service";
+import { FilePopoutUtilsService } from "../services/file-popout-utils.service";
 
 @Component({
   selector: "app-send-add-edit",
@@ -28,9 +30,7 @@ export class SendAddEditComponent extends BaseAddEditComponent {
   // File visibility
   isFirefox = false;
   inPopout = false;
-  inSidebar = false;
-  isLinux = false;
-  isUnsupportedMac = false;
+  showFileSelector = false;
 
   constructor(
     i18nService: I18nService,
@@ -47,7 +47,9 @@ export class SendAddEditComponent extends BaseAddEditComponent {
     private popupUtilsService: PopupUtilsService,
     logService: LogService,
     sendApiService: SendApiService,
-    dialogService: DialogServiceAbstraction
+    dialogService: DialogService,
+    formBuilder: FormBuilder,
+    private filePopoutUtilsService: FilePopoutUtilsService
   ) {
     super(
       i18nService,
@@ -60,35 +62,8 @@ export class SendAddEditComponent extends BaseAddEditComponent {
       logService,
       stateService,
       sendApiService,
-      dialogService
-    );
-  }
-
-  get showFileSelector(): boolean {
-    return !(this.editMode || this.showFilePopoutMessage);
-  }
-
-  get showFilePopoutMessage(): boolean {
-    return (
-      !this.editMode &&
-      (this.showFirefoxFileWarning || this.showSafariFileWarning || this.showChromiumFileWarning)
-    );
-  }
-
-  get showFirefoxFileWarning(): boolean {
-    return this.isFirefox && !(this.inSidebar || this.inPopout);
-  }
-
-  get showSafariFileWarning(): boolean {
-    return this.isSafari && !this.inPopout;
-  }
-
-  // Only show this for Chromium based browsers in Linux and Mac > Big Sur
-  get showChromiumFileWarning(): boolean {
-    return (
-      (this.isLinux || this.isUnsupportedMac) &&
-      !this.isFirefox &&
-      !(this.inSidebar || this.inPopout)
+      dialogService,
+      formBuilder
     );
   }
 
@@ -98,12 +73,10 @@ export class SendAddEditComponent extends BaseAddEditComponent {
 
   async ngOnInit() {
     // File visibility
-    this.isFirefox = this.platformUtilsService.isFirefox();
+    this.showFileSelector =
+      !this.editMode && !this.filePopoutUtilsService.showFilePopoutMessage(window);
     this.inPopout = this.popupUtilsService.inPopout(window);
-    this.inSidebar = this.popupUtilsService.inSidebar(window);
-    this.isLinux = window?.navigator?.userAgent.indexOf("Linux") !== -1;
-    this.isUnsupportedMac =
-      this.platformUtilsService.isChrome() && window?.navigator?.appVersion.includes("Mac OS X 11");
+    this.isFirefox = this.platformUtilsService.isFirefox();
 
     // eslint-disable-next-line rxjs-angular/prefer-takeuntil, rxjs/no-async-subscribe
     this.route.queryParams.pipe(first()).subscribe(async (params) => {

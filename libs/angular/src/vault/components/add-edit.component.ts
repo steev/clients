@@ -3,12 +3,6 @@ import { Observable, Subject, takeUntil, concatMap } from "rxjs";
 
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { EventCollectionService } from "@bitwarden/common/abstractions/event/event-collection.service";
-import { I18nService } from "@bitwarden/common/abstractions/i18n.service";
-import { LogService } from "@bitwarden/common/abstractions/log.service";
-import { MessagingService } from "@bitwarden/common/abstractions/messaging.service";
-import { PlatformUtilsService } from "@bitwarden/common/abstractions/platformUtils.service";
-import { StateService } from "@bitwarden/common/abstractions/state.service";
-import { CollectionService } from "@bitwarden/common/admin-console/abstractions/collection.service";
 import {
   isMember,
   OrganizationService,
@@ -16,25 +10,30 @@ import {
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { OrganizationUserStatusType, PolicyType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
-import { CollectionView } from "@bitwarden/common/admin-console/models/view/collection.view";
 import { EventType, SecureNoteType, UriMatchType } from "@bitwarden/common/enums";
-import { Utils } from "@bitwarden/common/misc/utils";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
+import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SendApiService } from "@bitwarden/common/tools/send/services/send-api.service.abstraction";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
+import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
-import { PasswordRepromptService } from "@bitwarden/common/vault/abstractions/password-reprompt.service";
 import { CipherRepromptType } from "@bitwarden/common/vault/enums/cipher-reprompt-type";
 import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { CardView } from "@bitwarden/common/vault/models/view/card.view";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
+import { CollectionView } from "@bitwarden/common/vault/models/view/collection.view";
 import { FolderView } from "@bitwarden/common/vault/models/view/folder.view";
 import { IdentityView } from "@bitwarden/common/vault/models/view/identity.view";
 import { LoginUriView } from "@bitwarden/common/vault/models/view/login-uri.view";
 import { LoginView } from "@bitwarden/common/vault/models/view/login.view";
 import { SecureNoteView } from "@bitwarden/common/vault/models/view/secure-note.view";
-
-import { DialogServiceAbstraction, SimpleDialogType } from "../../services/dialog";
+import { DialogService } from "@bitwarden/components";
+import { PasswordRepromptService } from "@bitwarden/vault";
 
 @Directive()
 export class AddEditComponent implements OnInit, OnDestroy {
@@ -101,7 +100,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
     protected passwordRepromptService: PasswordRepromptService,
     private organizationService: OrganizationService,
     protected sendApiService: SendApiService,
-    protected dialogService: DialogServiceAbstraction
+    protected dialogService: DialogService
   ) {
     this.typeOptions = [
       { name: i18nService.t("typeLogin"), value: CipherType.Login },
@@ -226,7 +225,9 @@ export class AddEditComponent implements OnInit, OnDestroy {
     if (this.cipher == null) {
       if (this.editMode) {
         const cipher = await this.loadCipher();
-        this.cipher = await cipher.decrypt();
+        this.cipher = await cipher.decrypt(
+          await this.cipherService.getKeyForCipherKeyDecryption(cipher)
+        );
 
         // Adjust Cipher Name if Cloning
         if (this.cloneMode) {
@@ -266,6 +267,11 @@ export class AddEditComponent implements OnInit, OnDestroy {
       }
     }
 
+    // We don't want to copy passkeys when we clone a cipher
+    if (this.cloneMode && this.cipher?.login?.hasFido2Credentials) {
+      this.cipher.login.fido2Credentials = null;
+    }
+
     this.folders$ = this.folderService.folderViews$;
 
     if (this.editMode && this.previousCipherId !== this.cipherId) {
@@ -273,6 +279,9 @@ export class AddEditComponent implements OnInit, OnDestroy {
     }
     this.previousCipherId = this.cipherId;
     this.reprompt = this.cipher.reprompt !== CipherRepromptType.None;
+    if (this.reprompt) {
+      this.cipher.login.autofillOnPageLoad = this.autofillOnPageLoadOptions[2].value;
+    }
   }
 
   async submit(): Promise<boolean> {
@@ -320,7 +329,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
           : this.collections.filter((c) => (c as any).checked).map((c) => c.id);
     }
 
-    // Clear current Cipher Id to trigger "Add" cipher flow
+    // Clear current Cipher Id if exists to trigger "Add" cipher flow
     if (this.cloneMode) {
       this.cipher.id = null;
     }
@@ -368,6 +377,10 @@ export class AddEditComponent implements OnInit, OnDestroy {
     }
   }
 
+  onCardNumberChange(): void {
+    this.cipher.card.brand = CardView.getCardBrandByPatterns(this.cipher.card.number);
+  }
+
   getCardExpMonthDisplay() {
     return this.cardExpMonthOptions.find((x) => x.value == this.cipher.card.expMonth)?.name;
   }
@@ -398,7 +411,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
       content: {
         key: this.cipher.isDeleted ? "permanentlyDeleteItemConfirmation" : "deleteItemConfirmation",
       },
-      type: SimpleDialogType.WARNING,
+      type: "warning",
     });
 
     if (!confirmed) {
@@ -429,16 +442,6 @@ export class AddEditComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    const confirmed = await this.dialogService.openSimpleDialog({
-      title: { key: "restoreItem" },
-      content: { key: "restoreItemConfirmation" },
-      type: SimpleDialogType.WARNING,
-    });
-
-    if (!confirmed) {
-      return false;
-    }
-
     try {
       this.restorePromise = this.restoreCipher();
       await this.restorePromise;
@@ -457,7 +460,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
       const confirmed = await this.dialogService.openSimpleDialog({
         title: { key: "overwriteUsername" },
         content: { key: "overwriteUsernameConfirmation" },
-        type: SimpleDialogType.WARNING,
+        type: "warning",
       });
 
       if (!confirmed) {
@@ -474,7 +477,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
       const confirmed = await this.dialogService.openSimpleDialog({
         title: { key: "overwritePassword" },
         content: { key: "overwritePasswordConfirmation" },
-        type: SimpleDialogType.WARNING,
+        type: "warning",
       });
 
       if (!confirmed) {
@@ -577,8 +580,10 @@ export class AddEditComponent implements OnInit, OnDestroy {
     this.reprompt = !this.reprompt;
     if (this.reprompt) {
       this.cipher.reprompt = CipherRepromptType.Password;
+      this.cipher.login.autofillOnPageLoad = this.autofillOnPageLoadOptions[2].value;
     } else {
       this.cipher.reprompt = CipherRepromptType.None;
+      this.cipher.login.autofillOnPageLoad = this.autofillOnPageLoadOptions[0].value;
     }
   }
 
@@ -596,9 +601,11 @@ export class AddEditComponent implements OnInit, OnDestroy {
   }
 
   protected saveCipher(cipher: Cipher) {
+    const isNotClone = this.editMode && !this.cloneMode;
+    const orgAdmin = this.organization?.isAdmin;
     return this.cipher.id == null
-      ? this.cipherService.createWithServer(cipher)
-      : this.cipherService.updateWithServer(cipher);
+      ? this.cipherService.createWithServer(cipher, orgAdmin)
+      : this.cipherService.updateWithServer(cipher, orgAdmin, isNotClone);
   }
 
   protected deleteCipher() {

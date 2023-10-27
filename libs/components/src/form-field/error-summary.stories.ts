@@ -1,7 +1,7 @@
 import { UntypedFormBuilder, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 
-import { I18nService } from "@bitwarden/common/abstractions/i18n.service";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 
 import { ButtonModule } from "../button";
 import { InputModule } from "../input/input.module";
@@ -24,7 +24,7 @@ export default {
               required: "required",
               inputRequired: "Input is required.",
               inputEmail: "Input is not an email-address.",
-              fieldsNeedAttention: "$COUNT$ field(s) above need your attention.",
+              fieldsNeedAttention: "__$1__ field(s) above need your attention.",
             });
           },
         },
@@ -63,12 +63,12 @@ export const Default: StoryObj<BitFormFieldComponent> = {
           <bit-label>Name</bit-label>
           <input bitInput formControlName="name" />
         </bit-form-field>
-  
+
         <bit-form-field>
           <bit-label>Email</bit-label>
           <input bitInput formControlName="email" />
         </bit-form-field>
-  
+
         <button type="submit" bitButton buttonType="primary">Submit</button>
         <bit-error-summary [formGroup]="formObj"></bit-error-summary>
       </form>

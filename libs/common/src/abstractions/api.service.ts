@@ -1,5 +1,4 @@
 import { OrganizationConnectionType } from "../admin-console/enums";
-import { CollectionRequest } from "../admin-console/models/request/collection.request";
 import { OrganizationSponsorshipCreateRequest } from "../admin-console/models/request/organization/organization-sponsorship-create.request";
 import { OrganizationSponsorshipRedeemRequest } from "../admin-console/models/request/organization/organization-sponsorship-redeem.request";
 import { OrganizationConnectionRequest } from "../admin-console/models/request/organization-connection.request";
@@ -14,10 +13,6 @@ import { ProviderUserConfirmRequest } from "../admin-console/models/request/prov
 import { ProviderUserInviteRequest } from "../admin-console/models/request/provider/provider-user-invite.request";
 import { ProviderUserUpdateRequest } from "../admin-console/models/request/provider/provider-user-update.request";
 import { SelectionReadOnlyRequest } from "../admin-console/models/request/selection-read-only.request";
-import {
-  CollectionAccessDetailsResponse,
-  CollectionResponse,
-} from "../admin-console/models/response/collection.response";
 import {
   OrganizationConnectionConfigApis,
   OrganizationConnectionResponse,
@@ -37,6 +32,7 @@ import {
 } from "../admin-console/models/response/provider/provider-user.response";
 import { ProviderResponse } from "../admin-console/models/response/provider/provider.response";
 import { SelectionReadOnlyResponse } from "../admin-console/models/response/selection-read-only.response";
+import { CreateAuthRequest } from "../auth/models/request/create-auth.request";
 import { DeviceVerificationRequest } from "../auth/models/request/device-verification.request";
 import { EmailTokenRequest } from "../auth/models/request/email-token.request";
 import { EmailRequest } from "../auth/models/request/email.request";
@@ -52,7 +48,6 @@ import { KeyConnectorUserKeyRequest } from "../auth/models/request/key-connector
 import { PasswordHintRequest } from "../auth/models/request/password-hint.request";
 import { PasswordRequest } from "../auth/models/request/password.request";
 import { PasswordlessAuthRequest } from "../auth/models/request/passwordless-auth.request";
-import { PasswordlessCreateAuthRequest } from "../auth/models/request/passwordless-create-auth.request";
 import { SecretVerificationRequest } from "../auth/models/request/secret-verification.request";
 import { SetKeyConnectorKeyRequest } from "../auth/models/request/set-key-connector-key.request";
 import { SetPasswordRequest } from "../auth/models/request/set-password.request";
@@ -135,9 +130,14 @@ import { CipherCreateRequest } from "../vault/models/request/cipher-create.reque
 import { CipherPartialRequest } from "../vault/models/request/cipher-partial.request";
 import { CipherShareRequest } from "../vault/models/request/cipher-share.request";
 import { CipherRequest } from "../vault/models/request/cipher.request";
+import { CollectionRequest } from "../vault/models/request/collection.request";
 import { AttachmentUploadDataResponse } from "../vault/models/response/attachment-upload-data.response";
 import { AttachmentResponse } from "../vault/models/response/attachment.response";
 import { CipherResponse } from "../vault/models/response/cipher.response";
+import {
+  CollectionAccessDetailsResponse,
+  CollectionResponse,
+} from "../vault/models/response/collection.response";
 import { SyncResponse } from "../vault/models/response/sync.response";
 
 /**
@@ -199,7 +199,8 @@ export abstract class ApiService {
   putUpdateTempPassword: (request: UpdateTempPasswordRequest) => Promise<any>;
   postConvertToKeyConnector: () => Promise<void>;
   //passwordless
-  postAuthRequest: (request: PasswordlessCreateAuthRequest) => Promise<AuthRequestResponse>;
+  postAuthRequest: (request: CreateAuthRequest) => Promise<AuthRequestResponse>;
+  postAdminAuthRequest: (request: CreateAuthRequest) => Promise<AuthRequestResponse>;
   getAuthResponse: (id: string, accessCode: string) => Promise<AuthRequestResponse>;
   getAuthRequest: (id: string) => Promise<AuthRequestResponse>;
   putAuthRequest: (id: string, request: PasswordlessAuthRequest) => Promise<AuthRequestResponse>;
@@ -241,6 +242,9 @@ export abstract class ApiService {
   putRestoreCipher: (id: string) => Promise<CipherResponse>;
   putRestoreCipherAdmin: (id: string) => Promise<CipherResponse>;
   putRestoreManyCiphers: (
+    request: CipherBulkRestoreRequest
+  ) => Promise<ListResponse<CipherResponse>>;
+  putRestoreManyCiphersAdmin: (
     request: CipherBulkRestoreRequest
   ) => Promise<ListResponse<CipherResponse>>;
 
@@ -520,7 +524,7 @@ export abstract class ApiService {
   ) => Promise<void>;
   postResendSponsorshipOffer: (sponsoringOrgId: string) => Promise<void>;
 
-  getUserKeyFromKeyConnector: (keyConnectorUrl: string) => Promise<KeyConnectorUserKeyResponse>;
+  getMasterKeyFromKeyConnector: (keyConnectorUrl: string) => Promise<KeyConnectorUserKeyResponse>;
   postUserKeyToKeyConnector: (
     keyConnectorUrl: string,
     request: KeyConnectorUserKeyRequest

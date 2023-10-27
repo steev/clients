@@ -27,6 +27,11 @@ export class OrganizationResponse extends BaseResponse {
   useResetPassword: boolean;
   useSecretsManager: boolean;
   hasPublicAndPrivateKeys: boolean;
+  usePasswordManager: boolean;
+  smSeats?: number;
+  smServiceAccounts?: number;
+  maxAutoscaleSmSeats?: number;
+  maxAutoscaleSmServiceAccounts?: number;
 
   constructor(response: any) {
     super(response);
@@ -39,8 +44,10 @@ export class OrganizationResponse extends BaseResponse {
     this.businessCountry = this.getResponseProperty("BusinessCountry");
     this.businessTaxNumber = this.getResponseProperty("BusinessTaxNumber");
     this.billingEmail = this.getResponseProperty("BillingEmail");
+
     const plan = this.getResponseProperty("Plan");
     this.plan = plan == null ? null : new PlanResponse(plan);
+
     this.planType = this.getResponseProperty("PlanType");
     this.seats = this.getResponseProperty("Seats");
     this.maxAutoscaleSeats = this.getResponseProperty("MaxAutoscaleSeats");
@@ -55,5 +62,10 @@ export class OrganizationResponse extends BaseResponse {
     this.useResetPassword = this.getResponseProperty("UseResetPassword");
     this.useSecretsManager = this.getResponseProperty("UseSecretsManager");
     this.hasPublicAndPrivateKeys = this.getResponseProperty("HasPublicAndPrivateKeys");
+    this.usePasswordManager = this.getResponseProperty("UsePasswordManager");
+    this.smSeats = this.getResponseProperty("SmSeats");
+    this.smServiceAccounts = this.getResponseProperty("SmServiceAccounts");
+    this.maxAutoscaleSmSeats = this.getResponseProperty("MaxAutoscaleSmSeats");
+    this.maxAutoscaleSmServiceAccounts = this.getResponseProperty("MaxAutoscaleSmServiceAccounts");
   }
 }

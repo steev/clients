@@ -11,9 +11,6 @@ import { concatMap, Subject, takeUntil } from "rxjs";
 
 import { ControlsOf } from "@bitwarden/angular/types/controls-of";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { ConfigServiceAbstraction } from "@bitwarden/common/abstractions/config/config.service.abstraction";
-import { I18nService } from "@bitwarden/common/abstractions/i18n.service";
-import { PlatformUtilsService } from "@bitwarden/common/abstractions/platformUtils.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
@@ -30,7 +27,10 @@ import { OrganizationSsoRequest } from "@bitwarden/common/auth/models/request/or
 import { OrganizationSsoResponse } from "@bitwarden/common/auth/models/response/organization-sso.response";
 import { SsoConfigView } from "@bitwarden/common/auth/models/view/sso-config.view";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
-import { Utils } from "@bitwarden/common/misc/utils";
+import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { Utils } from "@bitwarden/common/platform/misc/utils";
 
 import { ssoTypeValidator } from "./sso-type.validator";
 
@@ -235,11 +235,11 @@ export class SsoComponent implements OnInit, OnDestroy {
       )
       .subscribe();
 
-    const tdeFeatureFlag = await this.configService.getFeatureFlagBool(
+    const tdeFeatureFlag = await this.configService.getFeatureFlag<boolean>(
       FeatureFlag.TrustedDeviceEncryption
     );
 
-    this.showTdeOptions = tdeFeatureFlag && !this.platformUtilsService.isSelfHost();
+    this.showTdeOptions = tdeFeatureFlag;
     // If the tde flag is not enabled, continue showing the key connector options to keep the UI the same
     // Once the flag is removed, we can rely on the platformUtilsService.isSelfHost() check alone
     this.showKeyConnectorOptions = !tdeFeatureFlag || this.platformUtilsService.isSelfHost();

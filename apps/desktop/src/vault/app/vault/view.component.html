@@ -52,7 +52,7 @@
               <div
                 *ngIf="showPassword && !showPasswordCount"
                 class="monospaced password-wrapper"
-                appSelectCopy
+                [appCopyText]="cipher.login.password"
                 [innerHTML]="cipher.login.password | colorPassword"
               ></div>
               <div
@@ -117,6 +117,12 @@
                 <i class="bwi bwi-lg bwi-clone" aria-hidden="true"></i>
               </button>
             </div>
+          </div>
+          <!--Passkey-->
+          <div class="box-content-row text-muted" *ngIf="cipher.login.hasFido2Credentials">
+            <span class="row-label">{{ "typePasskey" | i18n }}</span>
+            {{ "dateCreated" | i18n }}
+            {{ cipher.login.fido2Credentials[0].creationDate | date : "short" }}
           </div>
           <div
             class="box-content-row box-content-row-flex totp"

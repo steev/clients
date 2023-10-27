@@ -12,7 +12,11 @@
           {{ "passwordGeneratorPolicyInEffect" | i18n }}
         </app-callout>
         <div class="generated-block" *ngIf="type === 'password'">
-          <div class="generated-wrapper" [innerHTML]="password | colorPassword" appSelectCopy></div>
+          <div
+            class="generated-wrapper"
+            [innerHTML]="password | colorPassword"
+            [appCopyText]="password"
+          ></div>
           <div class="action-buttons">
             <button
               type="button"
@@ -35,7 +39,11 @@
           </div>
         </div>
         <div class="generated-block" *ngIf="type === 'username'">
-          <div class="generated-wrapper" [innerHTML]="username | colorPassword" appSelectCopy></div>
+          <div
+            class="generated-wrapper"
+            [innerHTML]="username | colorPassword"
+            [appCopyText]="username"
+          ></div>
           <div class="action-buttons" #form [appApiAction]="usernameGeneratingPromise">
             <button
               type="button"
@@ -62,7 +70,7 @@
             </button>
           </div>
         </div>
-        <div class="box">
+        <div class="box" *ngIf="!comingFromAddEdit">
           <div class="box-content condensed">
             <div
               class="box-content-row box-content-row-radio"
@@ -87,7 +95,6 @@
                   [value]="o.value"
                   (change)="typeChanged()"
                   [checked]="type === o.value"
-                  [disabled]="comingFromAddEdit && type !== o.value"
                 />
                 <label class="unstyled" for="type_{{ o.value }}">
                   {{ o.name }}
@@ -373,6 +380,16 @@
                     (blur)="saveUsernameOptions()"
                   />
                 </div>
+                <div class="box-content-row" appBoxRow>
+                  <label for="simplelogin-baseUrl">{{ "baseUrl" | i18n }}</label>
+                  <input
+                    id="simplelogin-baseUrl"
+                    type="text"
+                    name="SimpleLoginDomain"
+                    [(ngModel)]="usernameOptions.forwardedSimpleLoginBaseUrl"
+                    (blur)="saveUsernameOptions()"
+                  />
+                </div>
               </ng-container>
               <ng-container *ngIf="usernameOptions.forwardedService === 'duckduckgo'">
                 <div class="box-content-row" appBoxRow>
@@ -398,12 +415,22 @@
                   />
                 </div>
                 <div class="box-content-row" appBoxRow>
-                  <label for="anonaddy-domain">{{ "domainName" | i18n }}</label>
+                  <label for="anonaddy-domain">{{ "aliasDomain" | i18n }}</label>
                   <input
                     id="anonaddy-domain"
                     type="text"
                     name="AnonAddyDomain"
                     [(ngModel)]="usernameOptions.forwardedAnonAddyDomain"
+                    (blur)="saveUsernameOptions()"
+                  />
+                </div>
+                <div class="box-content-row" appBoxRow>
+                  <label for="anonaddy-baseUrl">{{ "baseUrl" | i18n }}</label>
+                  <input
+                    id="anonaddy-baseUrl"
+                    type="text"
+                    name="AnonAddyDomain"
+                    [(ngModel)]="usernameOptions.forwardedAnonAddyBaseUrl"
                     (blur)="saveUsernameOptions()"
                   />
                 </div>
@@ -428,6 +455,28 @@
                     type="password"
                     name="FastmailApiToken"
                     [(ngModel)]="usernameOptions.forwardedFastmailApiToken"
+                    (blur)="saveUsernameOptions()"
+                  />
+                </div>
+              </ng-container>
+              <ng-container *ngIf="usernameOptions.forwardedService === 'forwardemail'">
+                <div class="box-content-row" appBoxRow>
+                  <label for="forwardemail-accessToken">{{ "apiAccessToken" | i18n }}</label>
+                  <input
+                    id="forwardemail-accessToken"
+                    type="password"
+                    name="ForwardEmailAccessToken"
+                    [(ngModel)]="usernameOptions.forwardedForwardEmailApiToken"
+                    (blur)="saveUsernameOptions()"
+                  />
+                </div>
+                <div class="box-content-row" appBoxRow>
+                  <label for="forwardemail-domain">{{ "aliasDomain" | i18n }}</label>
+                  <input
+                    id="forwardemail-domain"
+                    type="text"
+                    name="ForwardEmailDomain"
+                    [(ngModel)]="usernameOptions.forwardedForwardEmailDomain"
                     (blur)="saveUsernameOptions()"
                   />
                 </div>

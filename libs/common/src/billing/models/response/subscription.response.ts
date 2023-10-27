@@ -62,6 +62,8 @@ export class BillingSubscriptionItemResponse extends BaseResponse {
   quantity: number;
   interval: string;
   sponsoredSubscriptionItem: boolean;
+  addonSubscriptionItem: boolean;
+  productName: string;
 
   constructor(response: any) {
     super(response);
@@ -70,6 +72,7 @@ export class BillingSubscriptionItemResponse extends BaseResponse {
     this.quantity = this.getResponseProperty("Quantity");
     this.interval = this.getResponseProperty("Interval");
     this.sponsoredSubscriptionItem = this.getResponseProperty("SponsoredSubscriptionItem");
+    this.addonSubscriptionItem = this.getResponseProperty("AddonSubscriptionItem");
   }
 }
 

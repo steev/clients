@@ -1,9 +1,12 @@
 import { NgModule } from "@angular/core";
 
+import { PasswordCalloutComponent } from "@bitwarden/auth";
+
 import { LooseComponentsModule } from "../../../shared";
 import { SharedOrganizationModule } from "../shared";
 
 import { BulkConfirmComponent } from "./components/bulk/bulk-confirm.component";
+import { BulkEnableSecretsManagerDialogComponent } from "./components/bulk/bulk-enable-sm-dialog.component";
 import { BulkRemoveComponent } from "./components/bulk/bulk-remove.component";
 import { BulkRestoreRevokeComponent } from "./components/bulk/bulk-restore-revoke.component";
 import { BulkStatusComponent } from "./components/bulk/bulk-status.component";
@@ -18,9 +21,11 @@ import { PeopleComponent } from "./people.component";
     LooseComponentsModule,
     MembersRoutingModule,
     UserDialogModule,
+    PasswordCalloutComponent,
   ],
   declarations: [
     BulkConfirmComponent,
+    BulkEnableSecretsManagerDialogComponent,
     BulkRemoveComponent,
     BulkRestoreRevokeComponent,
     BulkStatusComponent,

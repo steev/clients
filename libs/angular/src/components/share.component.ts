@@ -1,18 +1,18 @@
 import { Directive, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { firstValueFrom, map, Observable, Subject, takeUntil } from "rxjs";
 
-import { I18nService } from "@bitwarden/common/abstractions/i18n.service";
-import { LogService } from "@bitwarden/common/abstractions/log.service";
-import { PlatformUtilsService } from "@bitwarden/common/abstractions/platformUtils.service";
-import { CollectionService } from "@bitwarden/common/admin-console/abstractions/collection.service";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationUserStatusType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
-import { CollectionView } from "@bitwarden/common/admin-console/models/view/collection.view";
-import { Utils } from "@bitwarden/common/misc/utils";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { Checkable, isChecked } from "@bitwarden/common/types/checkable";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
+import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
+import { CollectionView } from "@bitwarden/common/vault/models/view/collection.view";
 
 @Directive()
 export class ShareComponent implements OnInit, OnDestroy {
@@ -66,7 +66,9 @@ export class ShareComponent implements OnInit, OnDestroy {
     });
 
     const cipherDomain = await this.cipherService.get(this.cipherId);
-    this.cipher = await cipherDomain.decrypt();
+    this.cipher = await cipherDomain.decrypt(
+      await this.cipherService.getKeyForCipherKeyDecryption(cipherDomain)
+    );
 
     this.filterCollections();
   }
@@ -94,7 +96,9 @@ export class ShareComponent implements OnInit, OnDestroy {
     }
 
     const cipherDomain = await this.cipherService.get(this.cipherId);
-    const cipherView = await cipherDomain.decrypt();
+    const cipherView = await cipherDomain.decrypt(
+      await this.cipherService.getKeyForCipherKeyDecryption(cipherDomain)
+    );
     const orgs = await firstValueFrom(this.organizations$);
     const orgName =
       orgs.find((o) => o.id === this.organizationId)?.name ?? this.i18nService.t("organization");

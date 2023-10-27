@@ -1,7 +1,7 @@
 <form #form (ngSubmit)="submit()" [appApiAction]="formPromise" ngNativeValidate>
   <div>
     <div class="row">
-      <div class="form-group col-6">
+      <div class="form-group col-8">
         <label for="newSeatCount">{{ "subscriptionSeats" | i18n }}</label>
         <input
           id="newSeatCount"
@@ -14,7 +14,7 @@
           required
         />
         <small class="d-block text-muted mb-4">
-          <strong>{{ "total" | i18n }}:</strong> {{ newSeatCount || 0 }} &times;
+          <strong>{{ "total" | i18n }}:</strong> {{ additionalSeatCount || 0 }} &times;
           {{ seatPrice | currency : "$" }} = {{ adjustedSeatTotal | currency : "$" }} /
           {{ interval | i18n }}
         </small>
@@ -41,7 +41,7 @@
         <label for="maxAutoscaleSeats">{{ "maxSeatLimit" | i18n }}</label>
         <input
           id="maxAutoscaleSeats"
-          class="form-control col-6"
+          class="form-control col-8"
           type="number"
           name="MaxAutoscaleSeats"
           [(ngModel)]="newMaxSeats"
@@ -50,7 +50,7 @@
           [required]="limitSubscription"
         />
         <small class="d-block text-muted">
-          <strong>{{ "maxSeatCost" | i18n }}:</strong> {{ newMaxSeats || 0 }} &times;
+          <strong>{{ "maxSeatCost" | i18n }}:</strong> {{ additionalMaxSeatCount || 0 }} &times;
           {{ seatPrice | currency : "$" }} = {{ maxSeatTotal | currency : "$" }} /
           {{ interval | i18n }}
         </small>

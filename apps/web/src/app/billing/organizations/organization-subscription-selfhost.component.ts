@@ -3,11 +3,7 @@ import { FormControl, FormGroup } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import { concatMap, Subject, takeUntil } from "rxjs";
 
-import { ModalConfig, ModalService } from "@bitwarden/angular/services/modal.service";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { I18nService } from "@bitwarden/common/abstractions/i18n.service";
-import { MessagingService } from "@bitwarden/common/abstractions/messaging.service";
-import { PlatformUtilsService } from "@bitwarden/common/abstractions/platformUtils.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { OrganizationConnectionType } from "@bitwarden/common/admin-console/enums";
@@ -15,11 +11,13 @@ import { Organization } from "@bitwarden/common/admin-console/models/domain/orga
 import { OrganizationConnectionResponse } from "@bitwarden/common/admin-console/models/response/organization-connection.response";
 import { BillingSyncConfigApi } from "@bitwarden/common/billing/models/api/billing-sync-config.api";
 import { SelfHostedOrganizationSubscriptionView } from "@bitwarden/common/billing/models/view/self-hosted-organization-subscription.view";
+import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
+import { DialogService } from "@bitwarden/components";
 
-import {
-  BillingSyncKeyComponent,
-  BillingSyncKeyModalData,
-} from "../../billing/settings/billing-sync-key.component";
+import { BillingSyncKeyComponent } from "./billing-sync-key.component";
 
 enum LicenseOptions {
   SYNC = 0,
@@ -27,13 +25,13 @@ enum LicenseOptions {
 }
 
 @Component({
-  selector: "app-org-subscription-selfhost",
   templateUrl: "organization-subscription-selfhost.component.html",
 })
 export class OrganizationSubscriptionSelfhostComponent implements OnInit, OnDestroy {
   subscription: SelfHostedOrganizationSubscriptionView;
   organizationId: string;
   userOrg: Organization;
+  cloudWebVaultUrl: string;
 
   licenseOptions = LicenseOptions;
   form = new FormGroup({
@@ -75,15 +73,18 @@ export class OrganizationSubscriptionSelfhostComponent implements OnInit, OnDest
   }
 
   constructor(
-    private modalService: ModalService,
     private messagingService: MessagingService,
     private apiService: ApiService,
     private organizationService: OrganizationService,
     private route: ActivatedRoute,
     private organizationApiService: OrganizationApiServiceAbstraction,
     private platformUtilsService: PlatformUtilsService,
-    private i18nService: I18nService
-  ) {}
+    private i18nService: I18nService,
+    private environmentService: EnvironmentService,
+    private dialogService: DialogService
+  ) {
+    this.cloudWebVaultUrl = this.environmentService.getCloudWebVaultUrl();
+  }
 
   async ngOnInit() {
     this.route.params
@@ -143,18 +144,14 @@ export class OrganizationSubscriptionSelfhostComponent implements OnInit, OnDest
   }
 
   manageBillingSyncSelfHosted() {
-    const modalConfig: ModalConfig<BillingSyncKeyModalData> = {
-      data: {
-        entityId: this.organizationId,
-        existingConnectionId: this.existingBillingSyncConnection?.id,
-        billingSyncKey: this.existingBillingSyncConnection?.config?.billingSyncKey,
-        setParentConnection: (connection: OrganizationConnectionResponse<BillingSyncConfigApi>) => {
-          this.existingBillingSyncConnection = connection;
-        },
+    BillingSyncKeyComponent.open(this.dialogService, {
+      entityId: this.organizationId,
+      existingConnectionId: this.existingBillingSyncConnection?.id,
+      billingSyncKey: this.existingBillingSyncConnection?.config?.billingSyncKey,
+      setParentConnection: (connection: OrganizationConnectionResponse<BillingSyncConfigApi>) => {
+        this.existingBillingSyncConnection = connection;
       },
-    };
-
-    this.modalService.open(BillingSyncKeyComponent, modalConfig);
+    });
   }
 
   syncLicense = async () => {

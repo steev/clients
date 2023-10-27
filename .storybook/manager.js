@@ -4,9 +4,6 @@ import { create } from "@storybook/theming/create";
 
 const lightTheme = create({
   base: "light",
-  // Typography
-  fontBase: '"Open Sans", sans-serif',
-
   //logo and Title
   brandTitle: "Bitwarden Component Library",
   brandUrl: "https://components.bitwarden.com",
@@ -40,8 +37,6 @@ const lightTheme = create({
 
 const darkTheme = create({
   base: "dark",
-  // Typography
-  fontBase: '"Open Sans", sans-serif',
 
   //logo and Title
   brandTitle: "Bitwarden Component Library",

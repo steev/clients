@@ -45,7 +45,7 @@ const darkTheme = create({
 
   //logo and Title
   brandTitle: "Bitwarden Component Library",
-  brandUrl: "https://components.bitwarden.com",
+  brandUrl: "/",
   brandImage:
     "https://github.com/bitwarden/brand/blob/51942f8d6e55e96a078a524e0f739efbf1997bcf/logos/logo-horizontal-white.png?raw=true",
   brandTarget: "_self",

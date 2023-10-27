@@ -11,6 +11,7 @@ export class UserProjectAccessPolicyView extends BaseAccessPolicyView {
   organizationUserName: string;
   grantedProjectId: string;
   userId: string;
+  currentUser: boolean;
 }
 
 export class UserServiceAccountAccessPolicyView extends BaseAccessPolicyView {

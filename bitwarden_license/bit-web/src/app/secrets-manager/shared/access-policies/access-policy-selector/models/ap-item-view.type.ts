@@ -44,6 +44,7 @@ export function convertToAccessPolicyItemViews(
       listName: policy.organizationUserName,
       permission: ApPermissionEnumUtil.toApPermissionEnum(policy.read, policy.write),
       userId: policy.userId,
+      currentUser: policy.currentUser,
     });
   });
 

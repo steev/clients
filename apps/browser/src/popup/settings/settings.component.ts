@@ -272,7 +272,7 @@ export class SettingsComponent implements OnInit {
 
     await this.vaultTimeoutSettingsService.setVaultTimeoutOptions(
       newValue,
-      this.form.value.vaultTimeoutAction
+      await firstValueFrom(this.vaultTimeoutSettingsService.vaultTimeoutAction$())
     );
     if (newValue == null) {
       this.messagingService.send("bgReseedStorage");
@@ -474,7 +474,10 @@ export class SettingsComponent implements OnInit {
   }
 
   async import() {
-    this.router.navigate(["/import"]);
+    await this.router.navigate(["/import"]);
+    if (await BrowserApi.isPopupOpen()) {
+      this.popupUtilsService.popOut(window);
+    }
   }
 
   export() {

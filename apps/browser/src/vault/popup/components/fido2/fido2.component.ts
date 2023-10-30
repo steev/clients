@@ -30,7 +30,7 @@ import { SecureNoteView } from "@bitwarden/common/vault/models/view/secure-note.
 import { DialogService } from "@bitwarden/components";
 import { PasswordRepromptService } from "@bitwarden/vault";
 
-import { BrowserApi } from "../../../../platform/browser/browser-api";
+import { ZonedMessageListenerService } from "../../../../platform/browser/zoned-message-listener.service";
 import {
   BrowserFido2Message,
   BrowserFido2UserInterfaceSession,
@@ -78,7 +78,8 @@ export class Fido2Component implements OnInit, OnDestroy {
     private settingsService: SettingsService,
     private searchService: SearchService,
     private logService: LogService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private browserMessagingApi: ZonedMessageListenerService
   ) {}
 
   ngOnInit() {
@@ -93,7 +94,10 @@ export class Fido2Component implements OnInit, OnDestroy {
       }))
     );
 
-    combineLatest([queryParams$, BrowserApi.messageListener$() as Observable<BrowserFido2Message>])
+    combineLatest([
+      queryParams$,
+      this.browserMessagingApi.messageListener$() as Observable<BrowserFido2Message>,
+    ])
       .pipe(
         concatMap(async ([queryParams, message]) => {
           this.sessionId = queryParams.sessionId;
@@ -115,20 +119,6 @@ export class Fido2Component implements OnInit, OnDestroy {
 
           if (message.type === "AbortRequest") {
             this.abort(false);
-            return;
-          }
-
-          // Show dialog if user account does not have master password
-          if (!(await this.passwordRepromptService.enabled())) {
-            await this.dialogService.openSimpleDialog({
-              title: { key: "featureNotSupported" },
-              content: { key: "passkeyFeatureIsNotImplementedForAccountsWithoutMasterPassword" },
-              acceptButtonText: { key: "ok" },
-              cancelButtonText: null,
-              type: "info",
-            });
-
-            this.abort(true);
             return;
           }
 
@@ -217,7 +207,7 @@ export class Fido2Component implements OnInit, OnDestroy {
     });
   }
 
-  async submit() {
+  protected async submit() {
     const data = this.message$.value;
     if (data?.type === "PickCredentialRequest") {
       const userVerified = await this.handleUserVerification(data.userVerification, this.cipher);
@@ -254,23 +244,17 @@ export class Fido2Component implements OnInit, OnDestroy {
     this.loading = true;
   }
 
-  async saveNewLogin() {
+  protected async saveNewLogin() {
     const data = this.message$.value;
     if (data?.type === "ConfirmNewCredentialRequest") {
-      let userVerified = false;
-      if (data.userVerification) {
-        userVerified = await this.passwordRepromptService.showPasswordPrompt();
-      }
+      await this.createNewCipher();
 
-      if (!data.userVerification || userVerified) {
-        await this.createNewCipher();
-      }
-
+      // We are bypassing user verification pending implementation of PIN and biometric support.
       this.send({
         sessionId: this.sessionId,
         cipherId: this.cipher?.id,
         type: "ConfirmNewCredentialResponse",
-        userVerified,
+        userVerified: data.userVerification,
       });
     }
 
@@ -319,46 +303,23 @@ export class Fido2Component implements OnInit, OnDestroy {
     });
   }
 
-  async loadLoginCiphers() {
-    this.ciphers = (await this.cipherService.getAllDecrypted()).filter(
-      (cipher) => cipher.type === CipherType.Login && !cipher.isDeleted
-    );
-    if (!this.hasLoadedAllCiphers) {
-      this.hasLoadedAllCiphers = !this.searchService.isSearchable(this.searchText);
-    }
-    await this.search(null);
-  }
-
-  async search(timeout: number = null) {
-    this.searchPending = false;
-    if (this.searchTimeout != null) {
-      clearTimeout(this.searchTimeout);
-    }
-
-    if (timeout == null) {
-      this.hasSearched = this.searchService.isSearchable(this.searchText);
+  protected async search() {
+    this.hasSearched = this.searchService.isSearchable(this.searchText);
+    this.searchPending = true;
+    if (this.hasSearched) {
       this.displayedCiphers = await this.searchService.searchCiphers(
         this.searchText,
         null,
         this.ciphers
       );
-      return;
+    } else {
+      const equivalentDomains = this.settingsService.getEquivalentDomains(this.url);
+      this.displayedCiphers = this.ciphers.filter((cipher) =>
+        cipher.login.matchesUri(this.url, equivalentDomains)
+      );
     }
-    this.searchPending = true;
-    this.searchTimeout = setTimeout(async () => {
-      this.hasSearched = this.searchService.isSearchable(this.searchText);
-      if (!this.hasLoadedAllCiphers && !this.hasSearched) {
-        await this.loadLoginCiphers();
-      } else {
-        this.displayedCiphers = await this.searchService.searchCiphers(
-          this.searchText,
-          null,
-          this.ciphers
-        );
-      }
-      this.searchPending = false;
-      this.selectedPasskey(this.displayedCiphers[0]);
-    }, timeout);
+    this.searchPending = false;
+    this.selectedPasskey(this.displayedCiphers[0]);
   }
 
   abort(fallback: boolean) {
@@ -405,17 +366,17 @@ export class Fido2Component implements OnInit, OnDestroy {
   }
 
   private async handleUserVerification(
-    userVerification: boolean,
+    userVerificationRequested: boolean,
     cipher: CipherView
   ): Promise<boolean> {
-    const masterPasswordRepromptRequiered = cipher && cipher.reprompt !== 0;
-    const verificationRequired = userVerification || masterPasswordRepromptRequiered;
+    const masterPasswordRepromptRequired = cipher && cipher.reprompt !== 0;
 
-    if (!verificationRequired) {
-      return false;
+    if (masterPasswordRepromptRequired) {
+      return await this.passwordRepromptService.showPasswordPrompt();
     }
 
-    return await this.passwordRepromptService.showPasswordPrompt();
+    // We are bypassing user verification pending implementation of PIN and biometric support.
+    return userVerificationRequested;
   }
 
   private send(msg: BrowserFido2Message) {

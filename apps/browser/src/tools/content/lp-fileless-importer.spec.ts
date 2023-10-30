@@ -1,18 +1,21 @@
+import { createPortSpyMock } from "../../autofill/jest/autofill-mocks";
+import { sendPortMessage } from "../../autofill/jest/testing-utils";
 import { FilelessImportPortNames } from "../enums/fileless-import.enums";
 
 import { LpFilelessImporter } from "./abstractions/lp-fileless-importer";
 
 describe("LpFilelessImporter", () => {
   let lpFilelessImporter: LpFilelessImporter;
-  let portSpy: chrome.runtime.Port & { onMessage: { callListener: (message: any) => void } };
+  const portSpy: chrome.runtime.Port = createPortSpyMock(FilelessImportPortNames.LpImporter);
+  chrome.runtime.connect = jest.fn(() => portSpy);
 
   beforeEach(() => {
     require("./lp-fileless-importer");
     lpFilelessImporter = (globalThis as any).lpFilelessImporter;
-    portSpy = (lpFilelessImporter as any)["messagePort"];
   });
 
   afterEach(() => {
+    (globalThis as any).lpFilelessImporter = undefined;
     jest.clearAllMocks();
     jest.resetModules();
   });
@@ -29,8 +32,6 @@ describe("LpFilelessImporter", () => {
 
   describe("handleFeatureFlagVerification", () => {
     it("disconnects the message port when the fileless import feature is disabled", () => {
-      jest.spyOn(portSpy, "disconnect");
-
       lpFilelessImporter.handleFeatureFlagVerification({ filelessImportEnabled: false });
 
       expect(portSpy.disconnect).toHaveBeenCalled();
@@ -70,7 +71,7 @@ describe("LpFilelessImporter", () => {
       jest.spyOn(lpFilelessImporter, "handleFeatureFlagVerification");
       jest.spyOn(lpFilelessImporter, "triggerCsvDownload");
 
-      portSpy.onMessage.callListener(message);
+      sendPortMessage(portSpy, message);
 
       expect(lpFilelessImporter.handleFeatureFlagVerification).not.toHaveBeenCalled();
       expect(lpFilelessImporter.triggerCsvDownload).not.toHaveBeenCalled();
@@ -80,7 +81,7 @@ describe("LpFilelessImporter", () => {
       const message = { command: "verifyFeatureFlag", filelessImportEnabled: true };
       jest.spyOn(lpFilelessImporter, "handleFeatureFlagVerification");
 
-      portSpy.onMessage.callListener(message);
+      sendPortMessage(portSpy, message);
 
       expect(lpFilelessImporter.handleFeatureFlagVerification).toHaveBeenCalledWith(message);
     });
@@ -89,7 +90,7 @@ describe("LpFilelessImporter", () => {
       const message = { command: "triggerCsvDownload" };
       jest.spyOn(lpFilelessImporter, "triggerCsvDownload");
 
-      portSpy.onMessage.callListener(message);
+      sendPortMessage(portSpy, message);
 
       expect(lpFilelessImporter.triggerCsvDownload).toHaveBeenCalled();
     });

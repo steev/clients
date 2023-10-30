@@ -26,25 +26,6 @@ const runtime = {
   onConnect: {
     addListener: jest.fn(),
   },
-  connect: jest.fn((connectInfo: chrome.runtime.ConnectInfo) => {
-    let onMessageCallback: CallableFunction;
-
-    const port = {
-      name: connectInfo.name,
-      onMessage: {
-        addListener: jest.fn((callback) => (onMessageCallback = callback)),
-        removeListener: jest.fn((callback) => {
-          if (onMessageCallback === callback) {
-            onMessageCallback = undefined;
-          }
-        }),
-        callListener: (message: any) => onMessageCallback(message, port),
-      },
-      postMessage: jest.fn(),
-      disconnect: jest.fn(),
-    };
-    return port;
-  }),
 };
 
 const contextMenus = {

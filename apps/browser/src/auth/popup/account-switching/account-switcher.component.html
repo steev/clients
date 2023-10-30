@@ -1,5 +1,5 @@
 <app-header>
-  <div class="left tw-flex tw-items-center">Close</div>
+  <div class="left tw-flex tw-items-center" routerLink="/home">Close</div>
   <div class="center tw-font-bold">Switch Accounts</div>
 </app-header>
 
@@ -30,6 +30,7 @@
       <button
         type="button"
         class="tw-flex tw-w-full tw-items-center tw-gap-2 tw-rounded-md tw-bg-background tw-p-3"
+        (click)="selectAccount(accountOption.id)"
       >
         <i class="bwi bwi-plus"></i>
         {{ accountOption.name }}

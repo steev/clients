@@ -5,7 +5,9 @@
   <h1 class="center">
     <span class="title">{{ "settings" | i18n }}</span>
   </h1>
-  <div class="right"></div>
+  <div class="right">
+    <bit-avatar [id]="'test'" [text]="'test Name'" routerLink="/account-switcher"></bit-avatar>
+  </div>
 </header>
 <main tabindex="-1" [formGroup]="form">
   <div class="box list">

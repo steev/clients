@@ -122,10 +122,29 @@ function createAutofillScriptMock(
   };
 }
 
+function createPortSpyMock(name: string) {
+  return mock<chrome.runtime.Port>({
+    name,
+    onMessage: {
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+    },
+    onDisconnect: {
+      addListener: jest.fn(),
+    },
+    postMessage: jest.fn(),
+    disconnect: jest.fn(),
+    sender: {
+      tab: createChromeTabMock(),
+    },
+  });
+}
+
 export {
   createAutofillFieldMock,
   createAutofillPageDetailsMock,
   createChromeTabMock,
   createGenerateFillScriptOptionsMock,
   createAutofillScriptMock,
+  createPortSpyMock,
 };

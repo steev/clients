@@ -1,7 +1,39 @@
-<div *ngIf="accountOptions$ | async as accountOptions" class="box-content">
-  <div *ngFor="let accountOption of accountOptions" class="box-content-row box-content-row-flex">
-    <button type="button" (click)="selectAccount(accountOption.id)" class="row-main">
-      {{ accountOption.name }}
+<app-header>
+  <div class="left tw-flex tw-items-center">Close</div>
+  <div class="center tw-font-bold">Switch Accounts</div>
+</app-header>
+
+<ul *ngIf="accountOptions$ | async as accountOptions" class="tw-grid tw-gap-2 tw-p-2">
+  <li *ngFor="let accountOption of accountOptions">
+    <button
+      *ngIf="accountOption.id !== 'addAccount'; else addAccount"
+      type="button"
+      class="tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-md tw-bg-background tw-p-3"
+      (click)="selectAccount(accountOption.id)"
+    >
+      <div class="tw-flex-shrink-0">
+        <bit-avatar [id]="accountOption.id" [text]="accountOption.name" size="small"></bit-avatar>
+      </div>
+      <div class="tw-text-left">
+        <div>
+          {{ accountOption.name }}
+        </div>
+        <div class="tw-text-sm tw-text-muted">bitwarden.com</div>
+        <div class="tw-text-sm tw-italic tw-text-muted">status</div>
+      </div>
+      <div class="tw-ml-auto tw-flex-shrink-0">
+        <i class="bwi bwi-lock tw-text-xl"></i>
+      </div>
     </button>
-  </div>
-</div>
+
+    <ng-template #addAccount>
+      <button
+        type="button"
+        class="tw-flex tw-w-full tw-items-center tw-gap-2 tw-rounded-md tw-bg-background tw-p-3"
+      >
+        <i class="bwi bwi-plus"></i>
+        {{ accountOption.name }}
+      </button>
+    </ng-template>
+  </li>
+</ul>

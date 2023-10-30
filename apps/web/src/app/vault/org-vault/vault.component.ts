@@ -121,7 +121,6 @@ export class VaultComponent implements OnInit, OnDestroy {
   protected processingEvent = false;
   protected filter: RoutedVaultFilterModel = {};
   protected organization: Organization;
-  protected isOrgOwner: boolean;
   protected allCollections: CollectionAdminView[];
   protected allGroups: GroupView[];
   protected ciphers: CipherView[];
@@ -472,7 +471,6 @@ export class VaultComponent implements OnInit, OnDestroy {
           this.selectedCollection = selectedCollection;
           this.showMissingCollectionPermissionMessage = showMissingCollectionPermissionMessage;
           this.isEmpty = collections?.length === 0 && ciphers?.length === 0;
-          this.isOrgOwner = this.organization.isOwner;
 
           // This is a temporary fix to avoid double fetching collections.
           // TODO: Remove when implementing new VVR menu

@@ -35,7 +35,6 @@ export class VaultCollectionRowComponent implements OnInit {
   @Input() organizations: Organization[];
   @Input() groups: GroupView[];
   @Input() orgVault: boolean;
-  @Input() isOrgOwner: boolean;
   permissionText: string;
 
   @Output() onEvent = new EventEmitter<VaultItemEvent>();
@@ -46,7 +45,7 @@ export class VaultCollectionRowComponent implements OnInit {
   constructor(private router: Router, private activatedRoute: ActivatedRoute) {}
 
   ngOnInit() {
-    if (this.collection.manage || this.isOrgOwner) {
+    if (this.collection.manage) {
       this.permissionText = "canManage";
     } else if (!this.collection.readOnly) {
       this.permissionText = "canEdit";

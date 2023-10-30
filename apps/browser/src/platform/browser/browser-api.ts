@@ -215,8 +215,10 @@ export class BrowserApi {
 
   // Keep track of all the events registered in a Safari popup so we can remove
   // them when the popup gets unloaded, otherwise we cause a memory leak
-  private static registeredMessageListeners: any[] = [];
-  private static registeredStorageChangeListeners: any[] = [];
+  private static trackedChromeEventListeners: [
+    event: chrome.events.Event<(...args: unknown[]) => unknown>,
+    callback: (...args: unknown[]) => unknown
+  ][] = [];
 
   static messageListener(
     name: string,
@@ -226,13 +228,7 @@ export class BrowserApi {
       sendResponse: any
     ) => boolean | void
   ) {
-    // eslint-disable-next-line no-restricted-syntax
-    chrome.runtime.onMessage.addListener(callback);
-
-    if (BrowserApi.isSafariApi && !BrowserApi.isBackgroundPage(window)) {
-      BrowserApi.registeredMessageListeners.push(callback);
-      BrowserApi.setupUnloadListeners();
-    }
+    BrowserApi.addListener(chrome.runtime.onMessage, callback);
   }
 
   static messageListener$() {
@@ -241,30 +237,53 @@ export class BrowserApi {
         subscriber.next(message);
       };
 
-      BrowserApi.messageListener("message", handler);
+      BrowserApi.addListener(chrome.runtime.onMessage, handler);
 
-      return () => {
-        chrome.runtime.onMessage.removeListener(handler);
-
-        if (BrowserApi.isSafariApi) {
-          const index = BrowserApi.registeredMessageListeners.indexOf(handler);
-          if (index !== -1) {
-            BrowserApi.registeredMessageListeners.splice(index, 1);
-          }
-        }
-      };
+      return () => BrowserApi.removeListener(chrome.runtime.onMessage, handler);
     });
   }
 
   static storageChangeListener(
     callback: Parameters<typeof chrome.storage.onChanged.addListener>[0]
   ) {
-    // eslint-disable-next-line no-restricted-syntax
-    chrome.storage.onChanged.addListener(callback);
+    BrowserApi.addListener(chrome.storage.onChanged, callback);
+  }
+
+  /**
+   * Adds a callback to the given chrome event in a cross-browser platform manner.
+   * @param event - The event in which to add the listener to.
+   * @param callback - The callback you want registered onto the event.
+   */
+  static addListener<T extends unknown[]>(
+    event: chrome.events.Event<(...args: T) => unknown>,
+    callback: (...args: unknown[]) => unknown
+  ) {
+    event.addListener(callback);
 
     if (BrowserApi.isSafariApi && !BrowserApi.isBackgroundPage(window)) {
-      BrowserApi.registeredStorageChangeListeners.push(callback);
+      BrowserApi.trackedChromeEventListeners.push([event, callback]);
       BrowserApi.setupUnloadListeners();
+    }
+  }
+
+  /**
+   * Removes a callback from the given chrome event in a cross-browser platform manner.
+   * @param event - The event in which to remove the listener from.
+   * @param callback - The callback you want removed from the event.
+   */
+  static removeListener<T extends unknown[]>(
+    event: chrome.events.Event<(...args: T) => unknown>,
+    callback: (...args: unknown[]) => unknown
+  ) {
+    event.removeListener(callback);
+
+    if (BrowserApi.isSafariApi && !BrowserApi.isBackgroundPage(window)) {
+      const index = BrowserApi.trackedChromeEventListeners.findIndex(([_event, eventListener]) => {
+        return eventListener == callback;
+      });
+      if (index !== -1) {
+        BrowserApi.trackedChromeEventListeners.splice(index, 1);
+      }
     }
   }
 
@@ -273,12 +292,8 @@ export class BrowserApi {
     // The MDN recommend using 'visibilitychange' but that event is fired any time the popup window is obscured as well
     // 'pagehide' works just like 'unload' but is compatible with the back/forward cache, so we prefer using that one
     window.onpagehide = () => {
-      for (const callback of BrowserApi.registeredMessageListeners) {
-        chrome.runtime.onMessage.removeListener(callback);
-      }
-
-      for (const callback of BrowserApi.registeredStorageChangeListeners) {
-        chrome.storage.onChanged.removeListener(callback);
+      for (const [event, callback] of BrowserApi.trackedChromeEventListeners) {
+        event.removeListener(callback);
       }
     };
   }

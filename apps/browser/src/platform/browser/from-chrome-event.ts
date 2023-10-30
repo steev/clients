@@ -1,5 +1,7 @@
 import { Observable } from "rxjs";
 
+import { BrowserApi } from "./browser-api";
+
 /**
  * Converts a Chrome event to an Observable stream.
  *
@@ -31,8 +33,7 @@ export function fromChromeEvent<T extends unknown[]>(
       subscriber.next(args);
     };
 
-    event.addListener(handler);
-
-    return () => event.removeListener(handler);
+    BrowserApi.addListener(event, handler);
+    return () => BrowserApi.removeListener(event, handler);
   });
 }

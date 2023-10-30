@@ -7317,7 +7317,7 @@
     "placeholders": {
       "id": {
         "content": "$1",
-        "example": "Master Password"
+        "example": "Limit Collection Creation/Deletion"
       }
     }
   },  

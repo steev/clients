@@ -3,7 +3,7 @@ use widestring::{U16CString, U16String};
 use windows::{
     core::{HRESULT, PCWSTR, PWSTR},
     Win32::{
-        Foundation::{GetLastError, BOOL, ERROR_NOT_FOUND, FILETIME, WIN32_ERROR},
+        Foundation::{ERROR_NOT_FOUND, FILETIME},
         Security::Credentials::{
             CredDeleteW, CredFree, CredReadW, CredWriteW, CREDENTIALW, CRED_FLAGS,
             CRED_PERSIST_ENTERPRISE, CRED_TYPE_GENERIC,

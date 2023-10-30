@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use widestring::{U16CString, U16String};
 use windows::{
-    core::{HRESULT, PCWSTR, PWSTR},
+    core::{PCWSTR, PWSTR},
     Win32::{
         Foundation::{ERROR_NOT_FOUND, FILETIME},
         Security::Credentials::{

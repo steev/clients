@@ -15,6 +15,7 @@ manual_test = []
 [dependencies]
 aes = "=0.8.3"
 anyhow = "=1.0.75"
+arboard = { version = "=3.2.1", default-features = false }
 base64 = "=0.21.4"
 cbc = { version = "=0.1.2", features = ["alloc"] }
 napi = { version = "=2.13.3", features = ["async"] }
@@ -31,7 +32,7 @@ typenum = "=1.16.0"
 napi-build = "=2.0.1"
 
 [target.'cfg(windows)'.dependencies]
-widestring = "=0.5.1"
+widestring = "=1.0.2"
 windows = { version = "=0.51.1", features = [
   "Foundation",
   "Security_Credentials_UI",

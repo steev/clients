@@ -75,7 +75,7 @@ describe("AutofillService", () => {
     const autofillV1Script = "autofill.js";
     const autofillV2Script = "autofill-init.js";
     const defaultAutofillScripts = ["autofiller.js", "notificationBar.js", "contextMenuHandler.js"];
-    const defaultExecuteScriptOptions = { allFrames: true, runAt: "document_start" };
+    const defaultExecuteScriptOptions = { runAt: "document_start" };
     let tabMock: chrome.tabs.Tab;
     let sender: chrome.runtime.MessageSender;
 
@@ -91,11 +91,13 @@ describe("AutofillService", () => {
       [autofillV1Script, ...defaultAutofillScripts].forEach((scriptName) => {
         expect(BrowserApi.executeScriptInTab).toHaveBeenCalledWith(tabMock.id, {
           file: `content/${scriptName}`,
+          frameId: sender.frameId,
           ...defaultExecuteScriptOptions,
         });
       });
       expect(BrowserApi.executeScriptInTab).not.toHaveBeenCalledWith(tabMock.id, {
         file: `content/${autofillV2Script}`,
+        frameId: sender.frameId,
         ...defaultExecuteScriptOptions,
       });
     });
@@ -517,14 +519,27 @@ describe("AutofillService", () => {
     it("returns a TOTP value", async () => {
       const totpCode = "123456";
       autofillOptions.cipher.login.totp = "totp";
-      jest.spyOn(stateService, "getDisableAutoTotpCopy").mockResolvedValueOnce(false);
-      jest.spyOn(totpService, "getCode").mockReturnValueOnce(Promise.resolve(totpCode));
+      jest.spyOn(stateService, "getCanAccessPremium").mockResolvedValue(true);
+      jest.spyOn(stateService, "getDisableAutoTotpCopy").mockResolvedValue(false);
+      jest.spyOn(totpService, "getCode").mockResolvedValue(totpCode);
 
       const autofillResult = await autofillService.doAutoFill(autofillOptions);
 
       expect(stateService.getDisableAutoTotpCopy).toHaveBeenCalled();
       expect(totpService.getCode).toHaveBeenCalledWith(autofillOptions.cipher.login.totp);
       expect(autofillResult).toBe(totpCode);
+    });
+
+    it("does not return a TOTP value if the user does not have premium features", async () => {
+      autofillOptions.cipher.login.totp = "totp";
+      jest.spyOn(stateService, "getCanAccessPremium").mockResolvedValue(false);
+      jest.spyOn(stateService, "getDisableAutoTotpCopy").mockResolvedValue(false);
+
+      const autofillResult = await autofillService.doAutoFill(autofillOptions);
+
+      expect(stateService.getDisableAutoTotpCopy).not.toHaveBeenCalled();
+      expect(totpService.getCode).not.toHaveBeenCalled();
+      expect(autofillResult).toBeNull();
     });
 
     it("returns a null value if the cipher type is not for a Login", async () => {
@@ -561,11 +576,15 @@ describe("AutofillService", () => {
     it("returns a null value if the user has disabled `auto TOTP copy`", async () => {
       autofillOptions.cipher.login.totp = "totp";
       autofillOptions.cipher.organizationUseTotp = true;
-      jest.spyOn(stateService, "getCanAccessPremium").mockResolvedValueOnce(true);
-      jest.spyOn(stateService, "getDisableAutoTotpCopy").mockResolvedValueOnce(true);
+      jest.spyOn(stateService, "getCanAccessPremium").mockResolvedValue(true);
+      jest.spyOn(stateService, "getDisableAutoTotpCopy").mockResolvedValue(true);
+      jest.spyOn(totpService, "getCode");
 
       const autofillResult = await autofillService.doAutoFill(autofillOptions);
 
+      expect(stateService.getCanAccessPremium).toHaveBeenCalled();
+      expect(stateService.getDisableAutoTotpCopy).toHaveBeenCalled();
+      expect(totpService.getCode).not.toHaveBeenCalled();
       expect(autofillResult).toBeNull();
     });
   });
@@ -776,6 +795,18 @@ describe("AutofillService", () => {
           }),
         },
       ];
+    });
+
+    it("returns a null vault without doing autofill if the page details does not contain fields ", async () => {
+      pageDetails[0].details.fields = [];
+      jest.spyOn(autofillService as any, "getActiveTab");
+      jest.spyOn(autofillService, "doAutoFill");
+
+      const result = await autofillService.doAutoFillActiveTab(pageDetails, false);
+
+      expect(autofillService["getActiveTab"]).not.toHaveBeenCalled();
+      expect(autofillService.doAutoFill).not.toHaveBeenCalled();
+      expect(result).toBeNull();
     });
 
     it("returns a null value without doing autofill if the active tab cannot be found", async () => {

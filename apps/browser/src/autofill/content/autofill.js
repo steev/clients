@@ -986,7 +986,7 @@
           styleTimeout = 200;
 
       /**
-       * Fll an element `el` using the value `op` from the fill script
+       * Fill an element `el` using the value `op` from the fill script
        * @param {HTMLElement} el
        * @param {string} op
        */

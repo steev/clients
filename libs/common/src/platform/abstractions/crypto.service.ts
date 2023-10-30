@@ -6,6 +6,7 @@ import { KeySuffixOptions, KdfType, HashPurpose } from "../../enums";
 import { EncArrayBuffer } from "../models/domain/enc-array-buffer";
 import { EncString } from "../models/domain/enc-string";
 import {
+  CipherKey,
   MasterKey,
   OrgKey,
   PinKey,
@@ -42,6 +43,12 @@ export abstract class CryptoService {
    * @returns The user key
    */
   getUserKey: (userId?: string) => Promise<UserKey>;
+
+  /**
+   * Checks if the user is using an old encryption scheme that used the master key
+   * for encryption of data instead of the user key.
+   */
+  isLegacyUser: (masterKey?: MasterKey, userId?: string) => Promise<boolean>;
   /**
    * Use for encryption/decryption of data in order to support legacy
    * encryption models. It will return the user key if available,
@@ -366,6 +373,11 @@ export abstract class CryptoService {
    */
   rsaDecrypt: (encValue: string, privateKeyValue?: Uint8Array) => Promise<Uint8Array>;
   randomNumber: (min: number, max: number) => Promise<number>;
+  /**
+   * Generates a new cipher key
+   * @returns A new cipher key
+   */
+  makeCipherKey: () => Promise<CipherKey>;
 
   /**
    * Initialize all necessary crypto keys needed for a new account.

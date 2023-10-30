@@ -475,8 +475,8 @@
   "maxFileSize": {
     "message": "Ukuran berkas maksimal adalah 500 MB."
   },
-  "updateKey": {
-    "message": "Anda tidak dapat menggunakan fitur ini sampai Anda memperbarui kunci enkripsi Anda."
+  "encryptionKeyMigrationRequired": {
+    "message": "Encryption key migration required. Please login through the web vault to update your encryption key."
   },
   "editedFolder": {
     "message": "Folder yang di Edit"
@@ -771,7 +771,7 @@
     "message": "Hubungi kami"
   },
   "helpAndFeedback": {
-    "message": "Help and feedback"
+    "message": "Bantuan dan masukan"
   },
   "getHelp": {
     "message": "Dapatkan bantuan"
@@ -1417,7 +1417,7 @@
     "message": "Require password or PIN on app start"
   },
   "recommendedForSecurity": {
-    "message": "Recommended for security."
+    "message": "Direkomendasikan untuk keamanan."
   },
   "lockWithMasterPassOnRestart": {
     "message": "Kunci dengan kata sandi utama saat komputer dihidupkan ulang"
@@ -1537,7 +1537,7 @@
     "message": "Untuk menyelesaikan masuk dengan SSO, harap setel kata sandi utama untuk mengakses dan melindungi brankas Anda."
   },
   "currentMasterPass": {
-    "message": "Current master password"
+    "message": "Kata sandi utama saat ini"
   },
   "newMasterPass": {
     "message": "Kata Sandi Utama Baru"
@@ -1661,6 +1661,9 @@
   },
   "personalOwnershipPolicyInEffect": {
     "message": "Kebijakan organisasi memengaruhi opsi kepemilikan Anda."
+  },
+  "personalOwnershipPolicyInEffectImports": {
+    "message": "An organization policy has blocked importing items into your individual vault."
   },
   "allSends": {
     "message": "Semua Sends",
@@ -1973,7 +1976,7 @@
     }
   },
   "switchAccount": {
-    "message": "Switch account"
+    "message": "Pindah akun"
   },
   "options": {
     "message": "Pilihan"
@@ -1982,7 +1985,7 @@
     "message": "Your session has timed out. Please go back and try logging in again."
   },
   "exportingPersonalVaultTitle": {
-    "message": "Exporting individual vault"
+    "message": "Mengekspor brankas individu"
   },
   "exportingIndividualVaultDescription": {
     "message": "Only the individual vault items associated with $EMAIL$ will be exported. Organization vault items will not be included. Only vault item information will be exported and will not include associated attachments.",
@@ -2000,22 +2003,22 @@
     "message": "Tidak terkunci"
   },
   "generator": {
-    "message": "Generator"
+    "message": "Pembuat Sandi"
   },
   "whatWouldYouLikeToGenerate": {
-    "message": "What would you like to generate?"
+    "message": "Apa yang ingin anda buat?"
   },
   "passwordType": {
-    "message": "Password type"
+    "message": "Jenis kata sandi"
   },
   "regenerateUsername": {
-    "message": "Regenerate username"
+    "message": "Buat nama pengguna baru"
   },
   "generateUsername": {
-    "message": "Generate username"
+    "message": "Buat nama pengguna baru"
   },
   "usernameType": {
-    "message": "Username type"
+    "message": "Jenis nama pengguna"
   },
   "plusAddressedEmail": {
     "message": "Plus addressed email",
@@ -2415,5 +2418,192 @@
   },
   "submenu": {
     "message": "Submenu"
+  },
+  "typePasskey": {
+    "message": "Passkey"
+  },
+  "passkeyNotCopied": {
+    "message": "Passkey will not be copied"
+  },
+  "passkeyNotCopiedAlert": {
+    "message": "The passkey will not be copied to the cloned item. Do you want to continue cloning this item?"
+  },
+  "aliasDomain": {
+    "message": "Alias domain"
+  },
+  "importData": {
+    "message": "Import data",
+    "description": "Used for the desktop menu item and the header of the import dialog"
+  },
+  "importError": {
+    "message": "Import error"
+  },
+  "importErrorDesc": {
+    "message": "There was a problem with the data you tried to import. Please resolve the errors listed below in your source file and try again."
+  },
+  "resolveTheErrorsBelowAndTryAgain": {
+    "message": "Resolve the errors below and try again."
+  },
+  "description": {
+    "message": "Description"
+  },
+  "importSuccess": {
+    "message": "Data successfully imported"
+  },
+  "importSuccessNumberOfItems": {
+    "message": "A total of $AMOUNT$ items were imported.",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "total": {
+    "message": "Total"
+  },
+  "importWarning": {
+    "message": "You are importing data to $ORGANIZATION$. Your data may be shared with members of this organization. Do you want to proceed?",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
+  },
+  "importFormatError": {
+    "message": "Data is not formatted correctly. Please check your import file and try again."
+  },
+  "importNothingError": {
+    "message": "Nothing was imported."
+  },
+  "importEncKeyError": {
+    "message": "Error decrypting the exported file. Your encryption key does not match the encryption key used export the data."
+  },
+  "invalidFilePassword": {
+    "message": "Invalid file password, please use the password you entered when you created the export file."
+  },
+  "importDestination": {
+    "message": "Import destination"
+  },
+  "learnAboutImportOptions": {
+    "message": "Learn about your import options"
+  },
+  "selectImportFolder": {
+    "message": "Select a folder"
+  },
+  "selectImportCollection": {
+    "message": "Select a collection"
+  },
+  "importTargetHint": {
+    "message": "Select this option if you want the imported file contents moved to a $DESTINATION$",
+    "description": "Located as a hint under the import target. Will be appended by either folder or collection, depending if the user is importing into an individual or an organizational vault.",
+    "placeholders": {
+      "destination": {
+        "content": "$1",
+        "example": "folder or collection"
+      }
+    }
+  },
+  "importUnassignedItemsError": {
+    "message": "File contains unassigned items."
+  },
+  "selectFormat": {
+    "message": "Select the format of the import file"
+  },
+  "selectImportFile": {
+    "message": "Select the import file"
+  },
+  "chooseFile": {
+    "message": "Choose File"
+  },
+  "noFileChosen": {
+    "message": "No file chosen"
+  },
+  "orCopyPasteFileContents": {
+    "message": "or copy/paste the import file contents"
+  },
+  "instructionsFor": {
+    "message": "$NAME$ Instructions",
+    "description": "The title for the import tool instructions.",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "LastPass (csv)"
+      }
+    }
+  },
+  "confirmVaultImport": {
+    "message": "Confirm vault import"
+  },
+  "confirmVaultImportDesc": {
+    "message": "This file is password-protected. Please enter the file password to import data."
+  },
+  "confirmFilePassword": {
+    "message": "Confirm file password"
+  },
+  "multifactorAuthenticationCancelled": {
+    "message": "Multifactor authentication cancelled"
+  },
+  "noLastPassDataFound": {
+    "message": "No LastPass data found"
+  },
+  "incorrectUsernameOrPassword": {
+    "message": "Incorrect username or password"
+  },
+  "multifactorAuthenticationFailed": {
+    "message": "Multifactor authentication failed"
+  },
+  "includeSharedFolders": {
+    "message": "Include shared folders"
+  },
+  "lastPassEmail": {
+    "message": "LastPass Email"
+  },
+  "importingYourAccount": {
+    "message": "Importing your account..."
+  },
+  "lastPassMFARequired": {
+    "message": "LastPass multifactor authentication required"
+  },
+  "lastPassMFADesc": {
+    "message": "Enter your one-time passcode from your authentication app"
+  },
+  "lastPassOOBDesc": {
+    "message": "Approve the login request in your authentication app or enter a one-time passcode."
+  },
+  "passcode": {
+    "message": "Passcode"
+  },
+  "lastPassMasterPassword": {
+    "message": "LastPass master password"
+  },
+  "lastPassAuthRequired": {
+    "message": "LastPass authentication required"
+  },
+  "awaitingSSO": {
+    "message": "Awaiting SSO authentication"
+  },
+  "awaitingSSODesc": {
+    "message": "Please continue to log in using your company credentials."
+  },
+  "seeDetailedInstructions": {
+    "message": "See detailed instructions on our help site at",
+    "description": "This is followed a by a hyperlink to the help website."
+  },
+  "importDirectlyFromLastPass": {
+    "message": "Import directly from LastPass"
+  },
+  "importFromCSV": {
+    "message": "Import from CSV"
+  },
+  "lastPassTryAgainCheckEmail": {
+    "message": "Try again or look for an email from LastPass to verify it's you."
+  },
+  "collection": {
+    "message": "Collection"
+  },
+  "lastPassYubikeyDesc": {
+    "message": "Insert the YubiKey associated with your LastPass account into your computer's USB port, then touch its button."
   }
 }

@@ -508,9 +508,6 @@
   "maxFileSize": {
     "message": "Mărimea maximă a fișierului este de 500 MB."
   },
-  "updateKey": {
-    "message": "Veți putea utiliza această caracteristică după ce veți actualiza cheia de criptare."
-  },
   "addedItem": {
     "message": "Articol adăugat"
   },
@@ -613,6 +610,72 @@
   },
   "loginWithMasterPassword": {
     "message": "Autentificați-vă cu parola principală"
+  },
+  "loginWithPasskey": {
+    "message": "Log in with passkey"
+  },
+  "loginWithPasskeyInfo": {
+    "message": "Use a generated passkey that will automatically log you in without a password. Biometrics, like facial recognition or fingerprint, or another FIDO2 security method will verify your identity."
+  },
+  "newPasskey": {
+    "message": "New passkey"
+  },
+  "learnMoreAboutPasswordless": {
+    "message": "Learn more about passwordless"
+  },
+  "passkeyEnterMasterPassword": {
+    "message": "Enter your master password to modify log in with passkey settings."
+  },
+  "creatingPasskeyLoading": {
+    "message": "Creating passkey..."
+  },
+  "creatingPasskeyLoadingInfo": {
+    "message": "Keep this window open and follow prompts from your browser."
+  },
+  "errorCreatingPasskey": {
+    "message": "Error creating passkey"
+  },
+  "errorCreatingPasskeyInfo": {
+    "message": "There was a problem creating your passkey."
+  },
+  "passkeySuccessfullyCreated": {
+    "message": "Passkey successfully created!"
+  },
+  "customName": {
+    "message": "Custom name"
+  },
+  "customPasskeyNameInfo": {
+    "message": "Name your passkey to help you identify it."
+  },
+  "encryptionNotSupported": {
+    "message": "Encryption not supported"
+  },
+  "loginWithPasskeyEnabled": {
+    "message": "Log in with passkey turned on"
+  },
+  "passkeySaved": {
+    "message": "$NAME$ saved",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Personal yubikey"
+      }
+    }
+  },
+  "passkeyRemoved": {
+    "message": "Passkey removed"
+  },
+  "removePasskey": {
+    "message": "Remove passkey"
+  },
+  "removePasskeyInfo": {
+    "message": "If all passkeys are removed, you will be unable to log into new devices without your master password."
+  },
+  "passkeyLimitReachedInfo": {
+    "message": "Passkey limit reached. Remove a passkey to add another."
+  },
+  "tryAgain": {
+    "message": "Try again"
   },
   "createAccount": {
     "message": "Creare cont"
@@ -3476,17 +3539,11 @@
   "keyUpdated": {
     "message": "Cheie actualizată"
   },
-  "updateKeyTitle": {
-    "message": "Actualizare cheie"
-  },
   "updateEncryptionKey": {
     "message": "Actualizare cheie de criptare"
   },
-  "updateEncryptionKeyShortDesc": {
-    "message": "În prezent utilizați o schemă de criptare învechită."
-  },
-  "updateEncryptionKeyDesc": {
-    "message": "Ne-am mutat la chei mai mari de criptare care oferă o mai bună securitate și acces la funcții mai noi. Actualizarea cheii de criptare este rapidă și ușoară. Doar tastați parola principală mai jos. Această actualizare va deveni în cele din urmă obligatorie."
+  "updateEncryptionSchemeDesc": {
+    "message": "We've changed the encryption scheme to provide better security. Update your encryption key now by entering your master password below."
   },
   "updateEncryptionKeyWarning": {
     "message": "După actualizarea cheii de criptare, trebuie să vă reconectați în toate aplicațiile Bitwarden pe care le utilizați în prezent (cum ar fi aplicația mobilă sau extensiile browserului). Faptul de a nu vă deconecta și reconecta (care descarcă noua cheie de criptare) poate duce la corupția datelor. Vom încerca să vă deconectăm automat, însă ar putea fi întârziat."
@@ -3580,6 +3637,18 @@
   },
   "organizationIsDisabled": {
     "message": "Organizație suspendată"
+  },
+  "secretsAccessSuspended": {
+    "message": "Suspended organizations cannot be accessed. Please contact your organization owner for assistance."
+  },
+  "secretsCannotCreate": {
+    "message": "Secrets cannot be created in suspended organizations. Please contact your organization owner for assistance."
+  },
+  "projectsCannotCreate": {
+    "message": "Projects cannot be created in suspended organizations. Please contact your organization owner for assistance."
+  },
+  "serviceAccountsCannotCreate": {
+    "message": "Service accounts cannot be created in suspended organizations. Please contact your organization owner for assistance."
   },
   "disabledOrganizationFilterError": {
     "message": "Articolele din organizațiile suspendate nu pot fi accesate. Contactați proprietarul organizației pentru asistență."
@@ -3926,8 +3995,9 @@
   "ssoIdentifier": {
     "message": "SSO identifier"
   },
-  "ssoIdentifierHint": {
-    "message": "Provide this ID to your members to login with SSO."
+  "ssoIdentifierHintPartOne": {
+    "message": "Provide this ID to your members to login with SSO. To bypass this step, set up ",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Provide this ID to your members to login with SSO. To bypass this step, set up Domain verification'"
   },
   "unlinkSso": {
     "message": "Deconectare SSO"
@@ -5415,6 +5485,19 @@
   "required": {
     "message": "necesar"
   },
+  "charactersCurrentAndMaximum": {
+    "message": "$CURRENT$/$MAX$ character maximum",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "0"
+      },
+      "max": {
+        "content": "$2",
+        "example": "100"
+      }
+    }
+  },
   "characterMaximum": {
     "message": "$MAX$ character maximum",
     "placeholders": {
@@ -5762,6 +5845,9 @@
   },
   "on": {
     "message": "Pornit"
+  },
+  "off": {
+    "message": "Off"
   },
   "members": {
     "message": "Members"
@@ -7105,8 +7191,8 @@
       }
     }
   },
-  "addSecretsManager": {
-    "message": "Add Secrets Manager"
+  "subscribeToSecretsManager": {
+    "message": "Subscribe to Secrets Manager"
   },
   "addSecretsManagerUpgradeDesc": {
     "message": "Add Secrets Manager to your upgraded plan to maintain access to any secrets created with your previous plan."
@@ -7178,7 +7264,26 @@
   "beta": {
     "message": "Beta"
   },
+  "baseUrl": {
+    "message": "Server URL"
+  },
+  "aliasDomain": {
+    "message": "Alias domain"
+  },
   "alreadyHaveAccount": {
     "message": "Already have an account?"
+  },
+  "typePasskey": {
+    "message": "Passkey"
+  },
+  "passkeyNotCopied": {
+    "message": "Passkey will not be copied"
+  },
+  "passkeyNotCopiedAlert": {
+    "message": "The passkey will not be copied to the cloned item. Do you want to continue cloning this item?"
+  },
+  "seeDetailedInstructions": {
+    "message": "See detailed instructions on our help site at",
+    "description": "This is followed a by a hyperlink to the help website."
   }
 }

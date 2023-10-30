@@ -1,14 +1,15 @@
-import { Directive, ElementRef, NgZone, OnInit, ViewChild } from "@angular/core";
+import { Directive, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { take } from "rxjs/operators";
+import { Subject } from "rxjs";
+import { take, takeUntil } from "rxjs/operators";
 
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { DevicesApiServiceAbstraction } from "@bitwarden/common/auth/abstractions/devices-api.service.abstraction";
 import { LoginService } from "@bitwarden/common/auth/abstractions/login.service";
 import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
 import { ForceResetPasswordReason } from "@bitwarden/common/auth/models/domain/force-reset-password-reason";
-import { PasswordLogInCredentials } from "@bitwarden/common/auth/models/domain/log-in-credentials";
+import { PasswordLoginCredentials } from "@bitwarden/common/auth/models/domain/login-credentials";
 import { AppIdService } from "@bitwarden/common/platform/abstractions/app-id.service";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
@@ -27,7 +28,7 @@ import {
 import { CaptchaProtectedComponent } from "./captcha-protected.component";
 
 @Directive()
-export class LoginComponent extends CaptchaProtectedComponent implements OnInit {
+export class LoginComponent extends CaptchaProtectedComponent implements OnInit, OnDestroy {
   @ViewChild("masterPasswordInput", { static: true }) masterPasswordInput: ElementRef;
 
   showPassword = false;
@@ -52,6 +53,8 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
   protected twoFactorRoute = "2fa";
   protected successRoute = "vault";
   protected forcePasswordResetRoute = "update-temp-password";
+
+  protected destroy$ = new Subject<void>();
 
   get loggedEmail() {
     return this.formGroup.value.email;
@@ -83,14 +86,17 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
   }
 
   async ngOnInit() {
-    this.route?.queryParams.subscribe((params) => {
-      if (params != null) {
-        const queryParamsEmail = params["email"];
-        if (queryParamsEmail != null && queryParamsEmail.indexOf("@") > -1) {
-          this.formGroup.get("email").setValue(queryParamsEmail);
-          this.loginService.setEmail(queryParamsEmail);
-          this.paramEmailSet = true;
-        }
+    this.route?.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      if (!params) {
+        return;
+      }
+
+      const queryParamsEmail = params.email;
+
+      if (queryParamsEmail != null && queryParamsEmail.indexOf("@") > -1) {
+        this.formGroup.get("email").setValue(queryParamsEmail);
+        this.loginService.setEmail(queryParamsEmail);
+        this.paramEmailSet = true;
       }
     });
     let email = this.loginService.getEmail();
@@ -107,6 +113,11 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
       rememberEmail = (await this.stateService.getRememberedEmail()) != null;
     }
     this.formGroup.get("rememberEmail")?.setValue(rememberEmail);
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   async submit(showToast = true) {
@@ -129,7 +140,7 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
     }
 
     try {
-      const credentials = new PasswordLogInCredentials(
+      const credentials = new PasswordLoginCredentials(
         data.email,
         data.masterPassword,
         this.captchaToken,
@@ -140,6 +151,8 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
       this.setFormValues();
       await this.loginService.saveEmailSettings();
       if (this.handleCaptchaRequired(response)) {
+        return;
+      } else if (this.handleMigrateEncryptionKey(response)) {
         return;
       } else if (response.requiresTwoFactor) {
         if (this.onSuccessfulLoginTwoFactorNavigate != null) {
@@ -179,7 +192,7 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
     }
   }
 
-  async startPasswordlessLogin() {
+  async startAuthRequestLogin() {
     this.formGroup.get("masterPassword")?.clearValidators();
     this.formGroup.get("masterPassword")?.updateValueAndValidity();
 
@@ -270,6 +283,21 @@ export class LoginComponent extends CaptchaProtectedComponent implements OnInit 
   async saveEmailSettings() {
     this.setFormValues();
     await this.loginService.saveEmailSettings();
+  }
+
+  // Legacy accounts used the master key to encrypt data. Migration is required
+  // but only performed on web
+  protected handleMigrateEncryptionKey(result: AuthResult): boolean {
+    if (!result.requiresEncryptionKeyMigration) {
+      return false;
+    }
+
+    this.platformUtilsService.showToast(
+      "error",
+      this.i18nService.t("errorOccured"),
+      this.i18nService.t("encryptionKeyMigrationRequired")
+    );
+    return true;
   }
 
   private getErrorToastMessage() {

@@ -215,10 +215,30 @@ export class TwoFactorComponent extends CaptchaProtectedComponent implements OnI
     await this.handleLoginResponse(authResult);
   }
 
+  protected handleMigrateEncryptionKey(result: AuthResult): boolean {
+    if (!result.requiresEncryptionKeyMigration) {
+      return false;
+    }
+
+    this.platformUtilsService.showToast(
+      "error",
+      this.i18nService.t("errorOccured"),
+      this.i18nService.t("encryptionKeyMigrationRequired")
+    );
+    return true;
+  }
+
   private async handleLoginResponse(authResult: AuthResult) {
     if (this.handleCaptchaRequired(authResult)) {
       return;
+    } else if (this.handleMigrateEncryptionKey(authResult)) {
+      return;
     }
+
+    // Save off the OrgSsoIdentifier for use in the TDE flows
+    // - TDE login decryption options component
+    // - Browser SSO on extension open
+    await this.stateService.setUserSsoOrganizationIdentifier(this.orgIdentifier);
 
     this.loginService.clearValues();
 
@@ -282,8 +302,10 @@ export class TwoFactorComponent extends CaptchaProtectedComponent implements OnI
       return await this.handleChangePasswordRequired(orgIdentifier);
     }
 
-    // Users can be forced to reset their password via an admin or org policy
-    // disallowing weak passwords
+    // Users can be forced to reset their password via an admin or org policy disallowing weak passwords
+    // Note: this is different from SSO component login flow as a user can
+    // login with MP and then have to pass 2FA to finish login and we can actually
+    // evaluate if they have a weak password at this time.
     if (authResult.forcePasswordReset !== ForceResetPasswordReason.None) {
       return await this.handleForcePasswordReset(orgIdentifier);
     }

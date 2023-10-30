@@ -19,6 +19,7 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { DialogService, SimpleDialogOptions } from "@bitwarden/components";
 
 import { BrowserApi } from "../platform/browser/browser-api";
+import { ZonedMessageListenerService } from "../platform/browser/zoned-message-listener.service";
 import { BrowserStateService } from "../platform/services/abstractions/browser-state.service";
 
 import { routerTransition } from "./app-routing.animations";
@@ -50,7 +51,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private ngZone: NgZone,
     private sanitizer: DomSanitizer,
     private platformUtilsService: PlatformUtilsService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private browserMessagingApi: ZonedMessageListenerService
   ) {}
 
   async ngOnInit() {
@@ -80,47 +82,33 @@ export class AppComponent implements OnInit, OnDestroy {
       window.onkeypress = () => this.recordActivity();
     });
 
-    (window as any).bitwardenPopupMainMessageListener = async (
-      msg: any,
-      sender: any,
-      sendResponse: any
-    ) => {
+    const bitwardenPopupMainMessageListener = (msg: any, sender: any) => {
       if (msg.command === "doneLoggingOut") {
-        this.ngZone.run(async () => {
-          this.authService.logOut(async () => {
-            if (msg.expired) {
-              this.showToast({
-                type: "warning",
-                title: this.i18nService.t("loggedOut"),
-                text: this.i18nService.t("loginExpired"),
-              });
-            }
+        this.authService.logOut(async () => {
+          if (msg.expired) {
+            this.showToast({
+              type: "warning",
+              title: this.i18nService.t("loggedOut"),
+              text: this.i18nService.t("loginExpired"),
+            });
+          }
 
-            if (this.activeUserId === null) {
-              this.router.navigate(["home"]);
-            }
-          });
-          this.changeDetectorRef.detectChanges();
+          if (this.activeUserId === null) {
+            this.router.navigate(["home"]);
+          }
         });
+        this.changeDetectorRef.detectChanges();
       } else if (msg.command === "authBlocked") {
-        this.ngZone.run(() => {
-          this.router.navigate(["home"]);
-        });
-      } else if (msg.command === "locked") {
-        if (msg.userId == null || msg.userId === (await this.stateService.getUserId())) {
-          this.ngZone.run(() => {
-            this.router.navigate(["lock"]);
-          });
-        }
+        this.router.navigate(["home"]);
+      } else if (msg.command === "locked" && msg.userId == null) {
+        this.router.navigate(["lock"]);
       } else if (msg.command === "showDialog") {
-        await this.ngZone.run(() => this.showDialog(msg));
+        this.showDialog(msg);
       } else if (msg.command === "showNativeMessagingFinterprintDialog") {
         // TODO: Should be refactored to live in another service.
-        await this.ngZone.run(() => this.showNativeMessagingFingerprintDialog(msg));
+        this.showNativeMessagingFingerprintDialog(msg);
       } else if (msg.command === "showToast") {
-        this.ngZone.run(() => {
-          this.showToast(msg);
-        });
+        this.showToast(msg);
       } else if (msg.command === "reloadProcess") {
         const forceWindowReload =
           this.platformUtilsService.isSafari() ||
@@ -132,20 +120,17 @@ export class AppComponent implements OnInit, OnDestroy {
           2000
         );
       } else if (msg.command === "reloadPopup") {
-        this.ngZone.run(() => {
-          this.router.navigate(["/"]);
-        });
+        this.router.navigate(["/"]);
       } else if (msg.command === "convertAccountToKeyConnector") {
-        this.ngZone.run(async () => {
-          this.router.navigate(["/remove-password"]);
-        });
+        this.router.navigate(["/remove-password"]);
       } else {
         msg.webExtSender = sender;
         this.broadcasterService.send(msg);
       }
     };
 
-    BrowserApi.messageListener("app.component", (window as any).bitwardenPopupMainMessageListener);
+    (window as any).bitwardenPopupMainMessageListener = bitwardenPopupMainMessageListener;
+    this.browserMessagingApi.messageListener("app.component", bitwardenPopupMainMessageListener);
 
     // eslint-disable-next-line rxjs/no-async-subscribe
     this.router.events.pipe(takeUntil(this.destroy$)).subscribe(async (event) => {

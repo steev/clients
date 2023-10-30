@@ -1,4 +1,5 @@
 import { ApiService } from "../../abstractions/api.service";
+import { ClientType } from "../../enums";
 import { KeysRequest } from "../../models/request/keys.request";
 import { AppIdService } from "../../platform/abstractions/app-id.service";
 import { CryptoService } from "../../platform/abstractions/crypto.service";
@@ -19,11 +20,11 @@ import { TwoFactorProviderType } from "../enums/two-factor-provider-type";
 import { AuthResult } from "../models/domain/auth-result";
 import { ForceResetPasswordReason } from "../models/domain/force-reset-password-reason";
 import {
-  PasswordlessLogInCredentials,
-  PasswordLogInCredentials,
-  SsoLogInCredentials,
-  UserApiLogInCredentials,
-} from "../models/domain/log-in-credentials";
+  AuthRequestLoginCredentials,
+  PasswordLoginCredentials,
+  SsoLoginCredentials,
+  UserApiLoginCredentials,
+} from "../models/domain/login-credentials";
 import { DeviceRequest } from "../models/request/identity-token/device.request";
 import { PasswordTokenRequest } from "../models/request/identity-token/password-token.request";
 import { SsoTokenRequest } from "../models/request/identity-token/sso-token.request";
@@ -35,7 +36,7 @@ import { IdentityTwoFactorResponse } from "../models/response/identity-two-facto
 
 type IdentityResponse = IdentityTokenResponse | IdentityTwoFactorResponse | IdentityCaptchaResponse;
 
-export abstract class LogInStrategy {
+export abstract class LoginStrategy {
   protected abstract tokenRequest: UserApiTokenRequest | PasswordTokenRequest | SsoTokenRequest;
   protected captchaBypassToken: string = null;
 
@@ -53,10 +54,10 @@ export abstract class LogInStrategy {
 
   abstract logIn(
     credentials:
-      | UserApiLogInCredentials
-      | PasswordLogInCredentials
-      | SsoLogInCredentials
-      | PasswordlessLogInCredentials
+      | UserApiLoginCredentials
+      | PasswordLoginCredentials
+      | SsoLoginCredentials
+      | AuthRequestLoginCredentials
   ): Promise<AuthResult>;
 
   async logInTwoFactor(
@@ -151,8 +152,19 @@ export abstract class LogInStrategy {
 
   protected async processTokenResponse(response: IdentityTokenResponse): Promise<AuthResult> {
     const result = new AuthResult();
+
+    // Old encryption keys must be migrated, but is currently only available on web.
+    // Other clients shouldn't continue the login process.
+    if (this.encryptionKeyMigrationRequired(response)) {
+      result.requiresEncryptionKeyMigration = true;
+      if (this.platformUtilsService.getClientType() !== ClientType.Web) {
+        return result;
+      }
+    }
+
     result.resetMasterPassword = response.resetMasterPassword;
 
+    // Convert boolean to enum
     if (response.forcePasswordReset) {
       result.forcePasswordReset = ForceResetPasswordReason.AdminForcePasswordReset;
     }
@@ -165,9 +177,7 @@ export abstract class LogInStrategy {
     }
 
     await this.setMasterKey(response);
-
     await this.setUserKey(response);
-
     await this.setPrivateKey(response);
 
     this.messagingService.send("loggedIn");
@@ -181,6 +191,12 @@ export abstract class LogInStrategy {
   protected abstract setUserKey(response: IdentityTokenResponse): Promise<void>;
 
   protected abstract setPrivateKey(response: IdentityTokenResponse): Promise<void>;
+
+  // Old accounts used master key for encryption. We are forcing migrations but only need to
+  // check on password logins
+  protected encryptionKeyMigrationRequired(response: IdentityTokenResponse): boolean {
+    return false;
+  }
 
   protected async createKeyPairForOldAccount() {
     try {

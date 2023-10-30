@@ -226,7 +226,7 @@
     "message": "Праверце, ці не скампраметаваны пароль."
   },
   "passwordExposed": {
-    "message": "Гэты пароль быў скампраметаваны наступную колькасць разоў: $VALUE$. Вы павінны змяніць яго.",
+    "message": "Гэты пароль быў скампраметаваны наступную колькасць раз(оў): $VALUE$. Вы павінны змяніць яго.",
     "placeholders": {
       "value": {
         "content": "$1",
@@ -508,9 +508,6 @@
   "maxFileSize": {
     "message": "Максімальны памер файла 500 МБ."
   },
-  "updateKey": {
-    "message": "Вы не зможаце выкарыстоўваць гэту функцыю, пакуль не абнавіце свой ключ шыфравання."
-  },
   "addedItem": {
     "message": "Элемент дададзены"
   },
@@ -613,6 +610,72 @@
   },
   "loginWithMasterPassword": {
     "message": "Увайсці з асноўным паролем"
+  },
+  "loginWithPasskey": {
+    "message": "Log in with passkey"
+  },
+  "loginWithPasskeyInfo": {
+    "message": "Use a generated passkey that will automatically log you in without a password. Biometrics, like facial recognition or fingerprint, or another FIDO2 security method will verify your identity."
+  },
+  "newPasskey": {
+    "message": "New passkey"
+  },
+  "learnMoreAboutPasswordless": {
+    "message": "Learn more about passwordless"
+  },
+  "passkeyEnterMasterPassword": {
+    "message": "Enter your master password to modify log in with passkey settings."
+  },
+  "creatingPasskeyLoading": {
+    "message": "Creating passkey..."
+  },
+  "creatingPasskeyLoadingInfo": {
+    "message": "Keep this window open and follow prompts from your browser."
+  },
+  "errorCreatingPasskey": {
+    "message": "Error creating passkey"
+  },
+  "errorCreatingPasskeyInfo": {
+    "message": "There was a problem creating your passkey."
+  },
+  "passkeySuccessfullyCreated": {
+    "message": "Passkey successfully created!"
+  },
+  "customName": {
+    "message": "Custom name"
+  },
+  "customPasskeyNameInfo": {
+    "message": "Name your passkey to help you identify it."
+  },
+  "encryptionNotSupported": {
+    "message": "Encryption not supported"
+  },
+  "loginWithPasskeyEnabled": {
+    "message": "Log in with passkey turned on"
+  },
+  "passkeySaved": {
+    "message": "$NAME$ saved",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "Personal yubikey"
+      }
+    }
+  },
+  "passkeyRemoved": {
+    "message": "Passkey removed"
+  },
+  "removePasskey": {
+    "message": "Remove passkey"
+  },
+  "removePasskeyInfo": {
+    "message": "If all passkeys are removed, you will be unable to log into new devices without your master password."
+  },
+  "passkeyLimitReachedInfo": {
+    "message": "Passkey limit reached. Remove a passkey to add another."
+  },
+  "tryAgain": {
+    "message": "Try again"
   },
   "createAccount": {
     "message": "Стварыць уліковы запіс"
@@ -1098,7 +1161,7 @@
     "message": "Уліковы запіс абноўлены"
   },
   "changeEmail": {
-    "message": "Змяніць электронную пошту"
+    "message": "Змяніць адрас электроннай пошты"
   },
   "changeEmailTwoFactorWarning": {
     "message": "Працягваючы, вы зменіце адрас электроннай пошты вашага ўліковага запісу. Гэта не паўплывае на змяненне адраса электроннай пошты, які выкарыстоўваецца для двухфактарнай аўтэнтыфікацыі. Калі вы хочаце змяніць і яго, то вам неабходна гэта зрабіць у наладах двухфактарнай аўтэнтыфікацыі."
@@ -1426,10 +1489,10 @@
     "message": "Абараніце свой уліковы запіс з дапамогай дадатковага кроку праверкі падчас уваходу."
   },
   "twoStepLoginTeamsDesc": {
-    "message": "Enable two-step login for your organization."
+    "message": "Уключыць двухэтапную аўтарызацыю для вашай арганізацыі."
   },
   "twoStepLoginEnterpriseDescStart": {
-    "message": "Enforce Bitwarden Two-step Login options for members by using the ",
+    "message": "Забяспечыць параметры двухэтапнага ўваходу ў Bitwarden для ўдзельнікаў, выкарыстоўваючы ",
     "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Enforce Bitwarden Two-step Login options for members by using the Two-step Login Policy.'"
   },
   "twoStepLoginPolicy": {
@@ -3476,17 +3539,11 @@
   "keyUpdated": {
     "message": "Ключ абноўлены"
   },
-  "updateKeyTitle": {
-    "message": "Абнавіць ключ"
-  },
   "updateEncryptionKey": {
     "message": "Абнавіць ключ шыфравання"
   },
-  "updateEncryptionKeyShortDesc": {
-    "message": "Зараз вы выкарыстоўваеце састарэлую схему шыфравання."
-  },
-  "updateEncryptionKeyDesc": {
-    "message": "Мы перайшлі на больш складаныя ключы шыфравання, якія забяспечваюць лепшую бяспеку і доступ да самых новых функцый. Абнаўленне вашых ключоў шыфравання адбудзецца хутка і лёгка. Проста ўвядзіце свой асноўны пароль знізу. Гэта абнаўленне ўрэшце стане абавязковым."
+  "updateEncryptionSchemeDesc": {
+    "message": "Мы змянілі схему шыфравання каб надаць найлепшы ўзровень бяспекі. Каб абнавіць ваш ключ шыфравання, увядзіце ваш асноўны пароль ніжэй."
   },
   "updateEncryptionKeyWarning": {
     "message": "Пасля абнаўлення вашага ключа шыфравання вам неабходна выйсці з сістэмы, а потым выканаць паўторны ўваход ва ўсе праграмы Bitwarden, якія вы зараз выкарыстоўваеце (напрыклад, мабільныя праграмы або пашырэнні для браўзераў). Збой пры выхадзе і паўторным уваходзе (пры гэтым спампоўваецца ваш новы ключ шыфравання) можа стаць прычынай пашкоджання даных. Мы паспрабуем аўтаматычна ажыццявіць завяршэнне ўсіх вашых сеансаў, але гэта можа адбывацца з затрымкай."
@@ -3580,6 +3637,18 @@
   },
   "organizationIsDisabled": {
     "message": "Арганізацыя адключана."
+  },
+  "secretsAccessSuspended": {
+    "message": "Suspended organizations cannot be accessed. Please contact your organization owner for assistance."
+  },
+  "secretsCannotCreate": {
+    "message": "Secrets cannot be created in suspended organizations. Please contact your organization owner for assistance."
+  },
+  "projectsCannotCreate": {
+    "message": "Projects cannot be created in suspended organizations. Please contact your organization owner for assistance."
+  },
+  "serviceAccountsCannotCreate": {
+    "message": "Service accounts cannot be created in suspended organizations. Please contact your organization owner for assistance."
   },
   "disabledOrganizationFilterError": {
     "message": "Доступ да элементаў у адключаных арганізацыях немагчымы. Звяжыце з уладальнікам арганізацыі для атрымання дапамогі."
@@ -3926,8 +3995,9 @@
   "ssoIdentifier": {
     "message": "Ідэнтыфікатар SSO"
   },
-  "ssoIdentifierHint": {
-    "message": "Забяспечце гэтым ідэнтыфікатарам вашых удзельніка для ўваходу з SSO."
+  "ssoIdentifierHintPartOne": {
+    "message": "Provide this ID to your members to login with SSO. To bypass this step, set up ",
+    "description": "This will be used as part of a larger sentence, broken up to include links. The full sentence will read 'Provide this ID to your members to login with SSO. To bypass this step, set up Domain verification'"
   },
   "unlinkSso": {
     "message": "Адлучыць SSO"
@@ -5415,6 +5485,19 @@
   "required": {
     "message": "патрабуецца"
   },
+  "charactersCurrentAndMaximum": {
+    "message": "$CURRENT$/$MAX$ character maximum",
+    "placeholders": {
+      "current": {
+        "content": "$1",
+        "example": "0"
+      },
+      "max": {
+        "content": "$2",
+        "example": "100"
+      }
+    }
+  },
   "characterMaximum": {
     "message": "Максімум $MAX$ сімвалаў",
     "placeholders": {
@@ -5762,6 +5845,9 @@
   },
   "on": {
     "message": "Уключана"
+  },
+  "off": {
+    "message": "Off"
   },
   "members": {
     "message": "Удзельнікі"
@@ -7105,8 +7191,8 @@
       }
     }
   },
-  "addSecretsManager": {
-    "message": "Дадаць менеджар сакрэтаў"
+  "subscribeToSecretsManager": {
+    "message": "Subscribe to Secrets Manager"
   },
   "addSecretsManagerUpgradeDesc": {
     "message": "Дадаць менеджар сакрэтаў у ваш абноўлены тарыфны план, каб падтрымліваць доступ да любых сакрэтаў, якія былі створаны з дапамогай вашых папярэдніх тарыфных планаў."
@@ -7178,7 +7264,26 @@
   "beta": {
     "message": "Бэта"
   },
+  "baseUrl": {
+    "message": "Адрас сервера"
+  },
+  "aliasDomain": {
+    "message": "Мянушка дамена"
+  },
   "alreadyHaveAccount": {
     "message": "Ужо маеце ўліковы запіс?"
+  },
+  "typePasskey": {
+    "message": "Passkey"
+  },
+  "passkeyNotCopied": {
+    "message": "Passkey will not be copied"
+  },
+  "passkeyNotCopiedAlert": {
+    "message": "The passkey will not be copied to the cloned item. Do you want to continue cloning this item?"
+  },
+  "seeDetailedInstructions": {
+    "message": "See detailed instructions on our help site at",
+    "description": "This is followed a by a hyperlink to the help website."
   }
 }

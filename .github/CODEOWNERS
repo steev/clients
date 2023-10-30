@@ -75,8 +75,8 @@ apps/web/src/translation-constants.ts @bitwarden/team-platform-dev
 apps/browser/src/autofill @bitwarden/team-autofill-dev
 
 ## Component Library ##
-.storybook @bitwarden/team-platform-dev
-libs/components @bitwarden/team-platform-dev
+.storybook @bitwarden/team-component-library
+libs/components @bitwarden/team-component-library
 
 ## Desktop native module ##
 apps/desktop/desktop_native @bitwarden/team-platform-dev
@@ -105,3 +105,9 @@ apps/web/src/locales/en/messages.json
 
 ## DevOps team files ##
 /.github/workflows @bitwarden/dept-devops
+
+# DevOps for Docker changes.
+**/Dockerfile @bitwarden/dept-devops
+**/*.Dockerfile @bitwarden/dept-devops
+**/.dockerignore @bitwarden/dept-devops
+**/entrypoint.sh @bitwarden/dept-devops

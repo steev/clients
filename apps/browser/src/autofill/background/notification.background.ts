@@ -47,8 +47,8 @@ export default class NotificationBackground {
 
     BrowserApi.messageListener(
       "notification.background",
-      async (msg: any, sender: chrome.runtime.MessageSender) => {
-        await this.processMessage(msg, sender);
+      (msg: any, sender: chrome.runtime.MessageSender) => {
+        this.processMessage(msg, sender);
       }
     );
 
@@ -464,7 +464,7 @@ export default class NotificationBackground {
   private async getDecryptedCipherById(cipherId: string) {
     const cipher = await this.cipherService.get(cipherId);
     if (cipher != null && cipher.type === CipherType.Login) {
-      return await cipher.decrypt();
+      return await cipher.decrypt(await this.cipherService.getKeyForCipherKeyDecryption(cipher));
     }
     return null;
   }

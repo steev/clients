@@ -475,8 +475,8 @@
   "maxFileSize": {
     "message": "الحجم الأقصى للملف هو 500 ميجابايت."
   },
-  "updateKey": {
-    "message": "لا يمكنك استخدام هذه الميزة حتى تقوم بتحديث مفتاح التشفير الخاص بك."
+  "encryptionKeyMigrationRequired": {
+    "message": "مطلوب ترحيل مفتاح التشفير. الرجاء تسجيل الدخول بواسطة مخزن الويب لتحديث مفتاح التشفير الخاص بك."
   },
   "editedFolder": {
     "message": "تم تعديل المجلد"
@@ -1078,7 +1078,7 @@
     "message": "1 جيغابايت وحدة تخزين مشفرة لمرفقات الملفات."
   },
   "premiumSignUpTwoStepOptions": {
-    "message": "Proprietary two-step login options such as YubiKey and Duo."
+    "message": "خيارات تسجيل الدخول بخطوتين المملوكة مثل YubiKey و Duo."
   },
   "premiumSignUpReports": {
     "message": "نظافة كلمة المرور، صحة الحساب، وتقارير خرق البيانات للحفاظ على سلامة خزنتك."
@@ -1493,7 +1493,7 @@
     "message": "تسجيل الخروج من الخزنة يتطلب إعادة المصادقة للوصول إليها مرة أخرى."
   },
   "unlockMethodNeededToChangeTimeoutActionDesc": {
-    "message": "Set up an unlock method to change your vault timeout action."
+    "message": "أعدنّ طريقة إلغاء القُفْل لتغيير إجراء مهلة المخزن الخاص بك."
   },
   "lock": {
     "message": "قفل",
@@ -1661,6 +1661,9 @@
   },
   "personalOwnershipPolicyInEffect": {
     "message": "تؤثر سياسة مؤسسة على خيارات الملكية الخاصة بك."
+  },
+  "personalOwnershipPolicyInEffectImports": {
+    "message": "An organization policy has blocked importing items into your individual vault."
   },
   "allSends": {
     "message": "كل الإرسالات",
@@ -1985,7 +1988,7 @@
     "message": "تصدير الخزنة الشخصية"
   },
   "exportingIndividualVaultDescription": {
-    "message": "Only the individual vault items associated with $EMAIL$ will be exported. Organization vault items will not be included. Only vault item information will be exported and will not include associated attachments.",
+    "message": "سيتم تصدير عناصر المخزن الفردية المرتبطة بـ $EMAIL$ فقط. لن يتم إدراج عناصر مخزن المؤسسة. سيتم تصدير معلومات المنتج فقط ولن تشمل المرفقات المرتبطة بها.",
     "placeholders": {
       "email": {
         "content": "$1",
@@ -2110,7 +2113,7 @@
     "message": "تسجيل الدخول باستخدام جهاز آخر"
   },
   "loginInitiated": {
-    "message": "Login initiated"
+    "message": "بَدْء تسجيل الدخول"
   },
   "notificationSentDevice": {
     "message": "تم إرسال إشعار إلى جهازك."
@@ -2250,31 +2253,31 @@
     "message": "تحديث الإعدادات الموصى بها"
   },
   "deviceApprovalRequired": {
-    "message": "Device approval required. Select an approval option below:"
+    "message": "موافقة الجهاز مطلوبة. حدد خيار الموافقة أدناه:"
   },
   "rememberThisDevice": {
-    "message": "Remember this device"
+    "message": "تذكر هذا الجهاز"
   },
   "uncheckIfPublicDevice": {
-    "message": "Uncheck if using a public device"
+    "message": "إلغاء تحديد عند استخدام جهاز عام"
   },
   "approveFromYourOtherDevice": {
-    "message": "Approve from your other device"
+    "message": "الموافقة من جهازك الآخر"
   },
   "requestAdminApproval": {
-    "message": "Request admin approval"
+    "message": "طلب موافقة المشرف"
   },
   "approveWithMasterPassword": {
-    "message": "Approve with master password"
+    "message": "الموافقة بواسطة كلمة المرور الرئيسية"
   },
   "region": {
-    "message": "Region"
+    "message": "المنطقة"
   },
   "ssoIdentifierRequired": {
-    "message": "Organization SSO identifier is required."
+    "message": "معرف الـSSO للمؤسسة مطلوب."
   },
   "eu": {
-    "message": "EU",
+    "message": "الاتحاد الأوروبي",
     "description": "European Union"
   },
   "loggingInOn": {
@@ -2287,46 +2290,46 @@
     "message": "bitwarden.eu"
   },
   "selfHostedServer": {
-    "message": "self-hosted"
+    "message": "استضافة ذاتية"
   },
   "accessDenied": {
     "message": "غير مسموح بالدخول. ليس لديك الصلاحية لعرض هذه الصفحة."
   },
   "accountSuccessfullyCreated": {
-    "message": "Account successfully created!"
+    "message": "تم إنشاء الحساب بنجاح!"
   },
   "adminApprovalRequested": {
-    "message": "Admin approval requested"
+    "message": "طلبت موافقة المسؤول"
   },
   "adminApprovalRequestSentToAdmins": {
-    "message": "Your request has been sent to your admin."
+    "message": "تم إرسال طلبك إلى المشرف الخاص بك."
   },
   "youWillBeNotifiedOnceApproved": {
-    "message": "You will be notified once approved."
+    "message": "سيتم إعلامك بمجرد الموافقة."
   },
   "troubleLoggingIn": {
-    "message": "Trouble logging in?"
+    "message": "مشكلة في تسجيل الدخول؟"
   },
   "loginApproved": {
-    "message": "Login approved"
+    "message": "تمت الموافقة على تسجيل الدخول"
   },
   "userEmailMissing": {
-    "message": "User email missing"
+    "message": "البريد الإلكتروني للمستخدم مفقود"
   },
   "deviceTrusted": {
-    "message": "Device trusted"
+    "message": "الجهاز موثوق به"
   },
   "inputRequired": {
-    "message": "Input is required."
+    "message": "الإدخال مطلوب."
   },
   "required": {
-    "message": "required"
+    "message": "مطلوب"
   },
   "search": {
-    "message": "Search"
+    "message": "بحث"
   },
   "inputMinLength": {
-    "message": "Input must be at least $COUNT$ characters long.",
+    "message": "الإدخال يجب أن يكون على الأقل $COUNT$ حرفاً.",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -2335,7 +2338,7 @@
     }
   },
   "inputMaxLength": {
-    "message": "Input must not exceed $COUNT$ characters in length.",
+    "message": "الإدخال يجب أن لا يتجاوز أحرف $COUNT$ في الطول.",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -2344,7 +2347,7 @@
     }
   },
   "inputForbiddenCharacters": {
-    "message": "The following characters are not allowed: $CHARACTERS$",
+    "message": "الأحرف التالية غير مسموح بها: $CHARACTERS$",
     "placeholders": {
       "characters": {
         "content": "$1",
@@ -2353,7 +2356,7 @@
     }
   },
   "inputMinValue": {
-    "message": "Input value must be at least $MIN$.",
+    "message": "يجب أن تكون قيمة الإدخال على الأقل $MIN$.",
     "placeholders": {
       "min": {
         "content": "$1",
@@ -2362,7 +2365,7 @@
     }
   },
   "inputMaxValue": {
-    "message": "Input value must not exceed $MAX$.",
+    "message": "يجب ألا تتجاوز قيمة الإدخال $MAX$.",
     "placeholders": {
       "max": {
         "content": "$1",
@@ -2371,17 +2374,17 @@
     }
   },
   "multipleInputEmails": {
-    "message": "1 or more emails are invalid"
+    "message": "1 أو أكثر من رسائل البريد الإلكتروني غير صالحة"
   },
   "inputTrimValidator": {
-    "message": "Input must not contain only whitespace.",
+    "message": "الإدخال يجب أن لا يحتوي على مساحة بيضاء فقط.",
     "description": "Notification to inform the user that a form's input can't contain only whitespace."
   },
   "inputEmail": {
-    "message": "Input is not an email address."
+    "message": "الإدخال ليس عنوان بريد إلكتروني."
   },
   "fieldsNeedAttention": {
-    "message": "$COUNT$ field(s) above need your attention.",
+    "message": "الحقل (الحقول) $COUNT$ أعلاه بحاجة إلى اهتمامك.",
     "placeholders": {
       "count": {
         "content": "$1",
@@ -2390,22 +2393,22 @@
     }
   },
   "selectPlaceholder": {
-    "message": "-- Select --"
+    "message": "-- اختيار --"
   },
   "multiSelectPlaceholder": {
-    "message": "-- Type to filter --"
+    "message": "-- اكتب للنصفية --"
   },
   "multiSelectLoading": {
-    "message": "Retrieving options..."
+    "message": "استرداد الخيارات..."
   },
   "multiSelectNotFound": {
-    "message": "No items found"
+    "message": "لم يتم العثور على عناصر"
   },
   "multiSelectClearAll": {
-    "message": "Clear all"
+    "message": "امسح الكل"
   },
   "plusNMore": {
-    "message": "+ $QUANTITY$ more",
+    "message": "+ $QUANTITY$ المزيد",
     "placeholders": {
       "quantity": {
         "content": "$1",
@@ -2414,6 +2417,193 @@
     }
   },
   "submenu": {
-    "message": "Submenu"
+    "message": "قائمة فرعية"
+  },
+  "typePasskey": {
+    "message": "Passkey"
+  },
+  "passkeyNotCopied": {
+    "message": "Passkey will not be copied"
+  },
+  "passkeyNotCopiedAlert": {
+    "message": "The passkey will not be copied to the cloned item. Do you want to continue cloning this item?"
+  },
+  "aliasDomain": {
+    "message": "Alias domain"
+  },
+  "importData": {
+    "message": "Import data",
+    "description": "Used for the desktop menu item and the header of the import dialog"
+  },
+  "importError": {
+    "message": "Import error"
+  },
+  "importErrorDesc": {
+    "message": "There was a problem with the data you tried to import. Please resolve the errors listed below in your source file and try again."
+  },
+  "resolveTheErrorsBelowAndTryAgain": {
+    "message": "Resolve the errors below and try again."
+  },
+  "description": {
+    "message": "Description"
+  },
+  "importSuccess": {
+    "message": "Data successfully imported"
+  },
+  "importSuccessNumberOfItems": {
+    "message": "A total of $AMOUNT$ items were imported.",
+    "placeholders": {
+      "amount": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "total": {
+    "message": "Total"
+  },
+  "importWarning": {
+    "message": "You are importing data to $ORGANIZATION$. Your data may be shared with members of this organization. Do you want to proceed?",
+    "placeholders": {
+      "organization": {
+        "content": "$1",
+        "example": "My Org Name"
+      }
+    }
+  },
+  "importFormatError": {
+    "message": "Data is not formatted correctly. Please check your import file and try again."
+  },
+  "importNothingError": {
+    "message": "Nothing was imported."
+  },
+  "importEncKeyError": {
+    "message": "Error decrypting the exported file. Your encryption key does not match the encryption key used export the data."
+  },
+  "invalidFilePassword": {
+    "message": "Invalid file password, please use the password you entered when you created the export file."
+  },
+  "importDestination": {
+    "message": "Import destination"
+  },
+  "learnAboutImportOptions": {
+    "message": "Learn about your import options"
+  },
+  "selectImportFolder": {
+    "message": "Select a folder"
+  },
+  "selectImportCollection": {
+    "message": "Select a collection"
+  },
+  "importTargetHint": {
+    "message": "Select this option if you want the imported file contents moved to a $DESTINATION$",
+    "description": "Located as a hint under the import target. Will be appended by either folder or collection, depending if the user is importing into an individual or an organizational vault.",
+    "placeholders": {
+      "destination": {
+        "content": "$1",
+        "example": "folder or collection"
+      }
+    }
+  },
+  "importUnassignedItemsError": {
+    "message": "File contains unassigned items."
+  },
+  "selectFormat": {
+    "message": "Select the format of the import file"
+  },
+  "selectImportFile": {
+    "message": "Select the import file"
+  },
+  "chooseFile": {
+    "message": "Choose File"
+  },
+  "noFileChosen": {
+    "message": "No file chosen"
+  },
+  "orCopyPasteFileContents": {
+    "message": "or copy/paste the import file contents"
+  },
+  "instructionsFor": {
+    "message": "$NAME$ Instructions",
+    "description": "The title for the import tool instructions.",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "LastPass (csv)"
+      }
+    }
+  },
+  "confirmVaultImport": {
+    "message": "Confirm vault import"
+  },
+  "confirmVaultImportDesc": {
+    "message": "This file is password-protected. Please enter the file password to import data."
+  },
+  "confirmFilePassword": {
+    "message": "Confirm file password"
+  },
+  "multifactorAuthenticationCancelled": {
+    "message": "Multifactor authentication cancelled"
+  },
+  "noLastPassDataFound": {
+    "message": "No LastPass data found"
+  },
+  "incorrectUsernameOrPassword": {
+    "message": "Incorrect username or password"
+  },
+  "multifactorAuthenticationFailed": {
+    "message": "Multifactor authentication failed"
+  },
+  "includeSharedFolders": {
+    "message": "Include shared folders"
+  },
+  "lastPassEmail": {
+    "message": "LastPass Email"
+  },
+  "importingYourAccount": {
+    "message": "Importing your account..."
+  },
+  "lastPassMFARequired": {
+    "message": "LastPass multifactor authentication required"
+  },
+  "lastPassMFADesc": {
+    "message": "Enter your one-time passcode from your authentication app"
+  },
+  "lastPassOOBDesc": {
+    "message": "Approve the login request in your authentication app or enter a one-time passcode."
+  },
+  "passcode": {
+    "message": "Passcode"
+  },
+  "lastPassMasterPassword": {
+    "message": "LastPass master password"
+  },
+  "lastPassAuthRequired": {
+    "message": "LastPass authentication required"
+  },
+  "awaitingSSO": {
+    "message": "Awaiting SSO authentication"
+  },
+  "awaitingSSODesc": {
+    "message": "Please continue to log in using your company credentials."
+  },
+  "seeDetailedInstructions": {
+    "message": "See detailed instructions on our help site at",
+    "description": "This is followed a by a hyperlink to the help website."
+  },
+  "importDirectlyFromLastPass": {
+    "message": "Import directly from LastPass"
+  },
+  "importFromCSV": {
+    "message": "Import from CSV"
+  },
+  "lastPassTryAgainCheckEmail": {
+    "message": "Try again or look for an email from LastPass to verify it's you."
+  },
+  "collection": {
+    "message": "Collection"
+  },
+  "lastPassYubikeyDesc": {
+    "message": "Insert the YubiKey associated with your LastPass account into your computer's USB port, then touch its button."
   }
 }

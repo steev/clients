@@ -40,6 +40,7 @@ export class VaultFilterComponent implements OnInit, OnDestroy {
   isLoaded = false;
 
   protected destroy$: Subject<void> = new Subject<void>();
+  protected isOrgVault = false;
 
   get filtersList() {
     return this.filters ? Object.values(this.filters) : [];

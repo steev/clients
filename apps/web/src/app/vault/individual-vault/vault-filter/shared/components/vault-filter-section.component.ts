@@ -17,6 +17,7 @@ export class VaultFilterSectionComponent implements OnInit, OnDestroy {
 
   @Input() activeFilter: VaultFilter;
   @Input() section: VaultFilterSection;
+  @Input() isOrgVault = false;
 
   data: TreeNode<VaultFilterType>;
   collapsedFilterNodes: Set<string> = new Set();

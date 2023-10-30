@@ -8,10 +8,10 @@
       appA11yTitle="{{ 'toggleCollapse' | i18n }}: {{ headerNode.node.name | i18n }}"
       aria-controls="sub-filters"
     >
-      <ng-container *ngIf="headerNode.node.name === 'collections'">
+      <ng-container *ngIf="headerNode.node.id === 'AllCollections' && isOrgVault">
         <i class="bwi bwi-fw bwi-angle-down" aria-hidden="true"></i>
       </ng-container>
-      <ng-container *ngIf="headerNode.node.name != 'collections'">
+      <ng-container *ngIf="!(headerNode.node.id === 'AllCollections' && isOrgVault)">
         <i
           class="bwi bwi-fw"
           aria-hidden="true"
@@ -46,7 +46,7 @@
     class="filter-options"
   >
     <ng-template #recursiveFilters let-filters>
-      <ng-container *ngIf="headerNode.node.name != 'collections'">
+      <ng-container *ngIf="!(headerNode.node.id === 'AllCollections' && isOrgVault)">
         <li
           *ngFor="let f of filters"
           [ngClass]="{

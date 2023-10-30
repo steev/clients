@@ -194,11 +194,6 @@ export default class AutofillService implements AutofillServiceInterface {
         await delay;
         /** TODO REMOVE BEFORE MERGING IN! */
 
-        const tabToFill = await BrowserApi.getTab(tab.id);
-        if (!tabToFill?.active || tabToFill?.url !== tab.url) {
-          return;
-        }
-
         // Add a small delay between operations
         fillScript.properties.delay_between_operations = 20;
 
@@ -208,11 +203,12 @@ export default class AutofillService implements AutofillServiceInterface {
         }
 
         BrowserApi.tabSendMessage(
-          tabToFill,
+          tab,
           {
             command: "fillForm",
             fillScript: fillScript,
-            url: tabToFill.url,
+            url: tab.url,
+            pageDetailsUrl: pd.details.url,
           },
           { frameId: pd.frameId }
         );

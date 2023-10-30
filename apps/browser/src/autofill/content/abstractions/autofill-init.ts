@@ -6,6 +6,7 @@ type AutofillExtensionMessage = {
   sender?: string;
   fillScript?: AutofillScript;
   url?: string;
+  pageDetailsUrl?: string;
 };
 
 type AutofillExtensionMessageHandlers = {

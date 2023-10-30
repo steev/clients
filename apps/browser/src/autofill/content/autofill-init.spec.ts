@@ -81,8 +81,13 @@ describe("AutofillInit", () => {
 
     it("skips calling the InsertAutofillContentService and does not fill the form if the url to fill is not equal to the current tab url", () => {
       const fillScript = mock<AutofillScript>();
+      const message = {
+        command: "fillForm",
+        fillScript,
+        pageDetailsUrl: "https://a-different-url.com",
+      };
 
-      bitwardenAutofillInit.fillForm(fillScript, "https://a-different-url.com");
+      bitwardenAutofillInit.fillForm(message);
 
       expect(bitwardenAutofillInit.insertAutofillContentService.fillForm).not.toHaveBeenCalledWith(
         fillScript
@@ -91,8 +96,13 @@ describe("AutofillInit", () => {
 
     it("will call the InsertAutofillContentService to fill the form", () => {
       const fillScript = mock<AutofillScript>();
+      const message = {
+        command: "fillForm",
+        fillScript,
+        pageDetailsUrl: window.location.href,
+      };
 
-      bitwardenAutofillInit.fillForm(fillScript, window.location.href);
+      bitwardenAutofillInit.fillForm(message);
 
       expect(bitwardenAutofillInit.insertAutofillContentService.fillForm).toHaveBeenCalledWith(
         fillScript

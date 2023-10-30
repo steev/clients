@@ -352,7 +352,7 @@ export class EventService {
       case EventType.Organization_SponsorshipsSynced:
         msg = humanReadableMsg = this.i18nService.t("sponsorshipsSynced");
         break;
-      case EventType.Organization_CollectionManagemenet_Updated:
+      case EventType.Organization_CollectionManagementUpdated:
         msg = this.i18nService.t("modifiedCollectionManagement", this.formatOrganizationId(ev));
         humanReadableMsg = this.i18nService.t(
           "modifiedCollectionManagement",

@@ -286,7 +286,6 @@ describe("AutofillService", () => {
       autofillOptions.cipher.login.matchesUri = jest.fn().mockReturnValue(true);
       autofillOptions.cipher.login.username = "username";
       autofillOptions.cipher.login.password = "password";
-      jest.spyOn(BrowserApi, "getTab").mockResolvedValue(createChromeTabMock());
     });
 
     describe("given a set of autofill options that are incomplete", () => {

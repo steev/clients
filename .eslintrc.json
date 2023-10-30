@@ -110,7 +110,9 @@
                   "libs/common/src/!(platform)/**/*",
                   "libs/common/src/platform/!(state)/**/*"
                 ],
-                "from": ["./libs/common/src/platform/state/**/*"]
+                "from": ["./libs/common/src/platform/state/**/*"],
+                // allow module index import
+                "except": ["**/state/index.ts"]
               }
             ]
           }

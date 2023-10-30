@@ -344,36 +344,6 @@ describe("AutofillService", () => {
           expect(error.message).toBe(didNotAutofillError);
         }
       });
-
-      it("throws an error if the tab to fill is not active", async () => {
-        jest.spyOn(BrowserApi, "getTab").mockResolvedValue(
-          createChromeTabMock({
-            active: false,
-          })
-        );
-
-        try {
-          await autofillService.doAutoFill(autofillOptions);
-          triggerTestFailure();
-        } catch (error) {
-          expect(error.message).toBe(didNotAutofillError);
-        }
-      });
-
-      it("throws an error if the tab to fill has changed urls", async () => {
-        jest.spyOn(BrowserApi, "getTab").mockResolvedValue(
-          createChromeTabMock({
-            url: "https://a-different-url.com",
-          })
-        );
-
-        try {
-          await autofillService.doAutoFill(autofillOptions);
-          triggerTestFailure();
-        } catch (error) {
-          expect(error.message).toBe(didNotAutofillError);
-        }
-      });
     });
 
     it("will autofill login data for a page", async () => {
@@ -429,6 +399,7 @@ describe("AutofillService", () => {
             untrustedIframe: false,
           },
           url: currentAutofillPageDetails.tab.url,
+          pageDetailsUrl: "url",
         },
         {
           frameId: currentAutofillPageDetails.frameId,

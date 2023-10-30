@@ -51,7 +51,6 @@ export class DefaultGlobalState<T> implements GlobalState<T> {
     const currentState = this.stateSubject.getValue();
     const newState = configureState(currentState);
     await this.chosenLocation.save(this.storageKey, newState);
-    this.stateSubject.next(newState);
     return newState;
   }
 

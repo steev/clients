@@ -1,5 +1,5 @@
 import { Component, HostBinding, OnDestroy, OnInit } from "@angular/core";
-import { Subject, map, takeUntil } from "rxjs";
+import { Subject, takeUntil } from "rxjs";
 
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { PolicyType } from "@bitwarden/common/admin-console/enums";
@@ -53,11 +53,8 @@ export class WebauthnLoginSettingsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.policyService
-      .get$(PolicyType.RequireSso)
-      .pipe(
-        map((policy) => policy?.enabled ?? false),
-        takeUntil(this.destroy$)
-      )
+      .policyAppliesToActiveUser$(PolicyType.RequireSso)
+      .pipe(takeUntil(this.destroy$))
       .subscribe((enabled) => {
         this.requireSsoPolicyEnabled = enabled;
       });

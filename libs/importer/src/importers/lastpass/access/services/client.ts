@@ -229,13 +229,13 @@ export class Client {
     let passcode: OtpResult = null;
     switch (method) {
       case OtpMethod.GoogleAuth:
-        passcode = ui.provideGoogleAuthPasscode();
+        passcode = await ui.provideGoogleAuthPasscode();
         break;
       case OtpMethod.MicrosoftAuth:
-        passcode = ui.provideMicrosoftAuthPasscode();
+        passcode = await ui.provideMicrosoftAuthPasscode();
         break;
       case OtpMethod.Yubikey:
-        passcode = ui.provideYubikeyPasscode();
+        passcode = await ui.provideYubikeyPasscode();
         break;
       default:
         throw new Error("Invalid OTP method");
@@ -273,22 +273,9 @@ export class Client {
     ui: Ui,
     rest: RestClient
   ): Promise<Session> {
-    const answer = this.approveOob(username, parameters, ui, rest);
-    if (answer == OobResult.cancel) {
-      throw new Error("Out of band step is canceled by the user");
-    }
-
-    const extraParameters = new Map<string, any>();
-    if (answer.waitForOutOfBand) {
-      extraParameters.set("outofbandrequest", 1);
-    } else {
-      extraParameters.set("otp", answer.passcode);
-    }
-
-    let session: Session = null;
-    for (;;) {
-      // In case of the OOB auth the server doesn't respond instantly. This works more like a long poll.
-      // The server times out in about 10 seconds so there's no need to back off.
+    // In case of the OOB auth the server doesn't respond instantly. This works more like a long poll.
+    // The server times out in about 10 seconds so there's no need to back off.
+    const attemptLogin = async (extraParameters: Map<string, any>): Promise<Session> => {
       const response = await this.performSingleLoginRequest(
         username,
         password,
@@ -298,9 +285,9 @@ export class Client {
         rest
       );
 
-      session = this.extractSessionFromLoginResponse(response, keyIterationCount, clientInfo);
+      const session = this.extractSessionFromLoginResponse(response, keyIterationCount, clientInfo);
       if (session != null) {
-        break;
+        return session;
       }
 
       if (this.getOptionalErrorAttribute(response, "cause") != "outofbandrequired") {
@@ -310,15 +297,46 @@ export class Client {
       // Retry
       extraParameters.set("outofbandretry", "1");
       extraParameters.set("outofbandretryid", this.getErrorAttribute(response, "retryid"));
-    }
 
-    if (answer.rememberMe) {
-      await this.markDeviceAsTrusted(session, clientInfo, rest);
-    }
+      return attemptLogin(extraParameters);
+    };
+
+    const pollingLoginSession = () => {
+      const extraParameters = new Map<string, any>();
+      extraParameters.set("outofbandrequest", 1);
+      return attemptLogin(extraParameters);
+    };
+
+    const passcodeLoginSession = async () => {
+      const answer = await this.approveOob(username, parameters, ui, rest);
+
+      if (answer == OobResult.cancel) {
+        throw new Error("Out of band step is canceled by the user");
+      }
+      const extraParameters = new Map<string, any>();
+      extraParameters.set("otp", answer.passcode);
+      const session = await attemptLogin(extraParameters);
+      if (answer.rememberMe) {
+        await this.markDeviceAsTrusted(session, clientInfo, rest);
+      }
+      return session;
+    };
+
+    const session: Session = await Promise.race([
+      pollingLoginSession(),
+      passcodeLoginSession(),
+    ]).finally(() => {
+      ui.closeMFADialog();
+    });
     return session;
   }
 
-  private approveOob(username: string, parameters: Map<string, string>, ui: Ui, rest: RestClient) {
+  private async approveOob(
+    username: string,
+    parameters: Map<string, string>,
+    ui: Ui,
+    rest: RestClient
+  ): Promise<OobResult> {
     const method = parameters.get("outofbandtype");
     if (method == null) {
       throw new Error("Out of band method is not specified");
@@ -335,12 +353,12 @@ export class Client {
     }
   }
 
-  private approveDuo(
+  private async approveDuo(
     username: string,
     parameters: Map<string, string>,
     ui: Ui,
     rest: RestClient
-  ): OobResult {
+  ): Promise<OobResult> {
     return parameters.get("preferduowebsdk") == "1"
       ? this.approveDuoWebSdk(username, parameters, ui, rest)
       : ui.approveDuo();
@@ -351,9 +369,9 @@ export class Client {
     parameters: Map<string, string>,
     ui: Ui,
     rest: RestClient
-  ): OobResult {
-    // TODO: implement this
-    return OobResult.cancel;
+  ): Promise<OobResult> {
+    // TODO: implement this instead of calling `approveDuo`
+    return ui.approveDuo();
   }
 
   private async markDeviceAsTrusted(session: Session, clientInfo: ClientInfo, rest: RestClient) {
@@ -525,6 +543,7 @@ export class Client {
       switch (cause.value) {
         case "unknownemail":
           return "Invalid username";
+        case "password_invalid":
         case "unknownpassword":
           return "Invalid password";
         case "googleauthfailed":
@@ -533,6 +552,8 @@ export class Client {
           return "Second factor code is incorrect";
         case "multifactorresponsefailed":
           return "Out of band authentication failed";
+        case "unifiedloginresult":
+          return "unifiedloginresult";
         default:
           return message?.value ?? cause.value;
       }

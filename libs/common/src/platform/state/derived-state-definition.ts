@@ -9,7 +9,7 @@ export class DeriveContext {
 
 export class DerivedStateDefinition<TFrom, TTo> {
   constructor(
-    readonly KeyDefinition: KeyDefinition<TTo>,
+    readonly keyDefinition: KeyDefinition<TTo>,
     readonly converter: (data: TFrom, context: DeriveContext) => Promise<TTo>
   ) {}
 }

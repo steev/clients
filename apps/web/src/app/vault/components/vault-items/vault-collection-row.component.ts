@@ -49,6 +49,8 @@ export class VaultCollectionRowComponent implements OnInit {
       this.permissionText = "canManage";
     } else if (!this.collection.readOnly) {
       this.permissionText = "canEdit";
+    } else if (this.collection.readOnly) {
+      this.permissionText = "canView";
     } else {
       this.permissionText = null;
     }

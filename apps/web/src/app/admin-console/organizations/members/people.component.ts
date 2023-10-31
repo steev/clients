@@ -380,7 +380,7 @@ export class PeopleComponent
   }
 
   async edit(user: OrganizationUserView, initialTab: MemberDialogTab = MemberDialogTab.Role) {
-    if (this.organization.hasReseller && this.organization.seats === this.confirmedCount) {
+    if (!user && this.organization.hasReseller && this.organization.seats === this.confirmedCount) {
       this.platformUtilsService.showToast(
         "error",
         this.i18nService.t("seatLimitReached"),

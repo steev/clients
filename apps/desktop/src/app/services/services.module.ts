@@ -11,6 +11,7 @@ import {
 import { JslibServicesModule } from "@bitwarden/angular/services/jslib-services.module";
 import { AbstractThemingService } from "@bitwarden/angular/services/theming/theming.service.abstraction";
 import { PolicyService as PolicyServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
+import { AccountService as AccountServiceAbstraction } from "@bitwarden/common/auth/abstractions/account.service";
 import { AuthService as AuthServiceAbstraction } from "@bitwarden/common/auth/abstractions/auth.service";
 import { LoginService as LoginServiceAbstraction } from "@bitwarden/common/auth/abstractions/login.service";
 import { LoginService } from "@bitwarden/common/auth/services/login.service";
@@ -47,7 +48,7 @@ import { ElectronRendererSecureStorageService } from "../../platform/services/el
 import { ElectronRendererStorageService } from "../../platform/services/electron-renderer-storage.service";
 import { ElectronStateService } from "../../platform/services/electron-state.service";
 import { ElectronStateService as ElectronStateServiceAbstraction } from "../../platform/services/electron-state.service.abstraction";
-import { I18nService } from "../../platform/services/i18n.service";
+import { I18nRendererService } from "../../platform/services/i18n.renderer.service";
 import { EncryptedMessageHandlerService } from "../../services/encrypted-message-handler.service";
 import { NativeMessageHandlerService } from "../../services/native-message-handler.service";
 import { NativeMessagingService } from "../../services/native-messaging.service";
@@ -90,7 +91,7 @@ const RELOAD_CALLBACK = new InjectionToken<() => any>("RELOAD_CALLBACK");
     },
     {
       provide: I18nServiceAbstraction,
-      useClass: I18nService,
+      useClass: I18nRendererService,
       deps: [SYSTEM_LANGUAGE, LOCALES_DIRECTORY],
     },
     {
@@ -120,6 +121,7 @@ const RELOAD_CALLBACK = new InjectionToken<() => any>("RELOAD_CALLBACK");
         MEMORY_STORAGE,
         LogService,
         STATE_FACTORY,
+        AccountServiceAbstraction,
         STATE_SERVICE_USE_CACHE,
       ],
     },

@@ -15,14 +15,17 @@ import { BitwardenToastModule } from "@bitwarden/angular/components/toastr.compo
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { ColorPasswordCountPipe } from "@bitwarden/angular/pipes/color-password-count.pipe";
 import { ColorPasswordPipe } from "@bitwarden/angular/pipes/color-password.pipe";
+import { AvatarModule } from "@bitwarden/components";
 
+import { AccountSwitcherComponent } from "../auth/popup/account-switching/account-switcher.component";
+import { CurrentAccountComponent } from "../auth/popup/account-switching/current-account.component";
 import { SetPinComponent } from "../auth/popup/components/set-pin.component";
 import { EnvironmentComponent } from "../auth/popup/environment.component";
 import { HintComponent } from "../auth/popup/hint.component";
 import { HomeComponent } from "../auth/popup/home.component";
 import { LockComponent } from "../auth/popup/lock.component";
 import { LoginDecryptionOptionsComponent } from "../auth/popup/login-decryption-options/login-decryption-options.component";
-import { LoginWithDeviceComponent } from "../auth/popup/login-with-device.component";
+import { LoginViaAuthRequestComponent } from "../auth/popup/login-via-auth-request.component";
 import { LoginComponent } from "../auth/popup/login.component";
 import { RegisterComponent } from "../auth/popup/register.component";
 import { RemovePasswordComponent } from "../auth/popup/remove-password.component";
@@ -31,6 +34,7 @@ import { SsoComponent } from "../auth/popup/sso.component";
 import { TwoFactorOptionsComponent } from "../auth/popup/two-factor-options.component";
 import { TwoFactorComponent } from "../auth/popup/two-factor.component";
 import { UpdateTempPasswordComponent } from "../auth/popup/update-temp-password.component";
+import { HeaderComponent } from "../platform/popup/header.component";
 import { FilePopoutCalloutComponent } from "../tools/popup/components/file-popout-callout.component";
 import { GeneratorComponent } from "../tools/popup/generator/generator.component";
 import { PasswordGeneratorHistoryComponent } from "../tools/popup/generator/password-generator-history.component";
@@ -100,6 +104,7 @@ import "../platform/popup/locales";
     ServicesModule,
     DialogModule,
     FilePopoutCalloutComponent,
+    AvatarModule,
   ],
   declarations: [
     ActionButtonsComponent,
@@ -121,11 +126,12 @@ import "../platform/popup/locales";
     FolderAddEditComponent,
     FoldersComponent,
     VaultFilterComponent,
+    HeaderComponent,
     HintComponent,
     HomeComponent,
     LockComponent,
     LoginComponent,
-    LoginWithDeviceComponent,
+    LoginViaAuthRequestComponent,
     LoginDecryptionOptionsComponent,
     OptionsComponent,
     GeneratorComponent,
@@ -159,6 +165,8 @@ import "../platform/popup/locales";
     HelpAndFeedbackComponent,
     AutofillComponent,
     EnvironmentSelectorComponent,
+    CurrentAccountComponent,
+    AccountSwitcherComponent,
   ],
   providers: [CurrencyPipe, DatePipe],
   bootstrap: [AppComponent],

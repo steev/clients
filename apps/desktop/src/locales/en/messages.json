@@ -403,6 +403,9 @@
   "length": {
     "message": "Length"
   },
+  "minLength": {
+    "message": "Minimum length (sum of selected options)"
+  },
   "uppercase": {
     "message": "Uppercase (A-Z)"
   },

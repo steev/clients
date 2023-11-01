@@ -33,6 +33,8 @@ export class GeneratorComponent implements OnInit {
   forwardOptions: EmailForwarderOptions[];
   usernameOptions: UsernameGeneratorOptions = {};
   passwordOptions: PasswordGeneratorOptions = {};
+  passwordOptionsMinLengthForReader = 5;
+  private passwordOptionsMinLengthForReaderTimer: NodeJS.Timeout | null = null;
   username = "-";
   password = "-";
   showOptions = false;
@@ -144,6 +146,38 @@ export class GeneratorComponent implements OnInit {
     await this.passwordGenerationService.addHistory(this.password);
   }
 
+  async setPasswordOptionsMinNumber($event: number) {
+    this.passwordOptions.minNumber = $event;
+    // `savePasswordOptions()` replaces the null
+    this.passwordOptions.number = null;
+
+    await this.savePasswordOptions();
+  }
+
+  async setPasswordOptionsNumber($event: boolean) {
+    this.passwordOptions.number = $event;
+    // `savePasswordOptions()` replaces the null
+    this.passwordOptions.minNumber = null;
+
+    await this.savePasswordOptions();
+  }
+
+  async setPasswordOptionsMinSpecial($event: number) {
+    this.passwordOptions.minSpecial = $event;
+    // `savePasswordOptions()` replaces the null
+    this.passwordOptions.special = null;
+
+    await this.savePasswordOptions();
+  }
+
+  async setPasswordOptionsSpecial($event: boolean) {
+    this.passwordOptions.special = $event;
+    // `savePasswordOptions()` replaces the null
+    this.passwordOptions.minSpecial = null;
+
+    await this.savePasswordOptions();
+  }
+
   async sliderInput() {
     this.normalizePasswordOptions();
     this.password = await this.passwordGenerationService.generatePassword(this.passwordOptions);
@@ -240,6 +274,15 @@ export class GeneratorComponent implements OnInit {
       this.passwordOptions,
       this.enforcedPasswordPolicyOptions
     );
+
+    // update screen reader minimum password length with 500ms debounce
+    // so that the user isn't flooded with status updates
+    if (this.passwordOptionsMinLengthForReaderTimer) {
+      clearTimeout(this.passwordOptionsMinLengthForReaderTimer);
+    }
+    this.passwordOptionsMinLengthForReaderTimer = setTimeout(() => {
+      this.passwordOptionsMinLengthForReader = this.passwordOptions.minLength || 5;
+    }, 500);
   }
 
   private async initForwardOptions() {

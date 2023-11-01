@@ -133,17 +133,12 @@ export class CreateCredentialDialogComponent implements OnInit {
     }
 
     const name = this.formGroup.value.credentialNaming.name;
-    try {
-      await this.webauthnService.saveCredential(
-        this.credentialOptions,
-        this.deviceResponse,
-        this.formGroup.value.credentialNaming.name
-      );
-    } catch (error) {
-      this.logService?.error(error);
-      this.platformUtilsService.showToast("error", null, this.i18nService.t("unexpectedError"));
-      return;
-    }
+
+    await this.webauthnService.saveCredential(
+      this.credentialOptions,
+      this.deviceResponse,
+      this.formGroup.value.credentialNaming.name
+    );
 
     if (await firstValueFrom(this.hasPasskeys$)) {
       this.platformUtilsService.showToast(

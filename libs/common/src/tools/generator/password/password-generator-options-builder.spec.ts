@@ -636,13 +636,40 @@ describe("Password generator options builder", () => {
     );
 
     it.each([
+      [0, 0, 0, 0],
+      [1, 1, 0, 0],
+      [0, 0, 1, 1],
+      [1, 1, 1, 1],
+    ])(
+      "should set `options.minLength` to the minimum boundary when the sum of minimums (%i + %i + %i + %i) is less than the default minimum length.",
+      (minLowercase, minUppercase, minNumber, minSpecial) => {
+        const sumOfMinimums = minLowercase + minUppercase + minNumber + minSpecial;
+        expect(sumOfMinimums).toBeLessThan(DefaultBoundaries.length.min);
+
+        const policy = new PasswordGeneratorPolicyOptions();
+        const builder = new PasswordGeneratorOptionsEvaluator(policy);
+        const options = Object.freeze({
+          minLowercase,
+          minUppercase,
+          minNumber,
+          minSpecial,
+          ...defaultOptions,
+        });
+
+        const actual = builder.sanitize(options);
+
+        expect(actual.minLength).toEqual(builder.length.min);
+      }
+    );
+
+    it.each([
       [12, 3, 3, 3, 3],
       [8, 2, 2, 2, 2],
       [9, 3, 3, 3, 0],
     ])(
-      "should set `options.minLength === %i` to the sum of minimums (%i + %i + %i + %i) when the sum is greater than the default minimum length.",
+      "should set `options.minLength === %i` to the sum of minimums (%i + %i + %i + %i) when the sum is at least the default minimum length.",
       (expectedMinLength, minLowercase, minUppercase, minNumber, minSpecial) => {
-        expect(expectedMinLength).toBeGreaterThan(DefaultBoundaries.length.min);
+        expect(expectedMinLength).toBeGreaterThanOrEqual(DefaultBoundaries.length.min);
 
         const policy = new PasswordGeneratorPolicyOptions();
         const builder = new PasswordGeneratorOptionsEvaluator(policy);

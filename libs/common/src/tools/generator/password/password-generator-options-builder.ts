@@ -106,7 +106,7 @@ export class PasswordGeneratorOptionsEvaluator {
     function fitToBounds(value: number, boundaries: Boundary) {
       const { min, max } = boundaries;
 
-      const withUpperBound = Math.min(value, max);
+      const withUpperBound = Math.min(value || 0, max);
       const withLowerBound = Math.max(withUpperBound, min);
 
       return withLowerBound;
@@ -122,8 +122,8 @@ export class PasswordGeneratorOptionsEvaluator {
 
     // apply boundaries; the boundaries can cascade boolean fields to numeric fields
     const length = fitToBounds(options.length, this.length);
-    const minNumber = (number && fitToBounds(options.minNumber, this.minDigits)) || 0;
-    const minSpecial = (special && fitToBounds(options.minSpecial, this.minSpecialCharacters)) || 0;
+    const minNumber = fitToBounds(options.minNumber, this.minDigits);
+    const minSpecial = fitToBounds(options.minSpecial, this.minSpecialCharacters);
 
     return {
       ...options,
@@ -147,7 +147,7 @@ export class PasswordGeneratorOptionsEvaluator {
   sanitize(options: PasswordGenerationOptions): PasswordGenerationOptions {
     function cascade(enabled: boolean, value: number): [boolean, number] {
       const enabledResult = enabled ?? value > 0;
-      const valueResult = enabledResult ? value ?? 1 : 0;
+      const valueResult = enabledResult ? value || 1 : 0;
 
       return [enabledResult, valueResult];
     }
@@ -158,7 +158,8 @@ export class PasswordGeneratorOptionsEvaluator {
     const [special, minSpecial] = cascade(options.special, options.minSpecial);
 
     // minimums can only increase the length
-    const minLength = minLowercase + minUppercase + minNumber + minSpecial;
+    const minConsistentLength = minLowercase + minUppercase + minNumber + minSpecial;
+    const minLength = Math.max(minConsistentLength, this.length.min);
     const length = Math.max(options.length ?? minLength, minLength);
 
     return {

@@ -206,7 +206,9 @@ export class PasswordGenerationService implements PasswordGenerationServiceAbstr
     const withPolicy = evaluator.applyPolicy(options);
     const sanitized = evaluator.sanitize(withPolicy);
 
-    return [sanitized, policy];
+    // callers assume this function updates the options parameter
+    const result = Object.assign(options, sanitized);
+    return [result, policy];
   }
 
   async getPasswordGeneratorPolicyOptions(): Promise<PasswordGeneratorPolicyOptions> {
@@ -350,9 +352,10 @@ export class PasswordGenerationService implements PasswordGenerationServiceAbstr
       : new PassphraseGeneratorOptionsEvaluator(enforcedPolicyOptions);
 
     const evaluatedOptions = evaluator.applyPolicy(options);
+    const santizedOptions = evaluator.sanitize(evaluatedOptions);
 
-    // preserves the behavior of the old password generator
-    Object.assign(options, evaluatedOptions);
+    // callers assume this function updates the options parameter
+    Object.assign(options, santizedOptions);
 
     return options;
   }

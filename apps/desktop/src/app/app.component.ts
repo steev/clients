@@ -1,3 +1,4 @@
+import { DialogRef } from "@angular/cdk/dialog";
 import {
   Component,
   NgZone,
@@ -107,6 +108,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private lastActivity: number = null;
   private modal: ModalRef = null;
+  private dialog: DialogRef = null;
   private idleTimer: number = null;
   private isIdle = false;
   private activeUserId: string = null;
@@ -470,15 +472,15 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   async openLoginApproval(notificationId: string) {
-    this.modalService.closeAll();
+    this.dialogService.closeAll();
 
-    this.modal = await this.modalService.open(LoginApprovalComponent, {
+    this.dialog = this.dialogService.open(LoginApprovalComponent, {
       data: { notificationId: notificationId },
     });
 
     // eslint-disable-next-line rxjs-angular/prefer-takeuntil
-    this.modal.onClosed.subscribe(() => {
-      this.modal = null;
+    this.dialog.closed.subscribe(() => {
+      this.dialog = null;
     });
   }
 

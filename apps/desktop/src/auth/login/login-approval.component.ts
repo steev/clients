@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
+import { DIALOG_DATA, DialogRef } from "@angular/cdk/dialog";
+import { Component, OnInit, OnDestroy, Inject } from "@angular/core";
 import { ipcRenderer } from "electron";
 import { Subject } from "rxjs";
 
-import { ModalRef } from "@bitwarden/angular/components/modal/modal.ref";
-import { ModalConfig } from "@bitwarden/angular/services/modal.service";
+import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthRequestResponse } from "@bitwarden/common/auth/models/response/auth-request.response";
@@ -13,13 +13,20 @@ import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.servic
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
+import { DialogModule, ButtonModule } from "@bitwarden/components";
 
 const RequestTimeOut = 60000 * 15; //15 Minutes
 const RequestTimeUpdate = 60000 * 5; //5 Minutes
 
+export interface LoginApprovalDialogParams {
+  notificationId: string;
+}
+
 @Component({
   selector: "login-approval",
   templateUrl: "login-approval.component.html",
+  standalone: true,
+  imports: [DialogModule, JslibModule, ButtonModule],
 })
 export class LoginApprovalComponent implements OnInit, OnDestroy {
   notificationId: string;
@@ -31,9 +38,10 @@ export class LoginApprovalComponent implements OnInit, OnDestroy {
   authRequestResponse: AuthRequestResponse;
   interval: NodeJS.Timer;
   requestTimeText: string;
-  dismissModal: boolean;
+  dismissDialog: boolean;
 
   constructor(
+    @Inject(DIALOG_DATA) private params: LoginApprovalDialogParams,
     protected stateService: StateService,
     protected platformUtilsService: PlatformUtilsService,
     protected i18nService: I18nService,
@@ -41,16 +49,15 @@ export class LoginApprovalComponent implements OnInit, OnDestroy {
     protected authService: AuthService,
     protected appIdService: AppIdService,
     protected cryptoService: CryptoService,
-    private modalRef: ModalRef,
-    config: ModalConfig
+    private dialogRef: DialogRef
   ) {
-    this.notificationId = config.data.notificationId;
+    this.notificationId = params.notificationId;
 
-    this.dismissModal = true;
-    this.modalRef.onClosed
+    this.dismissDialog = true;
+    this.dialogRef.closed
       // eslint-disable-next-line rxjs-angular/prefer-takeuntil
       .subscribe(() => {
-        if (this.dismissModal) {
+        if (this.dismissDialog) {
           this.approveLogin(false, false);
         }
       });
@@ -90,9 +97,9 @@ export class LoginApprovalComponent implements OnInit, OnDestroy {
   async approveLogin(approveLogin: boolean, approveDenyButtonClicked: boolean) {
     clearInterval(this.interval);
 
-    this.dismissModal = !approveDenyButtonClicked;
+    this.dismissDialog = !approveDenyButtonClicked;
     if (approveDenyButtonClicked) {
-      this.modalRef.close();
+      this.dialogRef.close();
     }
 
     this.authRequestResponse = await this.apiService.getAuthRequest(this.notificationId);
@@ -166,7 +173,7 @@ export class LoginApprovalComponent implements OnInit, OnDestroy {
       );
     } else {
       clearInterval(this.interval);
-      this.modalRef.close();
+      this.dialogRef.close();
       this.platformUtilsService.showToast(
         "info",
         null,

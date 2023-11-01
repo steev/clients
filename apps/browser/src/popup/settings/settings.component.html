@@ -1,14 +1,12 @@
-<header>
+<app-header>
   <div class="left">
     <app-pop-out></app-pop-out>
   </div>
   <h1 class="center">
     <span class="title">{{ "settings" | i18n }}</span>
   </h1>
-  <div class="right">
-    <bit-avatar [id]="'test'" [text]="'test Name'" routerLink="/account-switcher"></bit-avatar>
-  </div>
-</header>
+  <div class="right"></div>
+</app-header>
 <main tabindex="-1" [formGroup]="form">
   <div class="box list">
     <h2 class="box-header">{{ "manage" | i18n }}</h2>

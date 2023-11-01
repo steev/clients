@@ -213,6 +213,10 @@ header:not(bit-callout header) {
   .right {
     justify-content: flex-end;
     align-items: center;
+    app-current-account {
+      margin-top: 3px;
+      margin-right: 5px;
+    }
     app-avatar {
       max-height: 30px;
       margin-right: 5px;

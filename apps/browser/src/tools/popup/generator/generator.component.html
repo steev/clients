@@ -1,4 +1,4 @@
-<header>
+<app-header>
   <div class="left">
     <app-pop-out [show]="!comingFromAddEdit"></app-pop-out>
     <button type="button" (click)="close()" *ngIf="comingFromAddEdit">
@@ -12,9 +12,8 @@
     <button type="button" (click)="select()" *ngIf="comingFromAddEdit">
       {{ "select" | i18n }}
     </button>
-    <bit-avatar [id]="'test'" [text]="'test Name'" routerLink="/account-switcher"></bit-avatar>
   </div>
-</header>
+</app-header>
 <main tabindex="-1">
   <app-callout type="info" *ngIf="enforcedPasswordPolicyOptions?.inEffect() && type === 'password'">
     {{ "passwordGeneratorPolicyInEffect" | i18n }}

@@ -1,18 +1,69 @@
 import Domain from "../../../platform/models/domain/domain-base";
 
+/** Organizational policy for the password generator. */
 export class PasswordGeneratorPolicyOptions extends Domain {
-  defaultType = "";
+  /** The default kind of credential to generate */
+  defaultType: "password" | "passphrase" | "" = "";
+
+  /** The minimum length of generated passwords.
+   *  When this is less than or equal to zero, it is ignored.
+   *  If this is less than the total number of characters required by
+   *  the policy's other settings, then it is ignored.
+   *  This field is not used for passphrases.
+   */
   minLength = 0;
+
+  /** When this is true, an uppercase character must be part of
+   *  the generated password.
+   *  This field is not used for passphrases.
+   */
   useUppercase = false;
+
+  /** When this is true, a lowercase character must be part of
+   *  the generated password. This field is not used for passphrases.
+   */
   useLowercase = false;
+
+  /** When this is true, at least one digit must be part of the generated
+   *  password. This field is not used for passphrases.
+   */
   useNumbers = false;
+
+  /** The quantity of digits to include in the generated password.
+   *  When this is less than or equal to zero, it is ignored.
+   *  This field is not used for passphrases.
+   */
   numberCount = 0;
+
+  /** When this is true, at least one digit must be part of the generated
+   *  password. This field is not used for passphrases.
+   */
   useSpecial = false;
+
+  /** The quantity of special characters to include in the generated
+   *  password. When this is less than or equal to zero, it is ignored.
+   *  This field is not used for passphrases.
+   */
   specialCount = 0;
+
+  /** The minimum number of words required by generated passphrases.
+   *  This field is not used for passwords.
+   */
   minNumberWords = 0;
+
+  /** When this is true, the first letter of each word in the passphrase
+   *  is capitalized. This field is not used for passwords.
+   */
   capitalize = false;
+
+  /** When this is true, a number is included within the passphrase.
+   *  This field is not used for passwords.
+   */
   includeNumber = false;
 
+  /** Checks whether a policy is in effect.
+   * @returns True if the policy is in effect, false otherwise.
+   */
   inEffect() {
     return (
       this.defaultType !== "" ||
@@ -27,5 +78,13 @@ export class PasswordGeneratorPolicyOptions extends Domain {
       this.capitalize ||
       this.includeNumber
     );
+  }
+
+  /** Creates a copy of the policy.
+   */
+  clone() {
+    const policy = new PasswordGeneratorPolicyOptions();
+    Object.assign(policy, this);
+    return policy;
   }
 }

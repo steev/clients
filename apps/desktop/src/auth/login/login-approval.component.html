@@ -22,10 +22,16 @@
     </div>
   </div>
   <div bitDialogFooter>
-    <button bitButton buttonType="primary" (click)="approveLogin(true, true)">
+    <button bitButton type="button" buttonType="primary" (click)="approveLogin(true, true)">
       {{ "confirmLogIn" | i18n }}
     </button>
-    <button bitButton buttonType="secondary" bitDialogClose (click)="approveLogin(false, true)">
+    <button
+      bitButton
+      type="button"
+      buttonType="secondary"
+      bitDialogClose
+      (click)="approveLogin(false, true)"
+    >
       {{ "denyLogIn" | i18n }}
     </button>
   </div>

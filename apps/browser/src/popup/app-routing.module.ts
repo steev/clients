@@ -12,12 +12,13 @@ import { canAccessFeature } from "@bitwarden/angular/guard/feature-flag.guard";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
 import { fido2AuthGuard } from "../auth/guards/fido2-auth.guard";
+import { AccountSwitcherComponent } from "../auth/popup/account-switching/account-switcher.component";
 import { EnvironmentComponent } from "../auth/popup/environment.component";
 import { HintComponent } from "../auth/popup/hint.component";
 import { HomeComponent } from "../auth/popup/home.component";
 import { LockComponent } from "../auth/popup/lock.component";
 import { LoginDecryptionOptionsComponent } from "../auth/popup/login-decryption-options/login-decryption-options.component";
-import { LoginWithDeviceComponent } from "../auth/popup/login-with-device.component";
+import { LoginViaAuthRequestComponent } from "../auth/popup/login-via-auth-request.component";
 import { LoginComponent } from "../auth/popup/login.component";
 import { RegisterComponent } from "../auth/popup/register.component";
 import { RemovePasswordComponent } from "../auth/popup/remove-password.component";
@@ -90,13 +91,13 @@ const routes: Routes = [
   },
   {
     path: "login-with-device",
-    component: LoginWithDeviceComponent,
+    component: LoginViaAuthRequestComponent,
     canActivate: [],
     data: { state: "login-with-device" },
   },
   {
     path: "admin-approval-requested",
-    component: LoginWithDeviceComponent,
+    component: LoginViaAuthRequestComponent,
     canActivate: [],
     data: { state: "login-with-device" },
   },
@@ -361,6 +362,11 @@ const routes: Routes = [
         data: { state: "tabs_send" },
       },
     ],
+  },
+  {
+    path: "account-switcher",
+    component: AccountSwitcherComponent,
+    data: { state: "account-switcher" },
   },
 ];
 

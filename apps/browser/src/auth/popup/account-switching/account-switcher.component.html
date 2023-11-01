@@ -1,6 +1,6 @@
 <app-header>
   <div class="left">
-    <button type="button" routerLink="/home">Close</button>
+    <button type="button" (click)="back()">Close</button>
   </div>
   <div class="center tw-font-bold">Switch Accounts</div>
 </app-header>
@@ -15,7 +15,11 @@
         (click)="selectAccount(accountOption.id)"
       >
         <div class="tw-flex-shrink-0">
-          <bit-avatar [id]="accountOption.id" [text]="accountOption.name"></bit-avatar>
+          <bit-avatar
+            [id]="accountOption.id"
+            [text]="accountOption.name"
+            size="medium"
+          ></bit-avatar>
         </div>
         <div class="tw-text-left">
           <div>

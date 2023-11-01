@@ -1,5 +1,9 @@
 <div *ngIf="currentAccount$ | async as currentAccount">
   <div (click)="currentAccountClicked()" class="tw-mr-1 tw-mt-1">
-    <bit-avatar [id]="currentAccount.id" [text]="currentAccountName$ | async"></bit-avatar>
+    <bit-avatar
+      [id]="currentAccount.id"
+      [text]="currentAccountName$ | async"
+      size="medium"
+    ></bit-avatar>
   </div>
 </div>

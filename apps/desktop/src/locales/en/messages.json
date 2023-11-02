@@ -403,8 +403,8 @@
   "length": {
     "message": "Length"
   },
-  "minLength": {
-    "message": "Minimum length (sum of selected options)"
+  "passwordMinLength": {
+    "message": "Minimum password length"
   },
   "uppercase": {
     "message": "Uppercase (A-Z)"

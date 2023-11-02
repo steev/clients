@@ -193,18 +193,18 @@
               attr.aria-label="{{ 'length' | i18n }}"
               tabindex="-1"
             />
-            <div>
-              <span>{{ "minLength" | i18n }}</span>
-              <span>{{ passwordOptions.minLength }}</span>
-              <span
-                class="sr-only"
-                attr.aria-label="{{ 'minLength' | i18n }}"
-                role="status"
-                aria-live="polite"
-              >
-                {{ passwordOptionsMinLengthForReader }}
-              </span>
-            </div>
+          </div>
+          <div class="box-content-row" appBoxRow>
+            <span>{{ "passwordMinLength" | i18n }}</span>
+            <span
+              class="sr-only"
+              attr.aria-label="{{ 'passwordMinLength' | i18n }}"
+              role="status"
+              aria-live="polite"
+            >
+              {{ passwordOptionsMinLengthForReader }}
+            </span>
+            <span class="txt-right">{{ passwordOptions.minLength }}</span>
           </div>
           <div class="box-content-row box-content-row-checkbox" appBoxRow>
             <label for="uppercase">A-Z</label>

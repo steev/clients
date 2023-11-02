@@ -117,11 +117,17 @@
         />
       </div>
       <div class="form-group col-4">
-        <span>{{ "minLength" | i18n }}</span>
-        <span class="pull-right">{{ passwordOptions.minLength }}</span>
+        <label for="min-length">{{ "passwordMinLength" | i18n }}</label>
+        <input
+          id="min-length"
+          class="form-control"
+          type="text"
+          readonly="true"
+          [value]="passwordOptions.length"
+        />
         <span
           class="sr-only"
-          attr.aria-label="{{ 'minLength' | i18n }}"
+          attr.aria-label="{{ 'passwordMinLength' | i18n }}"
           role="status"
           aria-live="polite"
         >

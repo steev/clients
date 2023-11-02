@@ -9,41 +9,7 @@
   <div *ngIf="accountOptions$ | async as accountOptions">
     <ul class="tw-grid tw-gap-2">
       <li *ngFor="let accountOption of accountOptions">
-        <button
-          *ngIf="accountOption.id !== specialAddAccountId; else addAccount"
-          type="button"
-          class="tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-md tw-bg-background tw-p-3"
-          (click)="selectAccount(accountOption.id)"
-        >
-          <div class="tw-flex-shrink-0">
-            <bit-avatar
-              [id]="accountOption.id"
-              [text]="accountOption.name"
-              size="medium"
-            ></bit-avatar>
-          </div>
-          <div class="tw-text-left">
-            <div>
-              {{ accountOption.name }}
-            </div>
-            <div class="tw-text-sm tw-text-muted">bitwarden.com</div>
-            <div class="tw-text-sm tw-italic tw-text-muted">status</div>
-          </div>
-          <div class="tw-ml-auto tw-flex-shrink-0">
-            <i class="bwi bwi-check-circle tw-text-2xl"></i>
-          </div>
-        </button>
-
-        <ng-template #addAccount>
-          <button
-            type="button"
-            class="tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-md tw-bg-background tw-p-3"
-            (click)="selectAccount(accountOption.id)"
-          >
-            <i class="bwi bwi-plus tw-text-2xl"></i>
-            {{ accountOption.name }}
-          </button>
-        </ng-template>
+        <auth-account [account]="accountOption"></auth-account>
       </li>
     </ul>
     <!--

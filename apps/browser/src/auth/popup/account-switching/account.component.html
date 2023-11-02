@@ -1,0 +1,31 @@
+<button
+  *ngIf="account.id !== specialAccountAddId; else addAccount"
+  type="button"
+  class="tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-md tw-bg-background tw-p-3"
+  (click)="selectAccount(account.id)"
+>
+  <div class="tw-flex-shrink-0">
+    <bit-avatar [id]="account.id" [text]="account.name" size="medium"></bit-avatar>
+  </div>
+  <div class="tw-text-left">
+    <div>
+      {{ account.name }}
+    </div>
+    <div class="tw-text-sm tw-text-muted">bitwarden.com</div>
+    <div class="tw-text-sm tw-italic tw-text-muted">status</div>
+  </div>
+  <div class="tw-ml-auto tw-flex-shrink-0">
+    <i class="bwi bwi-check-circle tw-text-2xl"></i>
+  </div>
+</button>
+
+<ng-template #addAccount>
+  <button
+    type="button"
+    class="tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-md tw-bg-background tw-p-3"
+    (click)="selectAccount(account.id)"
+  >
+    <i class="bwi bwi-plus tw-text-2xl"></i>
+    {{ account.name }}
+  </button>
+</ng-template>

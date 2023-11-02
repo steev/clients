@@ -1,6 +1,8 @@
 import Domain from "../../../platform/models/domain/domain-base";
 
-/** Organizational policy for the password generator. */
+/** Enterprise policy for the password generator.
+ * @see PolicyType.PasswordGenerator
+ */
 export class PasswordGeneratorPolicyOptions extends Domain {
   /** The default kind of credential to generate */
   defaultType: "password" | "passphrase" | "" = "";
@@ -61,8 +63,10 @@ export class PasswordGeneratorPolicyOptions extends Domain {
    */
   includeNumber = false;
 
-  /** Checks whether a policy is in effect.
-   * @returns True if the policy is in effect, false otherwise.
+  /** Checks whether the policy affects the password generator.
+   * @returns True if at least one password or passphrase requirement has been set.
+   * If it returns False, then no requirements have been set and the policy should
+   * not be enforced.
    */
   inEffect() {
     return (

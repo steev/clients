@@ -10,6 +10,7 @@ import { UserId } from "@bitwarden/common/types/guid";
   providedIn: "root",
 })
 export class AccountSwitcherService {
+  ACCOUNT_LIMIT = 5;
   SPECIAL_ADD_ACCOUNT_ID = "addAccount";
 
   constructor(
@@ -22,8 +23,8 @@ export class AccountSwitcherService {
     return combineLatest([this.accountService.accounts$, this.accountService.activeAccount$]).pipe(
       map(([accounts, activeAccount]) => {
         const accountEntries = Object.entries(accounts);
-        // Accounts shouldn't ever be more than 5 but just in case do a greater than
-        const hasMaxAccounts = accountEntries.length >= 5;
+        // Accounts shouldn't ever be more than ACCOUNT_LIMIT but just in case do a greater than
+        const hasMaxAccounts = accountEntries.length >= this.ACCOUNT_LIMIT;
         const options: { name: string; id: string; isSelected: boolean }[] = accountEntries.map(
           ([id, account]) => {
             return {

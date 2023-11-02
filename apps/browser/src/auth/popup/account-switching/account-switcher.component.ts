@@ -23,6 +23,12 @@ export class AccountSwitcherComponent {
     this.accountService.addAccount("Mario" as UserId, {
       name: "Mario",
       email: "mario@test.com",
+      status: AuthenticationStatus.Unlocked,
+    });
+
+    this.accountService.addAccount("Luigi" as UserId, {
+      name: "Luigi",
+      email: "luigi@test.com",
       status: AuthenticationStatus.Locked,
     });
 
@@ -32,7 +38,23 @@ export class AccountSwitcherComponent {
       status: AuthenticationStatus.Locked,
     });
 
+    this.accountService.addAccount("Bowser" as UserId, {
+      name: "Bowser",
+      email: "bowser@test.com",
+      status: AuthenticationStatus.Locked,
+    });
+
+    this.accountService.addAccount("Toad" as UserId, {
+      name: "Toad",
+      email: "toad@test.com",
+      status: AuthenticationStatus.Locked,
+    });
+
     this.accountService.switchAccount("Mario" as UserId);
+  }
+
+  get specialAddAccountId() {
+    return this.accountSwitcherService.SPECIAL_ADD_ACCOUNT_ID;
   }
 
   get accountOptions$() {

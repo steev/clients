@@ -6,12 +6,12 @@ import { MessagingService } from "@bitwarden/common/platform/abstractions/messag
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { UserId } from "@bitwarden/common/types/guid";
 
-const SPECIAL_ADD_ACCOUNT_VALUE = "addAccount";
-
 @Injectable({
   providedIn: "root",
 })
 export class AccountSwitcherService {
+  SPECIAL_ADD_ACCOUNT_ID = "addAccount";
+
   constructor(
     private accountService: AccountService,
     private stateService: StateService,
@@ -37,7 +37,7 @@ export class AccountSwitcherService {
         if (!hasMaxAccounts) {
           options.push({
             name: "Add Account",
-            id: SPECIAL_ADD_ACCOUNT_VALUE,
+            id: this.SPECIAL_ADD_ACCOUNT_ID,
             isSelected: activeAccount?.id == null,
           });
         }
@@ -48,7 +48,7 @@ export class AccountSwitcherService {
   }
 
   async selectAccount(id: string) {
-    if (id === SPECIAL_ADD_ACCOUNT_VALUE) {
+    if (id === this.SPECIAL_ADD_ACCOUNT_ID) {
       await this.stateService.setActiveUser(null);
       await this.stateService.setRememberedEmail(null);
       return;

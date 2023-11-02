@@ -6,45 +6,57 @@
 </app-header>
 
 <div class="tw-p-2">
-  <ul *ngIf="accountOptions$ | async as accountOptions" class="tw-grid tw-gap-2">
-    <li *ngFor="let accountOption of accountOptions">
-      <button
-        *ngIf="accountOption.id !== 'addAccount'; else addAccount"
-        type="button"
-        class="tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-md tw-bg-background tw-p-3"
-        (click)="selectAccount(accountOption.id)"
-      >
-        <div class="tw-flex-shrink-0">
-          <bit-avatar
-            [id]="accountOption.id"
-            [text]="accountOption.name"
-            size="medium"
-          ></bit-avatar>
-        </div>
-        <div class="tw-text-left">
-          <div>
-            {{ accountOption.name }}
-          </div>
-          <div class="tw-text-sm tw-text-muted">bitwarden.com</div>
-          <div class="tw-text-sm tw-italic tw-text-muted">status</div>
-        </div>
-        <div class="tw-ml-auto tw-flex-shrink-0">
-          <i class="bwi bwi-lock tw-text-2xl"></i>
-        </div>
-      </button>
-
-      <ng-template #addAccount>
+  <div *ngIf="accountOptions$ | async as accountOptions">
+    <ul class="tw-grid tw-gap-2">
+      <li *ngFor="let accountOption of accountOptions">
         <button
+          *ngIf="accountOption.id !== specialAddAccountId; else addAccount"
           type="button"
           class="tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-md tw-bg-background tw-p-3"
           (click)="selectAccount(accountOption.id)"
         >
-          <i class="bwi bwi-plus tw-text-2xl"></i>
-          {{ accountOption.name }}
+          <div class="tw-flex-shrink-0">
+            <bit-avatar
+              [id]="accountOption.id"
+              [text]="accountOption.name"
+              size="medium"
+            ></bit-avatar>
+          </div>
+          <div class="tw-text-left">
+            <div>
+              {{ accountOption.name }}
+            </div>
+            <div class="tw-text-sm tw-text-muted">bitwarden.com</div>
+            <div class="tw-text-sm tw-italic tw-text-muted">status</div>
+          </div>
+          <div class="tw-ml-auto tw-flex-shrink-0">
+            <i class="bwi bwi-lock tw-text-2xl"></i>
+          </div>
         </button>
-      </ng-template>
-    </li>
-  </ul>
+
+        <ng-template #addAccount>
+          <button
+            type="button"
+            class="tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-md tw-bg-background tw-p-3"
+            (click)="selectAccount(accountOption.id)"
+          >
+            <i class="bwi bwi-plus tw-text-2xl"></i>
+            {{ accountOption.name }}
+          </button>
+        </ng-template>
+      </li>
+    </ul>
+    <p
+      class="tw-text-sm tw-text-muted"
+      *ngIf="
+        accountOptions.length >= 5 &&
+        accountOptions[accountOptions.length - 1].id !== specialAddAccountId
+      "
+    >
+      Account limit reached. Log out of an account to add another.
+    </p>
+  </div>
+
   <div class="tw-mt-8">
     <div class="tw-mb-2 tw-uppercase tw-text-muted">Options</div>
     <div class="tw-grid tw-gap-2">

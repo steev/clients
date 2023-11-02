@@ -257,14 +257,17 @@ export class EmergencyAccessService {
    * @param newUserKey the new user key
    */
   async rotate(newUserKey: UserKey): Promise<void> {
-    const emergencyAccess = await this.emergencyAccessApiService.getEmergencyAccessTrusted();
+    const existingEmergencyAccess =
+      await this.emergencyAccessApiService.getEmergencyAccessTrusted();
     // Any Invited or Accepted requests won't have the key yet, so we don't need to update them
     const allowedStatuses = new Set([
       EmergencyAccessStatusType.Confirmed,
       EmergencyAccessStatusType.RecoveryInitiated,
       EmergencyAccessStatusType.RecoveryApproved,
     ]);
-    const filteredAccesses = emergencyAccess.data.filter((d) => allowedStatuses.has(d.status));
+    const filteredAccesses = existingEmergencyAccess.data.filter((d) =>
+      allowedStatuses.has(d.status)
+    );
 
     for (const details of filteredAccesses) {
       // Get public key of grantee

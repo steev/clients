@@ -176,11 +176,10 @@ cdk-virtual-scroll-viewport::-webkit-scrollbar-thumb,
 }
 
 header:not(bit-callout header) {
-  max-height: 44px;
+  height: 44px;
   display: flex;
 
   &:not(.no-theme) {
-    min-height: 44px;
     border-bottom: 1px solid #000000;
 
     @include themify($themes) {

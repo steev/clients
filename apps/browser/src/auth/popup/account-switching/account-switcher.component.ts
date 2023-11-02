@@ -53,6 +53,10 @@ export class AccountSwitcherComponent {
     this.accountService.switchAccount("Mario" as UserId);
   }
 
+  get accountLimit() {
+    return this.accountSwitcherService.ACCOUNT_LIMIT;
+  }
+
   get specialAddAccountId() {
     return this.accountSwitcherService.SPECIAL_ADD_ACCOUNT_ID;
   }

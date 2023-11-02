@@ -46,10 +46,15 @@
         </ng-template>
       </li>
     </ul>
+    <!--
+        If the user has not reached the account limit, the last 'accountOption' will have an 'id' of
+        'SPECIAL_ADD_ACCOUNT_ID'. Since we don't want to count this as one of the actual accounts,
+        we check to make sure the 'id' of the last 'accountOption' is not equal to 'SPECIAL_ADD_ACCOUNT_ID'
+    -->
     <p
       class="tw-text-sm tw-text-muted"
       *ngIf="
-        accountOptions.length >= 5 &&
+        accountOptions.length >= accountLimit &&
         accountOptions[accountOptions.length - 1].id !== specialAddAccountId
       "
     >

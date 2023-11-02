@@ -3,7 +3,7 @@ import { PasswordGeneratorPolicyOptions } from "../../../admin-console/models/do
 import {
   DefaultBoundaries,
   PassphraseGeneratorOptionsEvaluator,
-} from "./passphrase-generator-options-builder";
+} from "./passphrase-generator-options-evaluator";
 import { PassphraseGenerationOptions } from "./password-generator-options";
 
 describe("Password generator options builder", () => {

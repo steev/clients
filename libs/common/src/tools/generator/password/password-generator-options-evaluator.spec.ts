@@ -4,7 +4,7 @@ import { PasswordGenerationOptions } from "./password-generator-options";
 import {
   DefaultBoundaries,
   PasswordGeneratorOptionsEvaluator,
-} from "./password-generator-options-builder";
+} from "./password-generator-options-evaluator";
 
 describe("Password generator options builder", () => {
   const defaultOptions = Object.freeze({ minLength: 0 });

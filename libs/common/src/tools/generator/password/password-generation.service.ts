@@ -7,10 +7,10 @@ import { EFFLongWordList } from "../../../platform/misc/wordlist";
 import { EncString } from "../../../platform/models/domain/enc-string";
 
 import { GeneratedPasswordHistory } from "./generated-password-history";
-import { PassphraseGeneratorOptionsEvaluator } from "./passphrase-generator-options-builder";
+import { PassphraseGeneratorOptionsEvaluator } from "./passphrase-generator-options-evaluator";
 import { PasswordGenerationServiceAbstraction } from "./password-generation.service.abstraction";
 import { PasswordGeneratorOptions } from "./password-generator-options";
-import { PasswordGeneratorOptionsEvaluator } from "./password-generator-options-builder";
+import { PasswordGeneratorOptionsEvaluator } from "./password-generator-options-evaluator";
 
 const DefaultOptions: PasswordGeneratorOptions = {
   length: 14,

@@ -18,6 +18,10 @@ import {
   UsernameGeneratorOptions,
 } from "@bitwarden/common/tools/generator/username";
 
+// NodeJS.Timeout is not available in the browser but must
+// be included for electron environments.
+type TimeoutId = NodeJS.Timeout | number | string;
+
 @Directive()
 export class GeneratorComponent implements OnInit {
   @Input() comingFromAddEdit = false;
@@ -34,7 +38,7 @@ export class GeneratorComponent implements OnInit {
   usernameOptions: UsernameGeneratorOptions = {};
   passwordOptions: PasswordGeneratorOptions = {};
   passwordOptionsMinLengthForReader = 5;
-  private passwordOptionsMinLengthForReaderTimer: NodeJS.Timeout | null = null;
+  private passwordOptionsMinLengthForReaderTimer: TimeoutId | null = null;
   username = "-";
   password = "-";
   showOptions = false;

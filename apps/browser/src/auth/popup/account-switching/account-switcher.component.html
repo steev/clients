@@ -7,8 +7,8 @@
 
 <div class="tw-p-2">
   <div *ngIf="accountOptions$ | async as accountOptions">
-    <ul class="tw-grid tw-gap-2">
-      <li *ngFor="let accountOption of accountOptions">
+    <ul class="tw-grid tw-gap-2" role="listbox">
+      <li *ngFor="let accountOption of accountOptions" role="option">
         <auth-account [account]="accountOption"></auth-account>
       </li>
     </ul>

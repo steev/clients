@@ -405,6 +405,9 @@
   "lockNow": {
     "message": "Lock now"
   },
+  "lockAll": {
+    "message": "Lock all"
+  },
   "immediately": {
     "message": "Immediately"
   },
@@ -2682,5 +2685,11 @@
   },
   "lastPassYubikeyDesc": {
     "message": "Insert the YubiKey associated with your LastPass account into your computer's USB port, then touch its button."
+  },
+  "switchAccounts": {
+    "message": "Switch Accounts"
+  },
+  "accountLimitReached": {
+    "message": "Account limit reached. Log out of an account to add another."
   }
 }

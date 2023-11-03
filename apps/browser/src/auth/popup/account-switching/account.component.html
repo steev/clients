@@ -15,7 +15,7 @@
     <div class="tw-text-sm tw-italic tw-text-muted">{{ status.text }}</div>
   </div>
   <div class="tw-ml-auto tw-flex-shrink-0">
-    <i class="bwi tw-text-2xl" [ngClass]="status.icon"></i>
+    <i class="bwi tw-text-2xl" [ngClass]="status.icon" aria-hidden="true"></i>
   </div>
 </button>
 
@@ -25,7 +25,7 @@
     class="tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-md tw-bg-background tw-p-3"
     (click)="selectAccount(account.id)"
   >
-    <i class="bwi bwi-plus tw-text-2xl"></i>
+    <i class="bwi bwi-plus tw-text-2xl" aria-hidden="true"></i>
     {{ account.name }}
   </button>
 </ng-template>

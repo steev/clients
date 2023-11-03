@@ -2,9 +2,8 @@ import { BehaviorSubject, Observable, defer, filter, map, shareReplay, tap } fro
 import { Jsonify } from "type-fest";
 
 import { AbstractStorageService } from "../../abstractions/storage.service";
-import { globalKeyBuilder } from "../../misc/key-builders";
 import { GlobalState } from "../global-state";
-import { KeyDefinition } from "../key-definition";
+import { KeyDefinition, globalKeyBuilder } from "../key-definition";
 
 export class DefaultGlobalState<T> implements GlobalState<T> {
   private storageKey: string;

@@ -15,7 +15,7 @@ export class DefaultUserStateProvider implements UserStateProvider {
   private userStateCache: Record<string, UserState<unknown>> = {};
 
   constructor(
-    protected accountService: AccountService, // Inject the lightest weight service that provides accountUserId$
+    protected accountService: AccountService,
     protected encryptService: EncryptService,
     protected memoryStorage: AbstractMemoryStorageService,
     protected diskStorage: AbstractStorageService

@@ -16,10 +16,9 @@ import { AccountService } from "../../../auth/abstractions/account.service";
 import { UserId } from "../../../types/guid";
 import { EncryptService } from "../../abstractions/encrypt.service";
 import { AbstractStorageService } from "../../abstractions/storage.service";
-import { userKeyBuilder } from "../../misc/key-builders";
 import { DerivedStateDefinition } from "../derived-state-definition";
 import { DerivedUserState } from "../derived-user-state";
-import { KeyDefinition } from "../key-definition";
+import { KeyDefinition, userKeyBuilder } from "../key-definition";
 import { UserState } from "../user-state";
 
 const FAKE_DEFAULT = Symbol("fakeDefault");

@@ -7,8 +7,7 @@ import { Jsonify } from "type-fest";
 
 import { trackEmissions } from "../../../../spec";
 import { FakeStorageService } from "../../../../spec/fake-storage.service";
-import { globalKeyBuilder } from "../../misc/key-builders";
-import { KeyDefinition } from "../key-definition";
+import { KeyDefinition, globalKeyBuilder } from "../key-definition";
 import { StateDefinition } from "../state-definition";
 
 import { DefaultGlobalState } from "./default-global-state";

@@ -5,14 +5,28 @@
   (click)="selectAccount(account.id)"
 >
   <div class="tw-flex-shrink-0">
-    <bit-avatar [id]="account.id" [text]="account.name" size="medium"></bit-avatar>
+    <bit-avatar
+      [id]="account.id"
+      [text]="account.name"
+      size="medium"
+      aria-hidden="true"
+    ></bit-avatar>
   </div>
   <div class="tw-text-left">
+    <span class="tw-sr-only" *ngIf="status.text === 'active'"> {{ "activeAccount" | i18n }}: </span>
+    <span class="tw-sr-only" *ngIf="status.text !== 'active'"> {{ "switchAccount" | i18n }}: </span>
     <div>
       {{ account.name }}
     </div>
-    <div class="tw-text-sm tw-text-muted">bitwarden.com</div>
-    <div class="tw-text-sm tw-italic tw-text-muted">{{ status.text }}</div>
+    <div class="tw-text-sm tw-text-muted">
+      <span class="tw-sr-only">hosted at server</span>
+      bitwarden.com
+    </div>
+    <div class="tw-text-sm tw-italic tw-text-muted" [attr.aria-hidden]="status.text === 'active'">
+      <span class="tw-sr-only">(</span>
+      {{ status.text }}
+      <span class="tw-sr-only">)</span>
+    </div>
   </div>
   <div class="tw-ml-auto tw-flex-shrink-0">
     <i class="bwi tw-text-2xl" [ngClass]="status.icon" aria-hidden="true"></i>

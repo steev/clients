@@ -71,9 +71,9 @@ export class KeyDefinition<T> {
 
   /**
    * Helper for defining a derived definition that will often be used alongside a given key
+   *
    * @param keyDefinition The key definition detailing storage details for the derived state
    * @param deriveCallback The callback used to convert from the parent state to the derived state
-   * @returns
    */
   createDerivedDefinition<TTo>(
     keyDefinition: KeyDefinition<TTo>,

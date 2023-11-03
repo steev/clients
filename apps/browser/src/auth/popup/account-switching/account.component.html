@@ -14,7 +14,9 @@
   </div>
   <div class="tw-text-left">
     <span class="tw-sr-only" *ngIf="status.text === 'active'"> {{ "activeAccount" | i18n }}: </span>
-    <span class="tw-sr-only" *ngIf="status.text !== 'active'"> {{ "switchAccount" | i18n }}: </span>
+    <span class="tw-sr-only" *ngIf="status.text !== 'active'">
+      {{ "switchToAccount" | i18n }}
+    </span>
     <div>
       {{ account.name }}
     </div>

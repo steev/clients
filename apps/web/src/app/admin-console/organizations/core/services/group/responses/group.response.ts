@@ -13,6 +13,10 @@ export class GroupResponse extends BaseResponse {
     this.id = this.getResponseProperty("Id");
     this.organizationId = this.getResponseProperty("OrganizationId");
     this.name = this.getResponseProperty("Name");
+    /**
+     * @deprecated
+     * To be removed alongside `FeatureFlag.FlexibleCollections`.
+     **/
     this.accessAll = this.getResponseProperty("AccessAll");
     this.externalId = this.getResponseProperty("ExternalId");
   }

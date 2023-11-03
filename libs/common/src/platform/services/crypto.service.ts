@@ -176,6 +176,11 @@ export class CryptoService implements CryptoServiceAbstraction {
     ));
   }
 
+  /**
+   * Derive a master key from a password and email.
+   *
+   * Note: Does not validate the kdf config to ensure it satisfies the minimum requirements for the given kdf type.
+   */
   async makeMasterKey(
     password: string,
     email: string,
@@ -842,6 +847,43 @@ export class CryptoService implements CryptoServiceAbstraction {
     return null;
   }
 
+  /**
+   * Validate that the KDF config follows the requirements for the given KDF type.
+   *
+   * @remarks
+   * Should always be called before updating a users KDF config.
+   */
+  validateKdfConfig(kdf: KdfType, kdfConfig: KdfConfig): void {
+    switch (kdf) {
+      case KdfType.PBKDF2_SHA256:
+        if (!PBKDF2_ITERATIONS.inRange(kdfConfig.iterations)) {
+          throw new Error(
+            `PBKDF2 iterations must be between ${PBKDF2_ITERATIONS.min} and ${PBKDF2_ITERATIONS.max}`
+          );
+        }
+        break;
+      case KdfType.Argon2id:
+        if (!ARGON2_ITERATIONS.inRange(kdfConfig.iterations)) {
+          throw new Error(
+            `Argon2 iterations must be between ${ARGON2_ITERATIONS.min} and ${ARGON2_ITERATIONS.max}`
+          );
+        }
+
+        if (!ARGON2_MEMORY.inRange(kdfConfig.memory)) {
+          throw new Error(
+            `Argon2 memory must be between ${ARGON2_MEMORY.min}mb and ${ARGON2_MEMORY.max}mb`
+          );
+        }
+
+        if (!ARGON2_PARALLELISM.inRange(kdfConfig.parallelism)) {
+          throw new Error(
+            `Argon2 parallelism must be between ${ARGON2_PARALLELISM.min} and ${ARGON2_PARALLELISM.max}.`
+          );
+        }
+        break;
+    }
+  }
+
   protected async clearAllStoredUserKeys(userId?: string): Promise<void> {
     await this.stateService.setUserKeyAutoUnlock(null, { userId: userId });
     await this.stateService.setPinKeyEncryptedUserKeyEphemeral(null, { userId: userId });
@@ -902,36 +944,20 @@ export class CryptoService implements CryptoServiceAbstraction {
     if (kdf == null || kdf === KdfType.PBKDF2_SHA256) {
       if (kdfConfig.iterations == null) {
         kdfConfig.iterations = PBKDF2_ITERATIONS.defaultValue;
-      } else if (!PBKDF2_ITERATIONS.inRange(kdfConfig.iterations)) {
-        throw new Error(
-          `PBKDF2 iterations must be between ${PBKDF2_ITERATIONS.min} and ${PBKDF2_ITERATIONS.max}`
-        );
       }
 
       key = await this.cryptoFunctionService.pbkdf2(password, salt, "sha256", kdfConfig.iterations);
     } else if (kdf == KdfType.Argon2id) {
       if (kdfConfig.iterations == null) {
         kdfConfig.iterations = ARGON2_ITERATIONS.defaultValue;
-      } else if (!ARGON2_ITERATIONS.inRange(kdfConfig.iterations)) {
-        throw new Error(
-          `Argon2 iterations must be between ${ARGON2_ITERATIONS.min} and ${ARGON2_ITERATIONS.max}`
-        );
       }
 
       if (kdfConfig.memory == null) {
         kdfConfig.memory = ARGON2_MEMORY.defaultValue;
-      } else if (!ARGON2_MEMORY.inRange(kdfConfig.memory)) {
-        throw new Error(
-          `Argon2 memory must be between ${ARGON2_MEMORY.min}mb and ${ARGON2_MEMORY.max}mb`
-        );
       }
 
       if (kdfConfig.parallelism == null) {
         kdfConfig.parallelism = ARGON2_PARALLELISM.defaultValue;
-      } else if (!ARGON2_PARALLELISM.inRange(kdfConfig.parallelism)) {
-        throw new Error(
-          `Argon2 parallelism must be between ${ARGON2_PARALLELISM.min} and ${ARGON2_PARALLELISM.max}.`
-        );
       }
 
       const saltHash = await this.cryptoFunctionService.hash(salt, "sha256");

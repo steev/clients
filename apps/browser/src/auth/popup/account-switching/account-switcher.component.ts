@@ -29,13 +29,13 @@ export class AccountSwitcherComponent {
     this.accountService.addAccount("Luigi" as UserId, {
       name: "Luigi",
       email: "luigi@test.com",
-      status: AuthenticationStatus.Locked,
+      status: AuthenticationStatus.Unlocked,
     });
 
     this.accountService.addAccount("Yoshi" as UserId, {
       name: "Yoshi",
       email: "yoshi@test.com",
-      status: AuthenticationStatus.Locked,
+      status: AuthenticationStatus.Unlocked,
     });
 
     this.accountService.addAccount("Bowser" as UserId, {

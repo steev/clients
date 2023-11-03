@@ -30,6 +30,7 @@ export class AccountSwitcherService {
             return {
               name: account.name ?? account.email,
               id: id,
+              status: account.status,
               isSelected: id === activeAccount?.id,
             };
           }

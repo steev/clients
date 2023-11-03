@@ -2691,5 +2691,14 @@
   },
   "accountLimitReached": {
     "message": "Account limit reached. Log out of an account to add another."
+  },
+  "active": {
+    "message": "active"
+  },
+  "locked": {
+    "message": "locked"
+  },
+  "unlocked": {
+    "message": "unlocked"
   }
 }

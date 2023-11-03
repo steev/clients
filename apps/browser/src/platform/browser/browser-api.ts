@@ -147,6 +147,9 @@ export class BrowserApi {
   }
 
   static async onWindowCreated(callback: (win: chrome.windows.Window) => any) {
+    // FIXME: Make sure that is does not cause a memory leak in Safari or use BrowserApi.AddListener
+    // and test that it doesn't break.
+    // eslint-disable-next-line no-restricted-syntax
     return chrome.windows.onCreated.addListener(callback);
   }
 

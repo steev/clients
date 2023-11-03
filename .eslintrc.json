@@ -194,7 +194,8 @@
       "files": ["apps/browser/src/**/*.ts", "libs/**/*.ts"],
       "excludedFiles": [
         "apps/browser/src/autofill/{content,notification}/**/*.ts",
-        "apps/browser/src/**/background/**/*.ts" // It's okay to have long lived listeners in the background
+        "apps/browser/src/**/background/**/*.ts", // It's okay to have long lived listeners in the background
+        "apps/browser/src/platform/background.ts"
       ],
       "rules": {
         "no-restricted-syntax": [

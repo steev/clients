@@ -217,6 +217,9 @@ export class BrowserFido2UserInterfaceSession implements Fido2UserInterfaceSessi
       });
 
     this.windowClosed$ = fromEventPattern(
+      // FIXME: Make sure that is does not cause a memory leak in Safari or use BrowserApi.AddListener
+      // and test that it doesn't break.
+      // eslint-disable-next-line no-restricted-syntax
       (handler: any) => chrome.windows.onRemoved.addListener(handler),
       (handler: any) => chrome.windows.onRemoved.removeListener(handler)
     );

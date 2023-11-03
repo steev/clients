@@ -18,8 +18,8 @@ export class DefaultGlobalStateProvider implements GlobalStateProvider {
   ) {}
 
   get<T>(keyDefinition: KeyDefinition<T>): GlobalState<T> {
-    const locationDomainKey = `${keyDefinition.stateDefinition.storageLocation}_${keyDefinition.stateDefinition.name}_${keyDefinition.key}`;
-    const existingGlobalState = this.globalStateCache[locationDomainKey];
+    const cacheKey = keyDefinition.buildCacheKey();
+    const existingGlobalState = this.globalStateCache[cacheKey];
     if (existingGlobalState != null) {
       // The cast into the actual generic is safe because of rules around key definitions
       // being unique.
@@ -31,7 +31,7 @@ export class DefaultGlobalStateProvider implements GlobalStateProvider {
       this.getLocation(keyDefinition.stateDefinition.storageLocation)
     );
 
-    this.globalStateCache[locationDomainKey] = newGlobalState;
+    this.globalStateCache[cacheKey] = newGlobalState;
     return newGlobalState;
   }
 

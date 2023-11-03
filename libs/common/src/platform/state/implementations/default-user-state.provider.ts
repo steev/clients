@@ -22,8 +22,8 @@ export class DefaultUserStateProvider implements UserStateProvider {
   ) {}
 
   get<T>(keyDefinition: KeyDefinition<T>): UserState<T> {
-    const locationDomainKey = `${keyDefinition.stateDefinition.storageLocation}_${keyDefinition.stateDefinition.name}_${keyDefinition.key}`;
-    const existingUserState = this.userStateCache[locationDomainKey];
+    const cacheKey = keyDefinition.buildCacheKey();
+    const existingUserState = this.userStateCache[cacheKey];
     if (existingUserState != null) {
       // I have to cast out of the unknown generic but this should be safe if rules
       // around domain token are made
@@ -31,7 +31,7 @@ export class DefaultUserStateProvider implements UserStateProvider {
     }
 
     const newUserState = this.buildUserState(keyDefinition);
-    this.userStateCache[locationDomainKey] = newUserState;
+    this.userStateCache[cacheKey] = newUserState;
     return newUserState;
   }
 

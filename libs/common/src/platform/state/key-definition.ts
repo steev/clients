@@ -81,6 +81,14 @@ export class KeyDefinition<T> {
   ) {
     return new DerivedStateDefinition(keyDefinition, deriveCallback);
   }
+
+  /**
+   *
+   * @returns
+   */
+  buildCacheKey(): string {
+    return `${this.stateDefinition.storageLocation}_${this.stateDefinition.name}_${this.key}`;
+  }
 }
 
 export type StorageKey = Opaque<string, "StorageKey">;

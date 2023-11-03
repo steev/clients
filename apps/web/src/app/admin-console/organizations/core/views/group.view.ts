@@ -8,6 +8,10 @@ export class GroupView implements View {
   id: string;
   organizationId: string;
   name: string;
+  /**
+   * @deprecated
+   * To be removed alongside `FeatureFlag.FlexibleCollections`.
+   **/
   accessAll: boolean;
   externalId: string;
   collections: CollectionAccessSelectionView[] = [];

@@ -13,6 +13,10 @@ export class OrganizationUserAdminView {
   type: OrganizationUserType;
   status: OrganizationUserStatusType;
   externalId: string;
+  /**
+   * @deprecated
+   * To be removed alongside `FeatureFlag.FlexibleCollections`.
+   **/
   accessAll: boolean;
   permissions: PermissionsApi;
   resetPasswordEnrolled: boolean;

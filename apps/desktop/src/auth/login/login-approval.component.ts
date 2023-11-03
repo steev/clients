@@ -29,7 +29,7 @@ export class LoginApprovalComponent implements OnInit, OnDestroy {
   email: string;
   fingerprintPhrase: string;
   authRequestResponse: AuthRequestResponse;
-  interval: NodeJS.Timer;
+  interval: NodeJS.Timeout;
   requestTimeText: string;
   dismissModal: boolean;
 

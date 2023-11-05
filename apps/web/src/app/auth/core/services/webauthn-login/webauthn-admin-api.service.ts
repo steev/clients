@@ -8,8 +8,12 @@ import { SaveCredentialRequest } from "./request/save-credential.request";
 import { WebauthnLoginCredentialCreateOptionsResponse } from "./response/webauthn-login-credential-create-options.response";
 import { WebauthnLoginCredentialResponse } from "./response/webauthn-login-credential.response";
 
+// TODO: rename Webauthn to WebAuthn everywhere possible
+// TODO: rename this to WebAuthnLoginAdminApiService
+// TODO: ask about missing abstraction
+// TODO: are we moving this into libs/common?
 @Injectable({ providedIn: "root" })
-export class WebauthnLoginApiService {
+export class WebAuthnAdminApiService {
   constructor(private apiService: ApiService) {}
 
   async getCredentialCreateOptions(

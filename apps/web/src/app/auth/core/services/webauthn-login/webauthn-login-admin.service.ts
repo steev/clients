@@ -14,8 +14,9 @@ import { RotateableKeySetService } from "../rotateable-key-set.service";
 import { SaveCredentialRequest } from "./request/save-credential.request";
 import { WebauthnLoginAttestationResponseRequest } from "./request/webauthn-login-attestation-response.request";
 import { createSymmetricKeyFromPrf, getLoginWithPrfSalt } from "./utils";
-import { WebauthnLoginApiService } from "./webauthn-login-api.service";
+import { WebAuthnAdminApiService } from "./webauthn-admin-api.service";
 
+// TODO: ask about missing abstraction
 @Injectable({ providedIn: "root" })
 export class WebauthnLoginAdminService {
   static readonly MaxCredentialCount = 5;
@@ -33,7 +34,7 @@ export class WebauthnLoginAdminService {
   readonly loading$ = this._loading$.asObservable();
 
   constructor(
-    private apiService: WebauthnLoginApiService,
+    private apiService: WebAuthnAdminApiService,
     private userVerificationService: UserVerificationService,
     private rotateableKeySetService: RotateableKeySetService,
     @Optional() navigatorCredentials?: CredentialsContainer,

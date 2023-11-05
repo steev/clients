@@ -1,5 +1,5 @@
 import { CredentialAssertionOptionsResponse } from "../../services/webauthn/response/credential-assertion-options.response";
 
-export class WebauthnApiServiceAbstraction {
+export class WebAuthnLoginApiServiceAbstraction {
   getCredentialAssertionOptions: (email?: string) => Promise<CredentialAssertionOptionsResponse>;
 }

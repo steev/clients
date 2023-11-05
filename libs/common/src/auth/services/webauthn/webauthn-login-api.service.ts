@@ -1,10 +1,10 @@
 import { ApiService } from "../../../abstractions/api.service";
 import { EnvironmentService } from "../../../platform/abstractions/environment.service";
-import { WebauthnApiServiceAbstraction } from "../../abstractions/webauthn/webauthn-api.service.abstraction";
+import { WebAuthnLoginApiServiceAbstraction } from "../../abstractions/webauthn/webauthn-login-api.service.abstraction";
 
 import { CredentialAssertionOptionsResponse } from "./response/credential-assertion-options.response";
 
-export class WebauthnApiService implements WebauthnApiServiceAbstraction {
+export class WebAuthnLoginApiService implements WebAuthnLoginApiServiceAbstraction {
   constructor(private apiService: ApiService, private environmentService: EnvironmentService) {}
 
   async getCredentialAssertionOptions(email?: string): Promise<CredentialAssertionOptionsResponse> {

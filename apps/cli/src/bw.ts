@@ -43,6 +43,9 @@ import { FileUploadService } from "@bitwarden/common/platform/services/file-uplo
 import { MemoryStorageService } from "@bitwarden/common/platform/services/memory-storage.service";
 import { NoopMessagingService } from "@bitwarden/common/platform/services/noop-messaging.service";
 import { StateService } from "@bitwarden/common/platform/services/state.service";
+import { GlobalStateProvider } from "@bitwarden/common/platform/state";
+// eslint-disable-next-line import/no-restricted-paths -- We need the implementation to inject, but generally this should not be accessed
+import { DefaultGlobalStateProvider } from "@bitwarden/common/platform/state/implementations/default-global-state.provider";
 import { AuditService } from "@bitwarden/common/services/audit.service";
 import { SearchService } from "@bitwarden/common/services/search.service";
 import { SettingsService } from "@bitwarden/common/services/settings.service";
@@ -155,6 +158,7 @@ export class Main {
   configApiService: ConfigApiServiceAbstraction;
   configService: CliConfigService;
   accountService: AccountService;
+  globalStateProvider: GlobalStateProvider;
 
   constructor() {
     let p = null;
@@ -194,7 +198,15 @@ export class Main {
 
     this.memoryStorageService = new MemoryStorageService();
 
-    this.accountService = new AccountServiceImplementation(null, this.logService);
+    this.globalStateProvider = new DefaultGlobalStateProvider(
+      this.memoryStorageService,
+      this.storageService
+    );
+    this.accountService = new AccountServiceImplementation(
+      null,
+      this.logService,
+      this.globalStateProvider
+    );
 
     this.stateService = new StateService(
       this.storageService,

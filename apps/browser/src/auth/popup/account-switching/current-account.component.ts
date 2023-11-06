@@ -1,7 +1,9 @@
 import { Component } from "@angular/core";
 import { Router } from "@angular/router";
+import { map } from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { Utils } from "@bitwarden/common/platform/misc/utils";
 
 @Component({
   selector: "app-current-account",
@@ -12,6 +14,14 @@ export class CurrentAccountComponent {
 
   get currentAccount$() {
     return this.accountService.activeAccount$;
+  }
+
+  get currentAccountName$() {
+    return this.currentAccount$.pipe(
+      map((a) => {
+        return Utils.isNullOrWhitespace(a.name) ? a.email : a.name;
+      })
+    );
   }
 
   currentAccountClicked() {

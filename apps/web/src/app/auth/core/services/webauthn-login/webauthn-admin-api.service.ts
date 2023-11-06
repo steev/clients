@@ -9,9 +9,6 @@ import { WebauthnLoginCredentialCreateOptionsResponse } from "./response/webauth
 import { WebauthnLoginCredentialResponse } from "./response/webauthn-login-credential.response";
 
 // TODO: rename Webauthn to WebAuthn everywhere possible
-// TODO: rename this to WebAuthnLoginAdminApiService
-// TODO: ask about missing abstraction
-// TODO: are we moving this into libs/common?
 @Injectable({ providedIn: "root" })
 export class WebAuthnAdminApiService {
   constructor(private apiService: ApiService) {}

@@ -21,7 +21,7 @@ import { LoginComponent } from "./login.component";
     LoginComponent,
     LoginViaAuthRequestComponent,
     LoginDecryptionOptionsComponent,
-    LoginViaWebAuthnComponent, // TODO: why does this need to be exported?
+    LoginViaWebAuthnComponent,
   ],
 })
 export class LoginModule {}

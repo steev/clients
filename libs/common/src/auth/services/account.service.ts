@@ -56,10 +56,6 @@ export class AccountServiceImplementation implements InternalAccountService {
   ) {
     this.accountsState = this.globalStateProvider.get(ACCOUNT_ACCOUNTS);
     this.activeAccountIdState = this.globalStateProvider.get(ACCOUNT_ACTIVE_ACCOUNT_ID);
-
-    (window as any).services ||= {};
-    (window as any).services.accounts ||= [];
-    (window as any).services.accounts.push(this);
   }
 
   async addAccount(userId: UserId, accountData: AccountInfo): Promise<void> {

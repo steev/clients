@@ -234,7 +234,7 @@ header:not(bit-callout header) {
   }
 
   app-pop-out > button,
-  div > button,
+  div > button:not(app-current-account button),
   div > a {
     border: none;
     padding: 0 10px;

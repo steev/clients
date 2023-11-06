@@ -254,6 +254,10 @@ export class BrowserApi {
 
   /**
    * Adds a callback to the given chrome event in a cross-browser platform manner.
+   *
+   * **Important:** All event listeners in the browser extension popup context must
+   * use this instead of the native APIs to handle unsubscribing from Safari properly.
+   *
    * @param event - The event in which to add the listener to.
    * @param callback - The callback you want registered onto the event.
    */

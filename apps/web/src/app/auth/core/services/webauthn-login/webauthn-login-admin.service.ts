@@ -3,6 +3,10 @@ import { BehaviorSubject, filter, from, map, Observable, shareReplay, switchMap,
 
 import { PrfKeySet } from "@bitwarden/auth";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
+import {
+  createSymmetricKeyFromPrf,
+  getLoginWithPrfSalt,
+} from "@bitwarden/common/auth/utils/webauthn-utils";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { Verification } from "@bitwarden/common/types/verification";
 
@@ -13,11 +17,8 @@ import { RotateableKeySetService } from "../rotateable-key-set.service";
 
 import { SaveCredentialRequest } from "./request/save-credential.request";
 import { WebauthnLoginAttestationResponseRequest } from "./request/webauthn-login-attestation-response.request";
-import { createSymmetricKeyFromPrf, getLoginWithPrfSalt } from "./utils";
 import { WebAuthnAdminApiService } from "./webauthn-admin-api.service";
-
-// TODO: ask about missing abstraction
-@Injectable({ providedIn: "root" })
+@Injectable({ providedIn: "root" }) // scoped to web
 export class WebauthnLoginAdminService {
   static readonly MaxCredentialCount = 5;
 

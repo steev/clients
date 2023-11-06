@@ -70,7 +70,7 @@ import { TokenService } from "@bitwarden/common/auth/services/token.service";
 import { TwoFactorService } from "@bitwarden/common/auth/services/two-factor.service";
 import { UserVerificationApiService } from "@bitwarden/common/auth/services/user-verification/user-verification-api.service";
 import { UserVerificationService } from "@bitwarden/common/auth/services/user-verification/user-verification.service";
-import { WebAuthnLoginService } from "@bitwarden/common/auth/services/webauthn/webauthn-login.service";
+import { WebAuthnLoginService } from "@bitwarden/common/auth/services/webauthn-login/webauthn-login.service";
 import { AppIdService as AppIdServiceAbstraction } from "@bitwarden/common/platform/abstractions/app-id.service";
 import { BroadcasterService as BroadcasterServiceAbstraction } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { ConfigApiServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config-api.service.abstraction";
@@ -173,6 +173,7 @@ import {
   LOG_MAC_FAILURES,
   LOGOUT_CALLBACK,
   MEMORY_STORAGE,
+  NAVIGATOR_CREDENTIALS,
   SECURE_STORAGE,
   STATE_FACTORY,
   STATE_SERVICE_USE_CACHE,
@@ -228,6 +229,11 @@ import { AbstractThemingService } from "./theming/theming.service.abstraction";
     {
       provide: LOG_MAC_FAILURES,
       useValue: true,
+    },
+    {
+      provide: NAVIGATOR_CREDENTIALS,
+      useFactory: (window: Window) => window.navigator.credentials,
+      deps: [WINDOW],
     },
     {
       provide: AppIdServiceAbstraction,
@@ -753,7 +759,13 @@ import { AbstractThemingService } from "./theming/theming.service.abstraction";
     {
       provide: WebAuthnLoginServiceAbstraction,
       useClass: WebAuthnLoginService,
-      deps: [WebAuthnLoginApiServiceAbstraction, AuthServiceAbstraction, ConfigServiceAbstraction],
+      deps: [
+        WebAuthnLoginApiServiceAbstraction,
+        AuthServiceAbstraction,
+        ConfigServiceAbstraction,
+        NAVIGATOR_CREDENTIALS,
+        LogService,
+      ],
     },
   ],
 })

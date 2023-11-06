@@ -24,7 +24,7 @@ export class CurrentAccountComponent {
     );
   }
 
-  currentAccountClicked() {
-    this.router.navigate(["/account-switcher"]);
+  async currentAccountClicked() {
+    await this.router.navigate(["/account-switcher"]);
   }
 }

@@ -46,6 +46,7 @@ export class DefaultGlobalState<T> implements GlobalState<T> {
         this.stateSubject.next(value);
       });
 
+      // intentionally un-awaited
       this.getFromState().then((s) => {
         this.stateSubject.next(s);
       });

@@ -177,13 +177,13 @@ export class StateService<
       // if it's not in the accounts list.
       if (state.activeUserId != null && this.accountsSubject.value[state.activeUserId] == null) {
         const activeDiskAccount = await this.getAccountFromDisk({ userId: state.activeUserId });
-        this.accountService.addAccount(state.activeUserId as UserId, {
+        await this.accountService.addAccount(state.activeUserId as UserId, {
           name: activeDiskAccount.profile.name,
           email: activeDiskAccount.profile.email,
           status: AuthenticationStatus.LoggedOut,
         });
       }
-      this.accountService.switchAccount(state.activeUserId as UserId);
+      await this.accountService.switchAccount(state.activeUserId as UserId);
       // End TODO
 
       return state;
@@ -202,7 +202,7 @@ export class StateService<
       const diskAccount = await this.getAccountFromDisk({ userId: userId });
       state.accounts[userId].profile = diskAccount.profile;
       // TODO: Temporary update to avoid routing all account status changes through account service for now.
-      this.accountService.addAccount(userId as UserId, {
+      await this.accountService.addAccount(userId as UserId, {
         status: AuthenticationStatus.Locked,
         name: diskAccount.profile.name,
         email: diskAccount.profile.email,
@@ -222,7 +222,7 @@ export class StateService<
     await this.scaffoldNewAccountStorage(account);
     await this.setLastActive(new Date().getTime(), { userId: account.profile.userId });
     // TODO: Temporary update to avoid routing all account status changes through account service for now.
-    this.accountService.addAccount(account.profile.userId as UserId, {
+    await this.accountService.addAccount(account.profile.userId as UserId, {
       status: AuthenticationStatus.Locked,
       name: account.profile.name,
       email: account.profile.email,
@@ -232,13 +232,13 @@ export class StateService<
   }
 
   async setActiveUser(userId: string): Promise<void> {
-    this.clearDecryptedDataForActiveUser();
+    await this.clearDecryptedDataForActiveUser();
     await this.updateState(async (state) => {
       state.activeUserId = userId;
       await this.storageService.save(keys.activeUserId, userId);
       this.activeAccountSubject.next(state.activeUserId);
       // TODO: temporary update to avoid routing all account status changes through account service for now.
-      this.accountService.switchAccount(userId as UserId);
+      await this.accountService.switchAccount(userId as UserId);
 
       return state;
     });
@@ -254,7 +254,7 @@ export class StateService<
     }
 
     await this.removeAccountFromDisk(options?.userId);
-    this.removeAccountFromMemory(options?.userId);
+    await this.removeAccountFromMemory(options?.userId);
     await this.pushAccounts();
   }
 
@@ -581,7 +581,7 @@ export class StateService<
     );
 
     const nextStatus = value != null ? AuthenticationStatus.Unlocked : AuthenticationStatus.Locked;
-    this.accountService.setAccountStatus(options.userId as UserId, nextStatus);
+    await this.accountService.setAccountStatus(options.userId as UserId, nextStatus);
 
     if (options.userId == this.activeAccountSubject.getValue()) {
       const nextValue = value != null;
@@ -617,7 +617,7 @@ export class StateService<
     );
 
     const nextStatus = value != null ? AuthenticationStatus.Unlocked : AuthenticationStatus.Locked;
-    this.accountService.setAccountStatus(options.userId as UserId, nextStatus);
+    await this.accountService.setAccountStatus(options.userId as UserId, nextStatus);
 
     if (options?.userId == this.activeAccountSubject.getValue()) {
       const nextValue = value != null;

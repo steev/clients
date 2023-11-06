@@ -227,7 +227,7 @@
                     role="status"
                     aria-live="polite"
                   >
-                    {{ passwordOptionsMinLengthForReader }}
+                    {{ passwordOptionsMinLengthForReader$ | async }}
                   </span>
                 </div>
                 <div class="box-content-row box-content-row-checkbox" appBoxRow>

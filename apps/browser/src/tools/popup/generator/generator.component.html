@@ -202,7 +202,7 @@
               role="status"
               aria-live="polite"
             >
-              {{ passwordOptionsMinLengthForReader }}
+              {{ passwordOptionsMinLengthForReader$ | async }}
             </span>
             <span class="txt-right">{{ passwordOptions.minLength }}</span>
           </div>

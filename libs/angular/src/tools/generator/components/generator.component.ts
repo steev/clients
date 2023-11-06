@@ -1,6 +1,7 @@
 import { Directive, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { first } from "rxjs/operators";
+import { BehaviorSubject } from "rxjs";
+import { debounceTime, first, map } from "rxjs/operators";
 
 import { PasswordGeneratorPolicyOptions } from "@bitwarden/common/admin-console/models/domain/password-generator-policy-options";
 import { EmailForwarderOptions } from "@bitwarden/common/models/domain/email-forwarder-options";
@@ -18,10 +19,6 @@ import {
   UsernameGeneratorOptions,
 } from "@bitwarden/common/tools/generator/username";
 
-// NodeJS.Timeout is not available in the browser but must
-// be included for electron environments.
-type TimeoutId = NodeJS.Timeout | number | string;
-
 @Directive()
 export class GeneratorComponent implements OnInit {
   @Input() comingFromAddEdit = false;
@@ -37,14 +34,20 @@ export class GeneratorComponent implements OnInit {
   forwardOptions: EmailForwarderOptions[];
   usernameOptions: UsernameGeneratorOptions = {};
   passwordOptions: PasswordGeneratorOptions = {};
-  passwordOptionsMinLengthForReader = 5;
-  private passwordOptionsMinLengthForReaderTimer: TimeoutId | null = null;
   username = "-";
   password = "-";
   showOptions = false;
   avoidAmbiguous = false;
   enforcedPasswordPolicyOptions: PasswordGeneratorPolicyOptions;
   usernameWebsite: string = null;
+
+  // update screen reader minimum password length with 500ms debounce
+  // so that the user isn't flooded with status updates
+  private _passwordOptionsMinLengthForReader = new BehaviorSubject<number>(5);
+  protected passwordOptionsMinLengthForReader$ = this._passwordOptionsMinLengthForReader.pipe(
+    map((val) => val || 5),
+    debounceTime(500)
+  );
 
   constructor(
     protected passwordGenerationService: PasswordGenerationServiceAbstraction,
@@ -279,14 +282,7 @@ export class GeneratorComponent implements OnInit {
       this.enforcedPasswordPolicyOptions
     );
 
-    // update screen reader minimum password length with 500ms debounce
-    // so that the user isn't flooded with status updates
-    if (this.passwordOptionsMinLengthForReaderTimer) {
-      clearTimeout(this.passwordOptionsMinLengthForReaderTimer);
-    }
-    this.passwordOptionsMinLengthForReaderTimer = setTimeout(() => {
-      this.passwordOptionsMinLengthForReader = this.passwordOptions.minLength || 5;
-    }, 500);
+    this._passwordOptionsMinLengthForReader.next(this.passwordOptions.minLength);
   }
 
   private async initForwardOptions() {

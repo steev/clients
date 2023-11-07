@@ -263,7 +263,7 @@ export class BrowserApi {
    */
   static addListener<T extends unknown[]>(
     event: chrome.events.Event<(...args: T) => unknown>,
-    callback: (...args: unknown[]) => unknown
+    callback: (...args: T) => unknown
   ) {
     event.addListener(callback);
 

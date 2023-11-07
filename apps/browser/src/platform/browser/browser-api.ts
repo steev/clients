@@ -261,9 +261,9 @@ export class BrowserApi {
    * @param event - The event in which to add the listener to.
    * @param callback - The callback you want registered onto the event.
    */
-  static addListener<T extends unknown[]>(
-    event: chrome.events.Event<(...args: T) => unknown>,
-    callback: (...args: T) => unknown
+  static addListener<T extends (...args: readonly unknown[]) => unknown>(
+    event: chrome.events.Event<T>,
+    callback: T
   ) {
     event.addListener(callback);
 
@@ -278,9 +278,9 @@ export class BrowserApi {
    * @param event - The event in which to remove the listener from.
    * @param callback - The callback you want removed from the event.
    */
-  static removeListener<T extends unknown[]>(
-    event: chrome.events.Event<(...args: T) => unknown>,
-    callback: (...args: unknown[]) => unknown
+  static removeListener<T extends (...args: readonly unknown[]) => unknown>(
+    event: chrome.events.Event<T>,
+    callback: T
   ) {
     event.removeListener(callback);
 

@@ -8,7 +8,6 @@ import { MessagingService } from "../../platform/abstractions/messaging.service"
 import { PlatformUtilsService } from "../../platform/abstractions/platform-utils.service";
 import { StateService } from "../../platform/abstractions/state.service";
 import { SymmetricCryptoKey, UserKey } from "../../platform/models/domain/symmetric-crypto-key";
-import { AuthService } from "../abstractions/auth.service";
 import { TokenService } from "../abstractions/token.service";
 import { TwoFactorService } from "../abstractions/two-factor.service";
 import { AuthResult } from "../models/domain/auth-result";
@@ -48,8 +47,7 @@ export class WebAuthnLoginStrategy extends LoginStrategy {
     messagingService: MessagingService,
     logService: LogService,
     stateService: StateService,
-    twoFactorService: TwoFactorService,
-    private authService: AuthService
+    twoFactorService: TwoFactorService
   ) {
     super(
       cryptoService,
@@ -68,12 +66,16 @@ export class WebAuthnLoginStrategy extends LoginStrategy {
     return Promise.resolve();
   }
 
-  // TODO: ask about PRF crypto service
   protected async setUserKey(idTokenResponse: IdentityTokenResponse) {
     const userDecryptionOptions = idTokenResponse?.userDecryptionOptions;
 
     if (userDecryptionOptions?.webAuthnPrfOption) {
       const webAuthnPrfOption = idTokenResponse.userDecryptionOptions?.webAuthnPrfOption;
+
+      // confirm we still have the prf key
+      if (!this.credentials.prfKey) {
+        return;
+      }
 
       // decrypt prf encrypted private key
       const privateKey = await this.cryptoService.decryptToBytes(
@@ -87,7 +89,9 @@ export class WebAuthnLoginStrategy extends LoginStrategy {
         privateKey
       );
 
-      await this.cryptoService.setUserKey(new SymmetricCryptoKey(userKey) as UserKey);
+      if (userKey) {
+        await this.cryptoService.setUserKey(new SymmetricCryptoKey(userKey) as UserKey);
+      }
     }
   }
 

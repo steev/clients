@@ -70,6 +70,7 @@ import { TokenService } from "@bitwarden/common/auth/services/token.service";
 import { TwoFactorService } from "@bitwarden/common/auth/services/two-factor.service";
 import { UserVerificationApiService } from "@bitwarden/common/auth/services/user-verification/user-verification-api.service";
 import { UserVerificationService } from "@bitwarden/common/auth/services/user-verification/user-verification.service";
+import { WebAuthnLoginApiService } from "@bitwarden/common/auth/services/webauthn-login/webauthn-login-api.service";
 import { WebAuthnLoginService } from "@bitwarden/common/auth/services/webauthn-login/webauthn-login.service";
 import { AppIdService as AppIdServiceAbstraction } from "@bitwarden/common/platform/abstractions/app-id.service";
 import { BroadcasterService as BroadcasterServiceAbstraction } from "@bitwarden/common/platform/abstractions/broadcaster.service";
@@ -755,6 +756,11 @@ import { AbstractThemingService } from "./theming/theming.service.abstraction";
       provide: AuthRequestCryptoServiceAbstraction,
       useClass: AuthRequestCryptoServiceImplementation,
       deps: [CryptoServiceAbstraction],
+    },
+    {
+      provide: WebAuthnLoginApiServiceAbstraction,
+      useClass: WebAuthnLoginApiService,
+      deps: [ApiServiceAbstraction, EnvironmentServiceAbstraction],
     },
     {
       provide: WebAuthnLoginServiceAbstraction,

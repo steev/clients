@@ -3,7 +3,6 @@ import { Router } from "@angular/router";
 
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-// import { I18nService } from "@bitwarden/common/platform/services/i18n.service";
 
 import { AccountSwitcherService } from "../services/account-switcher.service";
 

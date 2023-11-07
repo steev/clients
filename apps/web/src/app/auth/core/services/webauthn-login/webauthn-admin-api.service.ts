@@ -8,7 +8,6 @@ import { SaveCredentialRequest } from "./request/save-credential.request";
 import { WebauthnLoginCredentialCreateOptionsResponse } from "./response/webauthn-login-credential-create-options.response";
 import { WebauthnLoginCredentialResponse } from "./response/webauthn-login-credential.response";
 
-// TODO: rename Webauthn to WebAuthn everywhere possible
 @Injectable({ providedIn: "root" })
 export class WebAuthnAdminApiService {
   constructor(private apiService: ApiService) {}

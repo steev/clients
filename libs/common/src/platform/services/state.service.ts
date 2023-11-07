@@ -3102,7 +3102,6 @@ export class StateService<
   }
 
   protected async pushAccounts(): Promise<void> {
-    await this.pruneInMemoryAccounts();
     await this.state().then((state) => {
       if (state.accounts == null || Object.keys(state.accounts).length < 1) {
         this.accountsSubject.next({});
@@ -3218,16 +3217,7 @@ export class StateService<
       return state;
     });
     // TODO: Invert this logic, we should remove accounts based on logged out emit
-    this.accountService.setAccountStatus(userId as UserId, AuthenticationStatus.LoggedOut);
-  }
-
-  protected async pruneInMemoryAccounts() {
-    // We preserve settings for logged out accounts, but we don't want to consider them when thinking about active account state
-    for (const userId in (await this.state())?.accounts) {
-      if (!(await this.getIsAuthenticated({ userId: userId }))) {
-        await this.removeAccountFromMemory(userId);
-      }
-    }
+    await this.accountService.setAccountStatus(userId as UserId, AuthenticationStatus.LoggedOut);
   }
 
   // settings persist even on reset, and are not affected by this method

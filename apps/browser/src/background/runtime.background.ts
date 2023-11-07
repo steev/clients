@@ -361,7 +361,9 @@ export default class RuntimeBackground {
           this.messagingService.send("update-temp-password", { userId: msg.userId });
         } else {
           this.messagingService.send("unlocked", { userId: msg.userId });
-          await this.main.syncService.fullSync(true);
+          await this.main.refreshBadge();
+          await this.main.refreshMenu();
+          await this.main.syncService.fullSync(false);
           this.messagingService.send("switchAccountFinish", { userId: msg.userId });
         }
         break;

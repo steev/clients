@@ -111,7 +111,6 @@ export class ImportService implements ImportServiceAbstraction {
     fileContents: string,
     organizationId: string = null,
     selectedImportTarget: string = null,
-    isUserAdmin: boolean,
     canAccessImportExport: boolean
   ): Promise<ImportResult> {
     let importResult: ImportResult;
@@ -151,7 +150,6 @@ export class ImportService implements ImportServiceAbstraction {
     if (
       organizationId &&
       Utils.isNullOrWhitespace(selectedImportTarget) &&
-      !isUserAdmin &&
       !canAccessImportExport
     ) {
       const hasUnassignedCollections = importResult.ciphers.some(

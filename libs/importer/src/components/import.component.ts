@@ -361,7 +361,6 @@ export class ImportComponent implements OnInit, OnDestroy {
         fileContents,
         this.organizationId,
         this.formGroup.controls.targetSelector.value,
-        this.isUserAdmin(this.organizationId),
         this.canAccessImportExport(this.organizationId)
       );
 

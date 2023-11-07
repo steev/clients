@@ -16,10 +16,11 @@ import { AccountService } from "../../../auth/abstractions/account.service";
 import { UserId } from "../../../types/guid";
 import { EncryptService } from "../../abstractions/encrypt.service";
 import { AbstractStorageService } from "../../abstractions/storage.service";
-import { DerivedStateDefinition } from "../derived-state-definition";
 import { DerivedUserState } from "../derived-user-state";
 import { KeyDefinition, userKeyBuilder } from "../key-definition";
-import { UserState } from "../user-state";
+import { Converter, UserState } from "../user-state";
+
+import { DefaultDerivedUserState } from "./default-derived-state";
 
 const FAKE_DEFAULT = Symbol("fakeDefault");
 
@@ -121,10 +122,8 @@ export class DefaultUserState<T> implements UserState<T> {
     return this.keyDefinition.deserializer(data);
   }
 
-  createDerived<TTo>(
-    derivedStateDefinition: DerivedStateDefinition<T, TTo>
-  ): DerivedUserState<T, TTo> {
-    return new DerivedUserState<T, TTo>(derivedStateDefinition, this.encryptService, this);
+  createDerived<TTo>(converter: Converter<T, TTo>): DerivedUserState<TTo> {
+    return new DefaultDerivedUserState<T, TTo>(converter, this.encryptService, this);
   }
 
   protected async createKey(): Promise<string> {

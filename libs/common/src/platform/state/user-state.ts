@@ -1,8 +1,16 @@
 import { Observable } from "rxjs";
 
 import { UserId } from "../../types/guid";
+import { EncryptService } from "../abstractions/encrypt.service";
+import { UserKey } from "../models/domain/symmetric-crypto-key";
 
-import { DerivedStateDefinition, DerivedUserState } from ".";
+import { DerivedUserState } from ".";
+
+export class DeriveContext {
+  constructor(readonly activeUserKey: UserKey, readonly encryptService: EncryptService) {}
+}
+
+export type Converter<TFrom, TTo> = (data: TFrom, context: DeriveContext) => Promise<TTo>;
 
 /**
  * A helper object for interacting with state that is scoped to a specific user.
@@ -26,10 +34,8 @@ export interface UserState<T> {
 
   /**
    * Creates a derives state from the current state. Derived states are always tied to the active user.
-   * @param derivedStateDefinition
+   * @param converter
    * @returns
    */
-  createDerived: <TTo>(
-    derivedStateDefinition: DerivedStateDefinition<T, TTo>
-  ) => DerivedUserState<T, TTo>;
+  createDerived: <TTo>(converter: Converter<T, TTo>) => DerivedUserState<TTo>;
 }

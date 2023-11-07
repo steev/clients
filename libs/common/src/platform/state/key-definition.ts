@@ -3,7 +3,6 @@ import { Jsonify, Opaque } from "type-fest";
 import { UserId } from "../../types/guid";
 import { Utils } from "../misc/utils";
 
-import { DeriveContext, DerivedStateDefinition } from "./derived-state-definition";
 import { StateDefinition } from "./state-definition";
 
 /**
@@ -67,19 +66,6 @@ export class KeyDefinition<T> {
       }
       return output;
     });
-  }
-
-  /**
-   * Helper for defining a derived definition that will often be used alongside a given key
-   *
-   * @param keyDefinition The key definition detailing storage details for the derived state
-   * @param deriveCallback The callback used to convert from the parent state to the derived state
-   */
-  createDerivedDefinition<TTo>(
-    keyDefinition: KeyDefinition<TTo>,
-    deriveCallback: (data: T, context: DeriveContext) => Promise<TTo>
-  ) {
-    return new DerivedStateDefinition(keyDefinition, deriveCallback);
   }
 
   /**

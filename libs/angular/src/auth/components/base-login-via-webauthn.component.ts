@@ -2,10 +2,10 @@ import { Directive, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { LoginService } from "@bitwarden/common/auth/abstractions/login.service";
-// import { WebauthnLoginServiceAbstraction } from "@bitwarden/common/auth/abstractions/webauthn/webauthn-login.service.abstraction";
-// import { ForceResetPasswordReason } from "@bitwarden/common/auth/models/domain/force-reset-password-reason";
-// import { WebauthnAssertionView } from "@bitwarden/common/auth/models/view/webauthn/webauthn-assertion.view";
-// import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
+import { WebAuthnLoginServiceAbstraction } from "@bitwarden/common/auth/abstractions/webauthn/webauthn-login.service.abstraction";
+import { ForceResetPasswordReason } from "@bitwarden/common/auth/models/domain/force-reset-password-reason";
+import { WebAuthnLoginAssertionView } from "@bitwarden/common/auth/models/view/webauthn-login/webauthn-login-assertion.view";
+import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
@@ -21,7 +21,7 @@ export class BaseLoginViaWebAuthnComponent implements OnInit {
   protected forcePasswordResetRoute = "/update-temp-password";
 
   constructor(
-    // private webauthnService: WebauthnLoginServiceAbstraction,
+    private webAuthnLoginService: WebAuthnLoginServiceAbstraction,
     private router: Router,
     private logService: LogService,
     private validationService: ValidationService,
@@ -33,45 +33,40 @@ export class BaseLoginViaWebAuthnComponent implements OnInit {
     this.authenticate();
   }
 
-  // TODO: write new webauthNLoginService - leverage existing code from Andreas's PR
-  // Write unit tests for webauth-login.service.ts
-
   protected retry() {
     this.currentState = "assert";
     this.authenticate();
   }
 
   private async authenticate() {
-    // TODO: this must be rewritten once service work is rewritten
-    // let assertion: WebauthnAssertionView;
-    // try {
-    //   const email = this.loginService.getEmail();
-    //   const options = await this.webauthnService.getCredentialAssertionOptions(email);
-    //   assertion = await this.webauthnService.assertCredential(options);
-    // } catch (error) {
-    //   this.validationService.showError(error);
-    //   this.currentState = "assertFailed";
-    //   return;
-    // }
-    // try {
-    //   const authResult = await this.webauthnService.logIn(assertion);
-    //   if (authResult.requiresTwoFactor) {
-    //     await this.router.navigate([this.twoFactorRoute]);
-    //   } else if (authResult.forcePasswordReset != ForceResetPasswordReason.None) {
-    //     await this.router.navigate([this.forcePasswordResetRoute]);
-    //   } else {
-    //     await this.setRememberEmailValues();
-    //     await this.router.navigate([this.successRoute]);
-    //   }
-    // } catch (error) {
-    //   if (error instanceof ErrorResponse) {
-    //     await this.router.navigate(["/login"]);
-    //     this.validationService.showError(error);
-    //     return;
-    //   }
-    //   this.logService.error(error);
-    //   this.currentState = "assertFailed";
-    // }
+    let assertion: WebAuthnLoginAssertionView;
+    try {
+      const options = await this.webAuthnLoginService.getCredentialAssertionOptions();
+      assertion = await this.webAuthnLoginService.assertCredential(options);
+    } catch (error) {
+      this.validationService.showError(error);
+      this.currentState = "assertFailed";
+      return;
+    }
+    try {
+      const authResult = await this.webAuthnLoginService.logIn(assertion);
+      if (authResult.requiresTwoFactor) {
+        await this.router.navigate([this.twoFactorRoute]);
+      } else if (authResult.forcePasswordReset != ForceResetPasswordReason.None) {
+        await this.router.navigate([this.forcePasswordResetRoute]);
+      } else {
+        await this.setRememberEmailValues();
+        await this.router.navigate([this.successRoute]);
+      }
+    } catch (error) {
+      if (error instanceof ErrorResponse) {
+        await this.router.navigate(["/login"]);
+        this.validationService.showError(error);
+        return;
+      }
+      this.logService.error(error);
+      this.currentState = "assertFailed";
+    }
   }
 
   private async setRememberEmailValues() {

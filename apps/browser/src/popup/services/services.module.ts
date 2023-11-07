@@ -63,6 +63,7 @@ import { GlobalState } from "@bitwarden/common/platform/models/domain/global-sta
 import { ConfigService } from "@bitwarden/common/platform/services/config/config.service";
 import { ConsoleLogService } from "@bitwarden/common/platform/services/console-log.service";
 import { ContainerService } from "@bitwarden/common/platform/services/container.service";
+import { MemoryStorageService } from "@bitwarden/common/platform/services/memory-storage.service";
 import { SearchService } from "@bitwarden/common/services/search.service";
 import { PasswordGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/password";
 import { UsernameGenerationServiceAbstraction } from "@bitwarden/common/tools/generator/username";
@@ -468,7 +469,7 @@ function getBgService<T>(service: keyof MainBackground) {
         return new BrowserStateService(
           storageService,
           secureStorageService,
-          memoryStorageService,
+          getBgService<MemoryStorageService>("memoryStorageService")(), // Need to use bg memory storage service until all data passed to storage is serializable/deserializable
           logService,
           new StateFactory(GlobalState, Account),
           accountService

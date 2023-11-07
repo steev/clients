@@ -17,7 +17,7 @@ export interface IUserDecryptionOptionsServerResponse {
   HasMasterPassword: boolean;
   TrustedDeviceOption?: ITrustedDeviceUserDecryptionOptionServerResponse;
   KeyConnectorOption?: IKeyConnectorUserDecryptionOptionServerResponse;
-  WebAuthnPrfDecryptionOption?: IWebAuthnPrfDecryptionOptionServerResponse;
+  WebAuthnPrfOptions?: IWebAuthnPrfDecryptionOptionServerResponse;
 }
 
 export class UserDecryptionOptionsResponse extends BaseResponse {
@@ -41,9 +41,10 @@ export class UserDecryptionOptionsResponse extends BaseResponse {
         this.getResponseProperty("KeyConnectorOption")
       );
     }
-    if (response.WebAuthnPrfDecryptionOption) {
+    if (response.WebAuthnPrfOptions) {
       this.webAuthnPrfOption = new WebAuthnPrfDecryptionOptionResponse(
-        this.getResponseProperty("WebAuthnPrfDecryptionOption")
+        // TODO: this will be modified to singular on server
+        this.getResponseProperty("WebAuthnPrfOptions")
       );
     }
   }

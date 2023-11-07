@@ -246,16 +246,18 @@ export class StateService<
     await this.pushAccounts();
   }
 
-  async clean(options?: StorageOptions): Promise<void> {
+  async clean(options?: StorageOptions): Promise<UserId> {
     options = this.reconcileOptions(options, await this.defaultInMemoryOptions());
     await this.deAuthenticateAccount(options.userId);
-    if (options.userId === (await this.state())?.activeUserId) {
-      await this.dynamicallySetActiveUser();
+    let currentUser = (await this.state())?.activeUserId;
+    if (options.userId === currentUser) {
+      currentUser = await this.dynamicallySetActiveUser();
     }
 
     await this.removeAccountFromDisk(options?.userId);
     await this.removeAccountFromMemory(options?.userId);
     await this.pushAccounts();
+    return currentUser as UserId;
   }
 
   async getAccessToken(options?: StorageOptions): Promise<string> {
@@ -3288,18 +3290,22 @@ export class StateService<
     const accounts = (await this.state())?.accounts;
     if (accounts == null || Object.keys(accounts).length < 1) {
       await this.setActiveUser(null);
-      return;
+      return null;
     }
+
+    let newActiveUser;
     for (const userId in accounts) {
       if (userId == null) {
         continue;
       }
       if (await this.getIsAuthenticated({ userId: userId })) {
-        await this.setActiveUser(userId);
+        newActiveUser = userId;
         break;
       }
-      await this.setActiveUser(null);
+      newActiveUser = null;
     }
+    await this.setActiveUser(newActiveUser);
+    return newActiveUser;
   }
 
   private async getTimeoutBasedStorageOptions(options?: StorageOptions): Promise<StorageOptions> {

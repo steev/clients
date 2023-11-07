@@ -1,4 +1,4 @@
-import { WebAuthnLoginAssertionResponseRequest } from "../../../../auth/services/webauthn-login/request/webauthn-login-assertion-response.request";
+import { WebAuthnLoginAssertionResponseRequest } from "../../../services/webauthn-login/request/webauthn-login-assertion-response.request";
 
 import { DeviceRequest } from "./device.request";
 import { TokenTwoFactorRequest } from "./token-two-factor.request";
@@ -19,6 +19,8 @@ export class WebAuthnTokenRequest extends TokenRequest {
 
     obj.grant_type = "webauthn";
     obj.token = this.token;
+    // must be a string b/c sending as form encoded data
+    obj.deviceResponse = JSON.stringify(this.deviceResponse);
 
     return obj;
   }

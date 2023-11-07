@@ -7,11 +7,11 @@ import { CredentialAssertionOptionsResponse } from "./response/credential-assert
 export class WebAuthnLoginApiService implements WebAuthnLoginApiServiceAbstraction {
   constructor(private apiService: ApiService, private environmentService: EnvironmentService) {}
 
-  async getCredentialAssertionOptions(email?: string): Promise<CredentialAssertionOptionsResponse> {
+  async getCredentialAssertionOptions(): Promise<CredentialAssertionOptionsResponse> {
     const response = await this.apiService.send(
       "POST",
-      `/accounts/webauthn-assertion-options`,
-      { email: email ?? null },
+      `/accounts/webauthn/assertion-options`,
+      {},
       false,
       true,
       this.environmentService.getIdentityUrl()

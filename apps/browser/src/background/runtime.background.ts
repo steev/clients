@@ -1,6 +1,6 @@
 import { NotificationsService } from "@bitwarden/common/abstractions/notifications.service";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
-import { ForceResetPasswordReason } from "@bitwarden/common/auth/models/domain/force-reset-password-reason";
+import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/force-set-password-reason";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -352,13 +352,13 @@ export default class RuntimeBackground {
 
         const status = await this.main.authService.getAuthStatus(msg.userId);
         const forcePasswordReset =
-          (await this.main.stateService.getForcePasswordResetReason({ userId: msg.userId })) !=
-          ForceResetPasswordReason.None;
+          (await this.main.stateService.getForceSetPasswordReason({ userId: msg.userId })) !=
+          ForceSetPasswordReason.None;
 
         if (status === AuthenticationStatus.Locked) {
           this.messagingService.send("locked", { userId: msg.userId });
         } else if (forcePasswordReset) {
-          this.messagingService.send("forcePasswordReset", { userId: msg.userId });
+          this.messagingService.send("update-temp-password", { userId: msg.userId });
         } else {
           this.messagingService.send("unlocked", { userId: msg.userId });
           await this.main.syncService.fullSync(true);

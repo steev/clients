@@ -130,6 +130,8 @@ export class AppComponent implements OnInit, OnDestroy {
         // TODO: unset loading?
         // this.loading = false;
         this.router.navigate(["vault"], { onSameUrlNavigation: "reload" }); // refreshes page to pick up sync
+      } else if (msg.command == "update-temp-password") {
+        this.router.navigate(["/update-temp-password"]);
       } else {
         msg.webExtSender = sender;
         this.broadcasterService.send(msg);

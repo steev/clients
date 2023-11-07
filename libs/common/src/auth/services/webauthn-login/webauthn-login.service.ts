@@ -15,6 +15,8 @@ import { createSymmetricKeyFromPrf, getLoginWithPrfSalt } from "../../utils/weba
 
 import { WebAuthnLoginAssertionResponseRequest } from "./request/webauthn-login-assertion-response.request";
 
+// TODO: add tests
+// TODO: Add JS doc commnets
 export class WebAuthnLoginService implements WebAuthnLoginServiceAbstraction {
   readonly enabled$: Observable<boolean>;
 
@@ -34,6 +36,8 @@ export class WebAuthnLoginService implements WebAuthnLoginServiceAbstraction {
     const response = await this.webAuthnLoginApiService.getCredentialAssertionOptions();
     return new WebAuthnLoginAssertionOptionsView(response.options, response.token);
   }
+
+  // TODO: discuss how method names have credential in them but classes don't
 
   // Assertion interacts w/ authenticator
   // Take this challenge and sign this with the private key that you should have

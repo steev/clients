@@ -4,8 +4,10 @@ import { FormBuilder, Validators } from "@angular/forms";
 import { catchError, combineLatest, from, map, of, Subject, switchMap, takeUntil } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { OrganizationUserService } from "@bitwarden/common/abstractions/organization-user/organization-user.service";
+import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
+import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
@@ -78,6 +80,11 @@ export const openGroupAddEditDialog = (
   templateUrl: "group-add-edit.component.html",
 })
 export class GroupAddEditComponent implements OnInit, OnDestroy {
+  protected flexibleCollectionsEnabled$ = this.configService.getFeatureFlag$(
+    FeatureFlag.FlexibleCollections,
+    false
+  );
+
   protected PermissionMode = PermissionMode;
   protected ResultType = GroupAddEditDialogResultType;
 
@@ -181,7 +188,8 @@ export class GroupAddEditComponent implements OnInit, OnDestroy {
     private logService: LogService,
     private formBuilder: FormBuilder,
     private changeDetectorRef: ChangeDetectorRef,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private configService: ConfigServiceAbstraction
   ) {
     this.tabIndex = params.initialTab ?? GroupAddEditTabType.Info;
   }

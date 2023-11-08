@@ -6,6 +6,10 @@ const AuthPopoutType = {
   ssoAuthResult: "auth_ssoAuthResult",
   twoFactorAuth: "auth_twoFactorAuth",
 } as const;
+const extensionUnlockUrls = new Set([
+  chrome.runtime.getURL("popup/index.html#/lock"),
+  chrome.runtime.getURL("popup/index.html#/home"),
+]);
 
 /**
  * Opens a window that facilitates unlocking / logging into the extension.
@@ -13,10 +17,6 @@ const AuthPopoutType = {
  * @param senderTab - Used to determine the windowId of the sender.
  */
 async function openUnlockPopout(senderTab: chrome.tabs.Tab) {
-  const extensionUnlockUrls = new Set([
-    chrome.runtime.getURL("popup/index.html#/lock"),
-    chrome.runtime.getURL("popup/index.html#/home"),
-  ]);
   const existingPopoutWindowTabs = await BrowserApi.tabsQuery({ windowType: "popup" });
   existingPopoutWindowTabs.forEach((tab) => {
     if (extensionUnlockUrls.has(tab.url)) {

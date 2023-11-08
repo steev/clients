@@ -6,6 +6,10 @@ const AuthPopoutType = {
   ssoAuthResult: "auth_ssoAuthResult",
   twoFactorAuth: "auth_twoFactorAuth",
 } as const;
+const extensionUnlockUrls = new Set([
+  chrome.runtime.getURL("popup/index.html#/lock"),
+  chrome.runtime.getURL("popup/index.html#/home"),
+]);
 
 /**
  * Opens a window that facilitates unlocking / logging into the extension.
@@ -14,6 +18,13 @@ const AuthPopoutType = {
  * @param skipNotification - Used to determine whether to show the unlock notification.
  */
 async function openUnlockPopout(senderTab: chrome.tabs.Tab, skipNotification = false) {
+  const existingPopoutWindowTabs = await BrowserApi.tabsQuery({ windowType: "popup" });
+  existingPopoutWindowTabs.forEach((tab) => {
+    if (extensionUnlockUrls.has(tab.url)) {
+      BrowserApi.removeWindow(tab.windowId);
+    }
+  });
+
   await BrowserPopupUtils.openPopout("popup/index.html", {
     singleActionKey: AuthPopoutType.unlockExtension,
     senderWindowId: senderTab.windowId,

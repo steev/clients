@@ -13,6 +13,17 @@ const AuthPopoutType = {
  * @param senderTab - Used to determine the windowId of the sender.
  */
 async function openUnlockPopout(senderTab: chrome.tabs.Tab) {
+  const extensionUnlockUrls = new Set([
+    chrome.runtime.getURL("popup/index.html#/lock"),
+    chrome.runtime.getURL("popup/index.html#/home"),
+  ]);
+  const existingPopoutWindowTabs = await BrowserApi.tabsQuery({ windowType: "popup" });
+  existingPopoutWindowTabs.forEach((tab) => {
+    if (extensionUnlockUrls.has(tab.url)) {
+      BrowserApi.removeWindow(tab.windowId);
+    }
+  });
+
   await BrowserPopupUtils.openPopout("popup/index.html", {
     singleActionKey: AuthPopoutType.unlockExtension,
     senderWindowId: senderTab.windowId,

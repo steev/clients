@@ -1,3 +1,4 @@
+import { createChromeTabMock } from "../../../autofill/jest/autofill-mocks";
 import { BrowserApi } from "../../../platform/browser/browser-api";
 import BrowserPopupUtils from "../../../platform/popup/browser-popup-utils";
 
@@ -23,6 +24,7 @@ describe("AuthPopoutWindow", () => {
 
   describe("openUnlockPopout", () => {
     it("opens a single action popup that allows the user to unlock the extension and sends a `bgUnlockPopoutOpened` message", async () => {
+      jest.spyOn(BrowserApi, "tabsQuery").mockResolvedValue([]);
       const senderTab = { windowId: 1 } as chrome.tabs.Tab;
 
       await openUnlockPopout(senderTab);
@@ -32,6 +34,33 @@ describe("AuthPopoutWindow", () => {
         senderWindowId: 1,
       });
       expect(sendMessageDataSpy).toHaveBeenCalledWith(senderTab, "bgUnlockPopoutOpened");
+    });
+
+    it("closes any existing popup window types that are open to the unlock extension route", async () => {
+      const unlockTab = createChromeTabMock({
+        url: chrome.runtime.getURL("popup/index.html#/lock"),
+      });
+      jest.spyOn(BrowserApi, "tabsQuery").mockResolvedValue([unlockTab]);
+      jest.spyOn(BrowserApi, "removeWindow");
+      const senderTab = { windowId: 1 } as chrome.tabs.Tab;
+
+      await openUnlockPopout(senderTab);
+
+      expect(BrowserApi.tabsQuery).toHaveBeenCalledWith({ windowType: "popup" });
+      expect(BrowserApi.removeWindow).toHaveBeenCalledWith(unlockTab.windowId);
+    });
+
+    it("closes any existing popup window types that are open to the login extension route", async () => {
+      const loginTab = createChromeTabMock({
+        url: chrome.runtime.getURL("popup/index.html#/home"),
+      });
+      jest.spyOn(BrowserApi, "tabsQuery").mockResolvedValue([loginTab]);
+      jest.spyOn(BrowserApi, "removeWindow");
+      const senderTab = { windowId: 1 } as chrome.tabs.Tab;
+
+      await openUnlockPopout(senderTab);
+
+      expect(BrowserApi.removeWindow).toHaveBeenCalledWith(loginTab.windowId);
     });
   });
 

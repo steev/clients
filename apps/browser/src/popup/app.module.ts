@@ -17,8 +17,9 @@ import { ColorPasswordCountPipe } from "@bitwarden/angular/pipes/color-password-
 import { ColorPasswordPipe } from "@bitwarden/angular/pipes/color-password.pipe";
 import { AvatarModule } from "@bitwarden/components";
 
+// TODO: Change this import to use @bitwarden
+import { AccountComponent } from "../../../../libs/auth/src/components/account.component";
 import { AccountSwitcherComponent } from "../auth/popup/account-switching/account-switcher.component";
-import { AccountComponent } from "../auth/popup/account-switching/account.component";
 import { CurrentAccountComponent } from "../auth/popup/account-switching/current-account.component";
 import { SetPinComponent } from "../auth/popup/components/set-pin.component";
 import { EnvironmentComponent } from "../auth/popup/environment.component";
@@ -106,6 +107,7 @@ import "../platform/popup/locales";
     DialogModule,
     FilePopoutCalloutComponent,
     AvatarModule,
+    AccountComponent,
   ],
   declarations: [
     ActionButtonsComponent,
@@ -168,7 +170,6 @@ import "../platform/popup/locales";
     EnvironmentSelectorComponent,
     CurrentAccountComponent,
     AccountSwitcherComponent,
-    AccountComponent,
   ],
   providers: [CurrencyPipe, DatePipe],
   bootstrap: [AppComponent],

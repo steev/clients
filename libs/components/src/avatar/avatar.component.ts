@@ -16,7 +16,7 @@ const SizeClasses: Record<SizeTypes, string[]> = {
 
 @Component({
   selector: "bit-avatar",
-  template: ` <img *ngIf="src" [src]="src" title="{{ title || text }}" [ngClass]="classList" /> `,
+  template: `<img *ngIf="src" [src]="src" title="{{ title || text }}" [ngClass]="classList" />`,
 })
 export class AvatarComponent implements OnChanges {
   @Input() border = false;

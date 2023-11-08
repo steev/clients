@@ -1545,6 +1545,9 @@
   "manage": {
     "message": "Håndtér"
   },
+  "canManage": {
+    "message": "Kan håndtere"
+  },
   "disable": {
     "message": "Deaktivér"
   },
@@ -3460,6 +3463,9 @@
   },
   "subscriptionUpdated": {
     "message": "Abonnement opdateret"
+  },
+  "subscribedToSecretsManager": {
+    "message": "Abonnement opdateret. Der er nu adgang til Secrets Manager."
   },
   "additionalOptions": {
     "message": "Yderligere indstillinger"
@@ -7218,6 +7224,18 @@
       }
     }
   },
+  "collectionManagement": {
+    "message": "Samlingshåndtering"
+  },
+  "collectionManagementDesc": {
+    "message": "Håndtér samlingsadfærden for organisationen"
+  },
+  "limitCollectionCreationDeletionDesc": {
+    "message": "Begræns samlingsoprettelse og -sletning til ejere og admins"
+  },
+  "collectionManagementUpdated": {
+    "message": "Samlingshåndteringsadfærd gemt"
+  },
   "passwordManagerPlanPrice": {
     "message": "Password Manager-abonnementspris"
   },
@@ -7264,6 +7282,12 @@
   "beta": {
     "message": "Beta"
   },
+  "assignCollectionAccess": {
+    "message": "Tildel samlingsadgang"
+  },
+  "editedCollections": {
+    "message": "Redigerede samlinger"
+  },
   "baseUrl": {
     "message": "Server-URL"
   },
@@ -7274,10 +7298,13 @@
     "message": "Har allerede en konto?"
   },
   "customBillingStart": {
-    "message": "Tilpasset fakturering vises ikke. Besøg siden "
+    "message": "Tilpasset fakturering afspejles ikke. Besøg "
   },
   "customBillingEnd": {
-    "message": " for seneste fakturering."
+    "message": " siden for seneste fakturering."
+  },
+  "managePermissionRequired": {
+    "message": "Mindst ét medlem eller én gruppe skal have håndteringstilladelser."
   },
   "typePasskey": {
     "message": "Adgangsnøgle"
@@ -7287,5 +7314,9 @@
   },
   "passkeyNotCopiedAlert": {
     "message": "Adgangsnøglen kopieres ikke til det klonede emne. Fortsæt kloningen af emnet alligevel?"
+  },
+  "seeDetailedInstructions": {
+    "message": "See detailed instructions on our help site at",
+    "description": "This is followed a by a hyperlink to the help website."
   }
 }

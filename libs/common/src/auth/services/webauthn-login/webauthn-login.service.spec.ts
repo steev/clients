@@ -6,11 +6,10 @@ import { LogService } from "../../../platform/abstractions/log.service";
 import { Utils } from "../../../platform/misc/utils";
 import { AuthService } from "../../abstractions/auth.service";
 import { WebAuthnLoginApiServiceAbstraction } from "../../abstractions/webauthn/webauthn-login-api.service.abstraction";
-import { WebAuthnLoginAssertionOptionsView } from "../../models/view/webauthn-login/webauthn-login-assertion-options.view";
+import { WebAuthnLoginCredentialAssertionOptionsView } from "../../models/view/webauthn-login/webauthn-login-credential-assertion-options.view";
 
 import { CredentialAssertionOptionsResponse } from "./response/credential-assertion-options.response";
 import { WebAuthnLoginService } from "./webauthn-login.service";
-// import { WebAuthnLoginAssertionView } from "../../models/view/webauthn-login/webauthn-login-assertion.view";
 
 describe("WebAuthnLoginService", () => {
   let webAuthnLoginService: WebAuthnLoginService;
@@ -110,7 +109,7 @@ describe("WebAuthnLoginService", () => {
       const result = await webAuthnLoginService.getCredentialAssertionOptions();
 
       // Assert
-      expect(result).toBeInstanceOf(WebAuthnLoginAssertionOptionsView);
+      expect(result).toBeInstanceOf(WebAuthnLoginCredentialAssertionOptionsView);
       expect(result.options.challenge).toEqual(Utils.fromUrlB64ToArray(challenge));
       expect(result.options.challenge).toBeInstanceOf(Uint8Array);
       expect(result.options.timeout).toEqual(timeout);
@@ -123,6 +122,9 @@ describe("WebAuthnLoginService", () => {
 
   // TODO: finish testing this
   //   describe("assertCredential(...)", () => {
+  //     // TODO: check that the device response (WebAuthnLoginAssertionResponseRequest) does not contain any PRF information
+  //     //  in the WebAuthnLoginResponseRequest.extensions
+
   //     it("should assert credential and return WebAuthnLoginAssertionView on success", async () => {
   //       // Arrange
   //       const webAuthnLoginService = setup(true);

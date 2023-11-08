@@ -9,14 +9,12 @@ import { WebAuthnLoginApiServiceAbstraction } from "../../abstractions/webauthn/
 import { WebAuthnLoginServiceAbstraction } from "../../abstractions/webauthn/webauthn-login.service.abstraction";
 import { AuthResult } from "../../models/domain/auth-result";
 import { WebAuthnLoginCredentials } from "../../models/domain/login-credentials";
-import { WebAuthnLoginAssertionOptionsView } from "../../models/view/webauthn-login/webauthn-login-assertion-options.view";
-import { WebAuthnLoginAssertionView } from "../../models/view/webauthn-login/webauthn-login-assertion.view";
+import { WebAuthnLoginCredentialAssertionOptionsView } from "../../models/view/webauthn-login/webauthn-login-credential-assertion-options.view";
+import { WebAuthnLoginCredentialAssertionView } from "../../models/view/webauthn-login/webauthn-login-credential-assertion.view";
 import { createSymmetricKeyFromPrf, getLoginWithPrfSalt } from "../../utils/webauthn-utils";
 
 import { WebAuthnLoginAssertionResponseRequest } from "./request/webauthn-login-assertion-response.request";
 
-// TODO: add tests
-// TODO: Add JS doc commnets
 export class WebAuthnLoginService implements WebAuthnLoginServiceAbstraction {
   readonly enabled$: Observable<boolean>;
 
@@ -30,25 +28,16 @@ export class WebAuthnLoginService implements WebAuthnLoginServiceAbstraction {
     this.enabled$ = from(this.configService.getFeatureFlag$(FeatureFlag.PasswordlessLogin, false));
   }
 
-  // Get me all the options I need to send to the hardware key to authenticate
-  // server provides a challenge and what types of credentials we (the relying party - BW) support
-  async getCredentialAssertionOptions(): Promise<WebAuthnLoginAssertionOptionsView> {
+  async getCredentialAssertionOptions(): Promise<WebAuthnLoginCredentialAssertionOptionsView> {
     const response = await this.webAuthnLoginApiService.getCredentialAssertionOptions();
-    return new WebAuthnLoginAssertionOptionsView(response.options, response.token);
+    return new WebAuthnLoginCredentialAssertionOptionsView(response.options, response.token);
   }
 
-  // TODO: discuss how method names have credential in them but classes don't
-
-  // Assertion interacts w/ authenticator
-  // Take this challenge and sign this with the private key that you should have
-  // Server could accept the signed challenge and verify it using the public key that it has
-  // We've basically moved this assertion validation into the identity service
-  // so when you call login if it can be validated, it will and you can be authenticated.
   async assertCredential(
-    credentialOptions: WebAuthnLoginAssertionOptionsView
-  ): Promise<WebAuthnLoginAssertionView> {
+    credentialAssertionOptions: WebAuthnLoginCredentialAssertionOptionsView
+  ): Promise<WebAuthnLoginCredentialAssertionView> {
     const nativeOptions: CredentialRequestOptions = {
-      publicKey: credentialOptions.options,
+      publicKey: credentialAssertionOptions.options,
     };
     // TODO: Remove `any` when typescript typings add support for PRF
     nativeOptions.publicKey.extensions = {
@@ -69,8 +58,14 @@ export class WebAuthnLoginService implements WebAuthnLoginServiceAbstraction {
 
       const deviceResponse = new WebAuthnLoginAssertionResponseRequest(response);
 
-      return new WebAuthnLoginAssertionView(
-        credentialOptions.token,
+      // Verify that we aren't going to send PRF information to the server in any case.
+      // Note: this will only happen if a dev has done something wrong.
+      if ("prf" in deviceResponse.extensions) {
+        throw new Error("PRF information is not allowed to be sent to the server.");
+      }
+
+      return new WebAuthnLoginCredentialAssertionView(
+        credentialAssertionOptions.token,
         deviceResponse,
         symmetricPrfKey
       );
@@ -80,7 +75,7 @@ export class WebAuthnLoginService implements WebAuthnLoginServiceAbstraction {
     }
   }
 
-  async logIn(assertion: WebAuthnLoginAssertionView): Promise<AuthResult> {
+  async logIn(assertion: WebAuthnLoginCredentialAssertionView): Promise<AuthResult> {
     const credential = new WebAuthnLoginCredentials(
       assertion.token,
       assertion.deviceResponse,

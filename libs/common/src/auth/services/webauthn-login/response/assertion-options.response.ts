@@ -5,6 +5,7 @@ export class AssertionOptionsResponse
   extends BaseResponse
   implements PublicKeyCredentialRequestOptions
 {
+  // A list of credentials that the authenticator is allowed to use; only used for non-discoverable flow
   allowCredentials?: PublicKeyCredentialDescriptor[];
   challenge: BufferSource;
   extensions?: AuthenticationExtensionsClientInputs;

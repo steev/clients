@@ -65,6 +65,9 @@ export class ElectronStorageService implements AbstractStorageService {
     });
   }
 
+  get valuesRequireDeserialization(): boolean {
+    return true;
+  }
   get updates$() {
     return this.updatesSubject.asObservable();
   }

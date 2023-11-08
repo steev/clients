@@ -16,6 +16,9 @@ export class ForegroundMemoryStorageService extends AbstractMemoryStorageService
   private _backgroundResponses$: Observable<MemoryStoragePortMessage>;
   private updatesSubject = new Subject<StorageUpdate>();
 
+  get valuesRequireDeserialization(): boolean {
+    return true;
+  }
   get updates$(): Observable<StorageUpdate> {
     return this.updatesSubject.asObservable();
   }

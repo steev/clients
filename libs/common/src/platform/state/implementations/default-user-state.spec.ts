@@ -84,9 +84,9 @@ describe("DefaultUserState", () => {
       date: new Date(2022, 0),
       array: ["value2"],
     };
-    const initialState: Record<string, Jsonify<TestState>> = {};
-    initialState[user1] = JSON.parse(JSON.stringify(state1));
-    initialState[user2] = JSON.parse(JSON.stringify(state2));
+    const initialState: Record<string, TestState> = {};
+    initialState[user1] = state1;
+    initialState[user2] = state2;
     diskStorageService.internalUpdateStore(initialState);
 
     const emissions = trackEmissions(userState.state$);
@@ -161,9 +161,9 @@ describe("DefaultUserState", () => {
 
     diskStorageService.internalUpdateStore({
       "user_00000000-0000-1000-a000-000000000001_fake_fake": {
-        date: "2020-09-21T13:14:17.648Z",
+        date: new Date(2020, 0),
         array: ["testValue"],
-      } as Jsonify<TestState>,
+      } as TestState,
     });
 
     const promise = firstValueFrom(userState.state$.pipe(timeout(20)))
@@ -236,7 +236,7 @@ describe("DefaultUserState", () => {
 
   describe("update", () => {
     const newData = { date: new Date(), array: ["test"] };
-    beforeEach(() => {
+    beforeEach(async () => {
       changeActiveUser("1");
     });
 
@@ -251,10 +251,12 @@ describe("DefaultUserState", () => {
 
     it("should emit once per update", async () => {
       const emissions = trackEmissions(userState.state$);
+      await awaitAsync(); // Need to await for the initial value to be emitted
 
       await userState.update((state, dependencies) => {
         return newData;
       });
+      await awaitAsync();
 
       expect(emissions).toEqual([
         null, // initial value
@@ -264,6 +266,8 @@ describe("DefaultUserState", () => {
 
     it("should provide combined dependencies", async () => {
       const emissions = trackEmissions(userState.state$);
+      await awaitAsync(); // Need to await for the initial value to be emitted
+
       const combinedDependencies = { date: new Date() };
 
       await userState.update(
@@ -275,6 +279,7 @@ describe("DefaultUserState", () => {
           combineLatestWith: of(combinedDependencies),
         }
       );
+      await awaitAsync();
 
       expect(emissions).toEqual([
         null, // initial value
@@ -284,6 +289,7 @@ describe("DefaultUserState", () => {
 
     it("should not update if shouldUpdate returns false", async () => {
       const emissions = trackEmissions(userState.state$);
+      await awaitAsync(); // Need to await for the initial value to be emitted
 
       const result = await userState.update(
         (state, dependencies) => {
@@ -294,6 +300,8 @@ describe("DefaultUserState", () => {
         }
       );
 
+      await awaitAsync();
+
       expect(diskStorageService.mock.save).not.toHaveBeenCalled();
       expect(result).toBe(undefined);
       expect(emissions).toEqual([null]);
@@ -301,6 +309,8 @@ describe("DefaultUserState", () => {
 
     it("should provide the current state to the update callback", async () => {
       const emissions = trackEmissions(userState.state$);
+      await awaitAsync(); // Need to await for the initial value to be emitted
+
       // Seed with interesting data
       const initialData = { date: new Date(2020, 0), array: ["value1", "value2"] };
       await userState.update((state, dependencies) => {
@@ -311,6 +321,8 @@ describe("DefaultUserState", () => {
         expect(state).toEqual(initialData);
         return newData;
       });
+
+      await awaitAsync();
 
       expect(emissions).toEqual([
         null, // Initial value

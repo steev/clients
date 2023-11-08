@@ -10,6 +10,7 @@ import { StorageOptions } from "../src/platform/models/domain/storage-options";
 export class FakeStorageService implements AbstractStorageService {
   private store: Record<string, unknown>;
   private updatesSubject = new Subject<StorageUpdate>();
+  private _valuesRequireDeserialization = false;
 
   /**
    * Returns a mock of a {@see AbstractStorageService} for asserting the expected
@@ -30,6 +31,14 @@ export class FakeStorageService implements AbstractStorageService {
    */
   internalUpdateStore(store: Record<string, unknown>) {
     this.store = store;
+  }
+
+  internalUpdateValuesRequireDeserialization(value: boolean) {
+    this._valuesRequireDeserialization = value;
+  }
+
+  get valuesRequireDeserialization(): boolean {
+    return this._valuesRequireDeserialization;
   }
 
   get updates$() {

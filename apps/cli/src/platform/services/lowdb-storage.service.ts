@@ -107,6 +107,9 @@ export class LowdbStorageService implements AbstractStorageService {
     this.ready = true;
   }
 
+  get valuesRequireDeserialization(): boolean {
+    return true;
+  }
   get updates$() {
     return this.updatesSubject.asObservable();
   }

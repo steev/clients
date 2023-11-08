@@ -16,6 +16,9 @@ export class HtmlStorageService implements AbstractStorageService {
     return { htmlStorageLocation: HtmlStorageLocation.Session };
   }
 
+  get valuesRequireDeserialization(): boolean {
+    return true;
+  }
   get updates$() {
     return this.updatesSubject.asObservable();
   }

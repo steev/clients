@@ -9,6 +9,7 @@ export type StorageUpdate = {
 };
 
 export abstract class AbstractStorageService {
+  abstract get valuesRequireDeserialization(): boolean;
   /**
    * Provides an {@link Observable} that represents a stream of updates that
    * have happened in this storage service or in the storage this service provides

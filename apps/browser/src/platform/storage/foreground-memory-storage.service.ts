@@ -3,7 +3,6 @@ import { Observable, Subject, filter, firstValueFrom, map } from "rxjs";
 import {
   AbstractMemoryStorageService,
   StorageUpdate,
-  StorageUpdateType,
 } from "@bitwarden/common/platform/abstractions/storage.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 
@@ -39,16 +38,10 @@ export class ForegroundMemoryStorageService extends AbstractMemoryStorageService
       .subscribe((message) => {
         switch (message.action) {
           case "initialization":
-            this.handleInitialize(message.data as [string, unknown][]); // Map entries as array
+            this.handleInitialize(message.data as string[]); // Map entries as array
             break;
           case "subject_update":
-            this.handleSubjectUpdate(
-              message.data as {
-                key: string;
-                value: unknown;
-                updateType: StorageUpdateType;
-              }
-            );
+            this.handleSubjectUpdate(message.data as StorageUpdate);
             break;
           default:
             throw new Error(`Unknown action: ${message.action}`);
@@ -104,18 +97,14 @@ export class ForegroundMemoryStorageService extends AbstractMemoryStorageService
     });
   }
 
-  private handleInitialize(data: [string, unknown][]) {
+  private handleInitialize(data: string[]) {
     // TODO: this isn't a save, but we don't have a better indicator for this
-    data.forEach(([key, value]) => {
-      this.updatesSubject.next({ key, value, updateType: "save" });
+    data.forEach((key) => {
+      this.updatesSubject.next({ key, updateType: "save" });
     });
   }
 
-  private handleSubjectUpdate(data: {
-    key: string;
-    value: unknown;
-    updateType: StorageUpdateType;
-  }) {
+  private handleSubjectUpdate(data: StorageUpdate) {
     this.updatesSubject.next(data);
   }
 }

@@ -49,13 +49,13 @@ describe("foreground background memory storage interaction", () => {
     expect(actionSpy).toHaveBeenCalledWith(key);
   });
 
-  test("background updates push to foreground", async () => {
+  test("background updates notify the foreground", async () => {
     const key = "key";
     const value = "value";
     const updateType = "save";
     const emissions = trackEmissions(foreground.updates$);
     await background.save(key, value);
 
-    expect(emissions).toEqual([{ key, value, updateType }]);
+    expect(emissions).toEqual([{ key, updateType }]);
   });
 });

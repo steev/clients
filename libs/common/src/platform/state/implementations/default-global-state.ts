@@ -4,8 +4,8 @@ import {
   defer,
   filter,
   firstValueFrom,
-  map,
   shareReplay,
+  switchMap,
   tap,
   timeout,
 } from "rxjs";
@@ -37,8 +37,13 @@ export class DefaultGlobalState<T> implements GlobalState<T> {
 
     const storageUpdates$ = this.chosenLocation.updates$.pipe(
       filter((update) => update.key === this.storageKey),
-      map((update) => {
-        return this.keyDefinition.deserializer(update.value as Jsonify<T>);
+      switchMap(async (update) => {
+        if (update.updateType === "remove") {
+          return null;
+        }
+        const jsonData = await this.chosenLocation.get<Jsonify<T>>(this.storageKey);
+        const data = this.keyDefinition.deserializer(jsonData);
+        return data;
       }),
       shareReplay({ bufferSize: 1, refCount: false })
     );

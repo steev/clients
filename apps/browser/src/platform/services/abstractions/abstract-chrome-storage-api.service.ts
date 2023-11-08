@@ -27,7 +27,6 @@ export default abstract class AbstractChromeStorageService implements AbstractSt
             key: key,
             // For removes this property will not exist but then it will just be
             // undefined which is fine.
-            value: change.newValue,
             updateType: updateType,
           };
         });

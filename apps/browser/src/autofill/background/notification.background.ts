@@ -12,9 +12,11 @@ import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folde
 import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 
+import { openUnlockPopout } from "../../auth/popup/utils/auth-popout-window";
 import LockedVaultPendingNotificationsItem from "../../background/models/lockedVaultPendingNotificationsItem";
 import { BrowserApi } from "../../platform/browser/browser-api";
 import { BrowserStateService } from "../../platform/services/abstractions/browser-state.service";
+import { openAddEditVaultItemPopout } from "../../vault/popup/utils/vault-popout-window";
 import AddChangePasswordQueueMessage from "../models/notifications/add-change-password-queue-message";
 import AddLoginQueueMessage from "../models/notifications/add-login-queue-message";
 import AddLoginRuntimeMessage from "../models/notifications/add-login-runtime-message";
@@ -98,7 +100,7 @@ export default class NotificationBackground {
             "addToLockedVaultPendingNotifications",
             retryMessage
           );
-          await BrowserApi.tabSendMessageData(sender.tab, "promptForLogin");
+          await openUnlockPopout(sender.tab);
           return;
         }
         await this.saveOrUpdateCredentials(sender.tab, msg.edit, msg.folder);
@@ -120,8 +122,11 @@ export default class NotificationBackground {
             break;
         }
         break;
-      case "promptForLogin":
+      case "bgUnlockPopoutOpened":
         await this.unlockVault(sender.tab);
+        break;
+      case "bgReopenUnlockPopout":
+        await openUnlockPopout(sender.tab);
         break;
       default:
         break;
@@ -496,9 +501,7 @@ export default class NotificationBackground {
       collectionIds: cipherView.collectionIds,
     });
 
-    await BrowserApi.tabSendMessageData(senderTab, "openAddEditCipher", {
-      cipherId: cipherView.id,
-    });
+    await openAddEditVaultItemPopout(senderTab, { cipherId: cipherView.id });
   }
 
   private async folderExists(folderId: string) {

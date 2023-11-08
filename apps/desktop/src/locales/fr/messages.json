@@ -132,7 +132,7 @@
     "message": "Afficher/masquer la visibilité"
   },
   "toggleCollapse": {
-    "message": "Déplier ou replier",
+    "message": "Déplier/Replier",
     "description": "Toggling an expand/collapse state."
   },
   "cardholderName": {
@@ -389,7 +389,7 @@
     "message": "Éditer le dossier"
   },
   "regeneratePassword": {
-    "message": "Re-générer un mot de passe"
+    "message": "Générer un nouveau mot de passe"
   },
   "copyPassword": {
     "message": "Copier le mot de passe"
@@ -426,7 +426,7 @@
     "description": "Make the first letter of a word uppercase."
   },
   "includeNumber": {
-    "message": "Inclure le numéro"
+    "message": "Inclure un chiffre"
   },
   "close": {
     "message": "Fermer"
@@ -448,7 +448,7 @@
     "message": "Rechercher dans un dossier"
   },
   "searchFavorites": {
-    "message": "Rechercher dans les favoris"
+    "message": "Rechercher parmi les favoris"
   },
   "searchType": {
     "message": "Recherche par type",
@@ -521,7 +521,7 @@
     "message": "Paramètres"
   },
   "passwordHint": {
-    "message": "Indice mot de passe"
+    "message": "Indice pour le mot de passe"
   },
   "enterEmailToGetHint": {
     "message": "Saisissez l'adresse électronique de votre compte pour recevoir l'indice de votre mot de passe principal."
@@ -2480,6 +2480,9 @@
   "importEncKeyError": {
     "message": "Erreur lors du déchiffrement du fichier exporté. Votre clé de chiffrement ne correspond pas à la clé de chiffrement utilisée pour exporter les données."
   },
+  "invalidFilePassword": {
+    "message": "Mot de passe du fichier incorrect, veuillez utiliser le mot de passe saisi lors de l'exportation du fichier."
+  },
   "importDestination": {
     "message": "Destination de l'import"
   },
@@ -2538,5 +2541,69 @@
   },
   "confirmFilePassword": {
     "message": "Confirmez le mot de passe du fichier"
+  },
+  "multifactorAuthenticationCancelled": {
+    "message": "Authentification multi-facteurs annulée"
+  },
+  "noLastPassDataFound": {
+    "message": "Aucune donnée LastPass trouvée"
+  },
+  "incorrectUsernameOrPassword": {
+    "message": "Nom d'utilisateur ou mot de passe incorrect"
+  },
+  "multifactorAuthenticationFailed": {
+    "message": "Multifactor authentication failed"
+  },
+  "includeSharedFolders": {
+    "message": "Include shared folders"
+  },
+  "lastPassEmail": {
+    "message": "Courriel LastPass"
+  },
+  "importingYourAccount": {
+    "message": "Importation de votre compte..."
+  },
+  "lastPassMFARequired": {
+    "message": "LastPass multifactor authentication required"
+  },
+  "lastPassMFADesc": {
+    "message": "Enter your one-time passcode from your authentication app"
+  },
+  "lastPassOOBDesc": {
+    "message": "Approve the login request in your authentication app or enter a one-time passcode."
+  },
+  "passcode": {
+    "message": "Passcode"
+  },
+  "lastPassMasterPassword": {
+    "message": "Mot de passe principal LastPass"
+  },
+  "lastPassAuthRequired": {
+    "message": "LastPass authentication required"
+  },
+  "awaitingSSO": {
+    "message": "En attente de l'authentification SSO"
+  },
+  "awaitingSSODesc": {
+    "message": "Please continue to log in using your company credentials."
+  },
+  "seeDetailedInstructions": {
+    "message": "Consultez les instructions détaillées sur notre site d'aide à",
+    "description": "This is followed a by a hyperlink to the help website."
+  },
+  "importDirectlyFromLastPass": {
+    "message": "Importer directement de LastPass"
+  },
+  "importFromCSV": {
+    "message": "Importer depuis un fichier CSV"
+  },
+  "lastPassTryAgainCheckEmail": {
+    "message": "Try again or look for an email from LastPass to verify it's you."
+  },
+  "collection": {
+    "message": "Collection"
+  },
+  "lastPassYubikeyDesc": {
+    "message": "Insert the YubiKey associated with your LastPass account into your computer's USB port, then touch its button."
   }
 }

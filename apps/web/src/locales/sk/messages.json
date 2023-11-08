@@ -1545,6 +1545,9 @@
   "manage": {
     "message": "Spravovať"
   },
+  "canManage": {
+    "message": "Môže spravovať"
+  },
   "disable": {
     "message": "Vypnúť"
   },
@@ -3460,6 +3463,9 @@
   },
   "subscriptionUpdated": {
     "message": "Predplatené bolo aktualizované"
+  },
+  "subscribedToSecretsManager": {
+    "message": "Predplatné aktualizované. Teraz máte prístup k Secrets Manager."
   },
   "additionalOptions": {
     "message": "Ďalšie možnosti"
@@ -7218,6 +7224,18 @@
       }
     }
   },
+  "collectionManagement": {
+    "message": "Správa zbierky"
+  },
+  "collectionManagementDesc": {
+    "message": "Spravovať správanie zbierky pre organizáciu"
+  },
+  "limitCollectionCreationDeletionDesc": {
+    "message": "Obmedziť vytváranie a vymazávanie zbierky len pre vlastníkov a administrátorov"
+  },
+  "collectionManagementUpdated": {
+    "message": "Nastavenie správy zbierky uložené"
+  },
   "passwordManagerPlanPrice": {
     "message": "Cena plánu Správcu Hesiel"
   },
@@ -7264,6 +7282,12 @@
   "beta": {
     "message": "Beta"
   },
+  "assignCollectionAccess": {
+    "message": "Udeliť prístup k zbierke"
+  },
+  "editedCollections": {
+    "message": "Zbierky upravené"
+  },
   "baseUrl": {
     "message": "URL servera"
   },
@@ -7274,10 +7298,13 @@
     "message": "Už máte účet?"
   },
   "customBillingStart": {
-    "message": "Custom billing is not reflected. Visit the "
+    "message": "Vlastná fakturácia sa nezohľadňuje. Navštívte "
   },
   "customBillingEnd": {
-    "message": " page for latest invoicing."
+    "message": " stránku pre posledné faktúry."
+  },
+  "managePermissionRequired": {
+    "message": "Aspoň jeden člen alebo skupina musí mať povolenie pre správu."
   },
   "typePasskey": {
     "message": "Passkey"
@@ -7287,5 +7314,9 @@
   },
   "passkeyNotCopiedAlert": {
     "message": "The passkey will not be copied to the cloned item. Do you want to continue cloning this item?"
+  },
+  "seeDetailedInstructions": {
+    "message": "Podrobné pokyny nájdete na našej stránke pomoci na adrese",
+    "description": "This is followed a by a hyperlink to the help website."
   }
 }

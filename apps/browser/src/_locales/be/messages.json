@@ -661,7 +661,7 @@
     "message": "Unlock your Bitwarden vault to complete the auto-fill request."
   },
   "notificationUnlock": {
-    "message": "Unlock"
+    "message": "Разблакіраваць"
   },
   "enableContextMenuItem": {
     "message": "Паказваць параметры кантэкстнага меню"
@@ -2183,7 +2183,7 @@
     "message": "Апавяшчэнне было адпраўлена на вашу прыладу."
   },
   "loginInitiated": {
-    "message": "Login initiated"
+    "message": "Ініцыяваны ўваход"
   },
   "exposedMasterPassword": {
     "message": "Скампраметаваны асноўны пароль"
@@ -2291,7 +2291,7 @@
     "message": "Organization SSO identifier is required."
   },
   "eu": {
-    "message": "EU",
+    "message": "ЕС",
     "description": "European Union"
   },
   "usDomain": {
@@ -2322,10 +2322,10 @@
     "message": "You will be notified once approved."
   },
   "troubleLoggingIn": {
-    "message": "Trouble logging in?"
+    "message": "Праблемы з уваходам?"
   },
   "loginApproved": {
-    "message": "Login approved"
+    "message": "Уваход ухвалены"
   },
   "userEmailMissing": {
     "message": "User email missing"
@@ -2388,14 +2388,14 @@
     }
   },
   "multipleInputEmails": {
-    "message": "1 or more emails are invalid"
+    "message": "1 або некалькі адрасоў электроннай пошты з'яўляюцца памылковымі"
   },
   "inputTrimValidator": {
-    "message": "Input must not contain only whitespace.",
+    "message": "Уведзенае значэнне не павінна змяшчаць толькі прабелы.",
     "description": "Notification to inform the user that a form's input can't contain only whitespace."
   },
   "inputEmail": {
-    "message": "Input is not an email address."
+    "message": "Уведзеныя даныя не з'яўляюцца адрасам электроннай пошты."
   },
   "fieldsNeedAttention": {
     "message": "$COUNT$ field(s) above need your attention.",
@@ -2407,19 +2407,19 @@
     }
   },
   "selectPlaceholder": {
-    "message": "-- Select --"
+    "message": "-- Выбраць --"
   },
   "multiSelectPlaceholder": {
-    "message": "-- Type to filter --"
+    "message": "- Увядзіце для фільтрацыі -"
   },
   "multiSelectLoading": {
-    "message": "Retrieving options..."
+    "message": "Атрыманне параметраў..."
   },
   "multiSelectNotFound": {
-    "message": "No items found"
+    "message": "Элементаў не знойдзена"
   },
   "multiSelectClearAll": {
-    "message": "Clear all"
+    "message": "Ачысціць усё"
   },
   "plusNMore": {
     "message": "+ $QUANTITY$ more",
@@ -2431,14 +2431,14 @@
     }
   },
   "submenu": {
-    "message": "Submenu"
+    "message": "Падменю"
   },
   "toggleCollapse": {
     "message": "Toggle collapse",
     "description": "Toggling an expand/collapse state."
   },
   "aliasDomain": {
-    "message": "Alias domain"
+    "message": "Мянушка дамена"
   },
   "passwordRepromptDisabledAutofillOnPageLoad": {
     "message": "Items with master password re-prompt cannot be auto-filled on page load. Auto-fill on page load turned off.",
@@ -2466,7 +2466,7 @@
     "message": "Resolve the errors below and try again."
   },
   "description": {
-    "message": "Description"
+    "message": "Апісанне"
   },
   "importSuccess": {
     "message": "Data successfully imported"
@@ -2481,7 +2481,7 @@
     }
   },
   "total": {
-    "message": "Total"
+    "message": "Усяго"
   },
   "importWarning": {
     "message": "You are importing data to $ORGANIZATION$. Your data may be shared with members of this organization. Do you want to proceed?",
@@ -2501,11 +2501,14 @@
   "importEncKeyError": {
     "message": "Error decrypting the exported file. Your encryption key does not match the encryption key used export the data."
   },
+  "invalidFilePassword": {
+    "message": "Invalid file password, please use the password you entered when you created the export file."
+  },
   "importDestination": {
     "message": "Import destination"
   },
   "learnAboutImportOptions": {
-    "message": "Learn about your import options"
+    "message": "Даведацца пра параметры імпартавання"
   },
   "selectImportFolder": {
     "message": "Select a folder"
@@ -2533,10 +2536,10 @@
     "message": "Select the import file"
   },
   "chooseFile": {
-    "message": "Choose File"
+    "message": "Выбраць файл"
   },
   "noFileChosen": {
-    "message": "No file chosen"
+    "message": "Файл не выбраны"
   },
   "orCopyPasteFileContents": {
     "message": "or copy/paste the import file contents"
@@ -2558,7 +2561,7 @@
     "message": "This file is password-protected. Please enter the file password to import data."
   },
   "confirmFilePassword": {
-    "message": "Confirm file password"
+    "message": "Пацвердзіць пароль файла"
   },
   "passkeyNotCopied": {
     "message": "Passkey will not be copied"
@@ -2582,7 +2585,7 @@
     "message": "You do not have a matching login for this site."
   },
   "confirm": {
-    "message": "Confirm"
+    "message": "Пацвердзіць"
   },
   "savePasskey": {
     "message": "Save passkey"
@@ -2610,5 +2613,69 @@
   },
   "useBrowserName": {
     "message": "Use browser"
+  },
+  "multifactorAuthenticationCancelled": {
+    "message": "Multifactor authentication cancelled"
+  },
+  "noLastPassDataFound": {
+    "message": "No LastPass data found"
+  },
+  "incorrectUsernameOrPassword": {
+    "message": "Incorrect username or password"
+  },
+  "multifactorAuthenticationFailed": {
+    "message": "Multifactor authentication failed"
+  },
+  "includeSharedFolders": {
+    "message": "Include shared folders"
+  },
+  "lastPassEmail": {
+    "message": "LastPass Email"
+  },
+  "importingYourAccount": {
+    "message": "Importing your account..."
+  },
+  "lastPassMFARequired": {
+    "message": "LastPass multifactor authentication required"
+  },
+  "lastPassMFADesc": {
+    "message": "Enter your one-time passcode from your authentication app"
+  },
+  "lastPassOOBDesc": {
+    "message": "Approve the login request in your authentication app or enter a one-time passcode."
+  },
+  "passcode": {
+    "message": "Passcode"
+  },
+  "lastPassMasterPassword": {
+    "message": "LastPass master password"
+  },
+  "lastPassAuthRequired": {
+    "message": "LastPass authentication required"
+  },
+  "awaitingSSO": {
+    "message": "Awaiting SSO authentication"
+  },
+  "awaitingSSODesc": {
+    "message": "Please continue to log in using your company credentials."
+  },
+  "seeDetailedInstructions": {
+    "message": "See detailed instructions on our help site at",
+    "description": "This is followed a by a hyperlink to the help website."
+  },
+  "importDirectlyFromLastPass": {
+    "message": "Import directly from LastPass"
+  },
+  "importFromCSV": {
+    "message": "Import from CSV"
+  },
+  "lastPassTryAgainCheckEmail": {
+    "message": "Try again or look for an email from LastPass to verify it's you."
+  },
+  "collection": {
+    "message": "Collection"
+  },
+  "lastPassYubikeyDesc": {
+    "message": "Insert the YubiKey associated with your LastPass account into your computer's USB port, then touch its button."
   }
 }

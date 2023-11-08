@@ -17,6 +17,8 @@ import {
   throwError,
 } from "rxjs";
 
+import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
+import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { UserRequestedFallbackAbortReason } from "@bitwarden/common/vault/abstractions/fido2/fido2-client.service.abstraction";
 import {
@@ -27,7 +29,7 @@ import {
 } from "@bitwarden/common/vault/abstractions/fido2/fido2-user-interface.service.abstraction";
 
 import { BrowserApi } from "../../platform/browser/browser-api";
-import { BrowserPopoutWindowService } from "../../platform/popup/abstractions/browser-popout-window.service";
+import { closeFido2Popout, openFido2Popout } from "../popup/utils/vault-popout-window";
 
 const BrowserFido2MessageName = "BrowserFido2UserInterfaceServiceMessage";
 
@@ -114,7 +116,7 @@ export type BrowserFido2Message = { sessionId: string } & (
  * The user interface is implemented as a popout and the service uses the browser's messaging API to communicate with it.
  */
 export class BrowserFido2UserInterfaceService implements Fido2UserInterfaceServiceAbstraction {
-  constructor(private browserPopoutWindowService: BrowserPopoutWindowService) {}
+  constructor(private authService: AuthService) {}
 
   async newSession(
     fallbackSupported: boolean,
@@ -122,7 +124,7 @@ export class BrowserFido2UserInterfaceService implements Fido2UserInterfaceServi
     abortController?: AbortController
   ): Promise<Fido2UserInterfaceSession> {
     return await BrowserFido2UserInterfaceSession.create(
-      this.browserPopoutWindowService,
+      this.authService,
       fallbackSupported,
       tab,
       abortController
@@ -132,13 +134,13 @@ export class BrowserFido2UserInterfaceService implements Fido2UserInterfaceServi
 
 export class BrowserFido2UserInterfaceSession implements Fido2UserInterfaceSession {
   static async create(
-    browserPopoutWindowService: BrowserPopoutWindowService,
+    authService: AuthService,
     fallbackSupported: boolean,
     tab: chrome.tabs.Tab,
     abortController?: AbortController
   ): Promise<BrowserFido2UserInterfaceSession> {
     return new BrowserFido2UserInterfaceSession(
-      browserPopoutWindowService,
+      authService,
       fallbackSupported,
       tab,
       abortController
@@ -175,7 +177,7 @@ export class BrowserFido2UserInterfaceSession implements Fido2UserInterfaceSessi
   private destroy$ = new Subject<void>();
 
   private constructor(
-    private readonly browserPopoutWindowService: BrowserPopoutWindowService,
+    private readonly authService: AuthService,
     private readonly fallbackSupported: boolean,
     private readonly tab: chrome.tabs.Tab,
     readonly abortController = new AbortController(),
@@ -278,7 +280,9 @@ export class BrowserFido2UserInterfaceSession implements Fido2UserInterfaceSessi
   }
 
   async ensureUnlockedVault(): Promise<void> {
-    await this.connect();
+    if ((await this.authService.getAuthStatus()) !== AuthenticationStatus.Unlocked) {
+      await this.connect();
+    }
   }
 
   async informCredentialNotFound(): Promise<void> {
@@ -293,7 +297,7 @@ export class BrowserFido2UserInterfaceSession implements Fido2UserInterfaceSessi
   }
 
   async close() {
-    await this.browserPopoutWindowService.closeFido2Popout();
+    await closeFido2Popout(this.sessionId);
     this.closed = true;
     this.destroy$.next();
     this.destroy$.complete();
@@ -343,9 +347,8 @@ export class BrowserFido2UserInterfaceSession implements Fido2UserInterfaceSessi
       )
     );
 
-    const popoutId = await this.browserPopoutWindowService.openFido2Popout(this.tab, {
+    const popoutId = await openFido2Popout(this.tab, {
       sessionId: this.sessionId,
-      senderTabId: this.tab.id,
       fallbackSupported: this.fallbackSupported,
     });
 
@@ -358,7 +361,7 @@ export class BrowserFido2UserInterfaceSession implements Fido2UserInterfaceSessi
       )
       .subscribe(() => {
         this.close();
-        this.abort();
+        this.abort(true);
       });
 
     await connectPromise;

@@ -7388,7 +7388,7 @@
     "placeholders": {
       "id": {
         "content": "$1",
-        "example": "Limit Collection Creation/Deletion"
+        "example": "Unique ID"
       }
     }
   },  

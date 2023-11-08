@@ -218,7 +218,7 @@ function handleTypeUnlock() {
   const unlockButton = document.getElementById("unlock-vault");
   unlockButton.addEventListener("click", (e) => {
     sendPlatformMessage({
-      command: "bgReopenPromptForLogin",
+      command: "bgReopenUnlockPopout",
     });
   });
 }

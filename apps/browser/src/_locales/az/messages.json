@@ -2501,6 +2501,9 @@
   "importEncKeyError": {
     "message": "Error decrypting the exported file. Your encryption key does not match the encryption key used export the data."
   },
+  "invalidFilePassword": {
+    "message": "Yararsız fayl parolu, zəhmət olmasa xaricə köçürmə faylını yaradarkən daxil etdiyiniz parolu istifadə edin."
+  },
   "importDestination": {
     "message": "Import destination"
   },
@@ -2610,5 +2613,69 @@
   },
   "useBrowserName": {
     "message": "Use browser"
+  },
+  "multifactorAuthenticationCancelled": {
+    "message": "Çox faktorlu kimlik doğrulama ləğv edildi"
+  },
+  "noLastPassDataFound": {
+    "message": "LastPass datası tapılmadı"
+  },
+  "incorrectUsernameOrPassword": {
+    "message": "Yanlış istifadəçi adı və ya parol"
+  },
+  "multifactorAuthenticationFailed": {
+    "message": "Çox faktorlu kimlik doğrulama uğursuz oldu"
+  },
+  "includeSharedFolders": {
+    "message": "Paylaşılan qovluqları daxil et"
+  },
+  "lastPassEmail": {
+    "message": "LastPass E-poçtu"
+  },
+  "importingYourAccount": {
+    "message": "Hesabınız daxilə köçürülür..."
+  },
+  "lastPassMFARequired": {
+    "message": "LastPass çox faktorlu kimlik doğrulama tələb olunur"
+  },
+  "lastPassMFADesc": {
+    "message": "Kimlik doğrulama tətbiqinizdəki təkistifadəlik kodu daxil edin"
+  },
+  "lastPassOOBDesc": {
+    "message": "Kimlik doğrulama tətbiqinizdəki giriş tələbini təsdiqləyin və ya təkistifadəlik kodu daxil edin."
+  },
+  "passcode": {
+    "message": "Kod"
+  },
+  "lastPassMasterPassword": {
+    "message": "LastPass ana parolu"
+  },
+  "lastPassAuthRequired": {
+    "message": "LastPass kimlik doğrulama tələb olunur"
+  },
+  "awaitingSSO": {
+    "message": "SSO kimlik doğrulaması gözlənilir"
+  },
+  "awaitingSSODesc": {
+    "message": "Lütfən şirkət kimlik məlumatlarınızı istifadə edərək giriş etməyə davam edin."
+  },
+  "seeDetailedInstructions": {
+    "message": "Kömək saytımızda detallı təlimatlara baxın",
+    "description": "This is followed a by a hyperlink to the help website."
+  },
+  "importDirectlyFromLastPass": {
+    "message": "Birbaşa \"LastPass\"dan daxilə köçür"
+  },
+  "importFromCSV": {
+    "message": "CSV-dən daxilə köçür"
+  },
+  "lastPassTryAgainCheckEmail": {
+    "message": "Yenidən snayın və ya siz olduğunuzu doğrulamaq üçün \"LastPass\"dan gələcək e-poçtu yoxlayın."
+  },
+  "collection": {
+    "message": "Kolleksiya"
+  },
+  "lastPassYubikeyDesc": {
+    "message": "LastPass hesabınızla əlaqələndirilmiş \"YubiKey\"i kompüterinizin USB yuvasına taxın, daha sonra düyməsinə basın."
   }
 }

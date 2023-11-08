@@ -53,7 +53,7 @@
       {{ selectableProduct.nameLocalizationKey | i18n }}
       <small class="mb-1">{{ selectableProduct.descriptionLocalizationKey | i18n : "1" }}</small>
       <ng-container
-        *ngIf="selectableProduct.product === productTypes.Enterprise; else fullFeatureList"
+        *ngIf="selectableProduct.product === productTypes.Enterprise; else nonEnterprisePlans"
       >
         <small>• {{ "includeAllTeamsFeatures" | i18n }}</small>
         <small *ngIf="selectableProduct.hasSelfHost">• {{ "onPremHostingOptional" | i18n }}</small>
@@ -66,67 +66,98 @@
           {{ "xDayFreeTrial" | i18n : selectableProduct.trialPeriodDays }}
         </small>
       </ng-container>
-      <ng-template #fullFeatureList>
-        <small *ngIf="selectableProduct.product == productTypes.Free"
-          >• {{ "limitedUsers" | i18n : selectableProduct.PasswordManager.maxSeats }}</small
-        >
-        <small
+      <ng-template #nonEnterprisePlans>
+        <ng-container
           *ngIf="
-            selectableProduct.product != productTypes.Free &&
-            selectableProduct.PasswordManager.maxSeats
+            teamsStarterPlanFeatureFlagIsEnabled &&
+              selectableProduct.product === productTypes.Teams;
+            else fullFeatureList
           "
-          >• {{ "addShareLimitedUsers" | i18n : selectableProduct.PasswordManager.maxSeats }}</small
         >
-        <small *ngIf="!selectableProduct.PasswordManager.maxSeats"
-          >• {{ "addShareUnlimitedUsers" | i18n }}</small
-        >
-        <small *ngIf="selectableProduct.PasswordManager.maxCollections"
-          >•
-          {{
-            "limitedCollections" | i18n : selectableProduct.PasswordManager.maxCollections
-          }}</small
-        >
-        <small *ngIf="selectableProduct.PasswordManager.maxAdditionalSeats"
-          >•
-          {{
-            "addShareLimitedUsers" | i18n : selectableProduct.PasswordManager.maxAdditionalSeats
-          }}</small
-        >
-        <small *ngIf="!selectableProduct.PasswordManager.maxCollections"
-          >• {{ "createUnlimitedCollections" | i18n }}</small
-        >
-        <small *ngIf="selectableProduct.PasswordManager.baseStorageGb"
-          >•
-          {{
-            "gbEncryptedFileStorage" | i18n : selectableProduct.PasswordManager.baseStorageGb + "GB"
-          }}</small
-        >
-        <small *ngIf="selectableProduct.hasGroups">• {{ "controlAccessWithGroups" | i18n }}</small>
-        <small *ngIf="selectableProduct.hasApi">• {{ "trackAuditLogs" | i18n }}</small>
-        <small *ngIf="selectableProduct.hasDirectory"
-          >• {{ "syncUsersFromDirectory" | i18n }}</small
-        >
-        <small *ngIf="selectableProduct.hasSelfHost">• {{ "onPremHostingOptional" | i18n }}</small>
-        <small *ngIf="selectableProduct.usersGetPremium">• {{ "usersGetPremium" | i18n }}</small>
-        <small *ngIf="selectableProduct.product != productTypes.Free"
-          >• {{ "priorityCustomerSupport" | i18n }}</small
-        >
-        <small *ngIf="selectableProduct.trialPeriodDays && createOrganization"
-          >•
-          {{ "xDayFreeTrial" | i18n : selectableProduct.trialPeriodDays }}
-        </small>
+          <small>• {{ "includeAllTeamsStarterFeatures" | i18n }}</small>
+          <small>• {{ "chooseMonthlyOrAnnualBilling" | i18n }}</small>
+          <small>• {{ "abilityToAddMoreThanNMembers" | i18n : 10 }}</small>
+          <small *ngIf="selectableProduct.trialPeriodDays && createOrganization">
+            • {{ "xDayFreeTrial" | i18n : selectableProduct.trialPeriodDays }}
+          </small>
+        </ng-container>
+        <ng-template #fullFeatureList>
+          <small *ngIf="selectableProduct.product == productTypes.Free"
+            >• {{ "limitedUsers" | i18n : selectableProduct.PasswordManager.maxSeats }}</small
+          >
+          <small
+            *ngIf="
+              selectableProduct.product != productTypes.Free &&
+              selectableProduct.product != productTypes.TeamsStarter &&
+              selectableProduct.PasswordManager.maxSeats
+            "
+            >•
+            {{ "addShareLimitedUsers" | i18n : selectableProduct.PasswordManager.maxSeats }}</small
+          >
+          <small *ngIf="!selectableProduct.PasswordManager.maxSeats"
+            >• {{ "addShareUnlimitedUsers" | i18n }}</small
+          >
+          <small *ngIf="selectableProduct.PasswordManager.maxCollections"
+            >•
+            {{
+              "limitedCollections" | i18n : selectableProduct.PasswordManager.maxCollections
+            }}</small
+          >
+          <small *ngIf="selectableProduct.PasswordManager.maxAdditionalSeats"
+            >•
+            {{
+              "addShareLimitedUsers" | i18n : selectableProduct.PasswordManager.maxAdditionalSeats
+            }}</small
+          >
+          <small *ngIf="!selectableProduct.PasswordManager.maxCollections"
+            >• {{ "createUnlimitedCollections" | i18n }}</small
+          >
+          <small *ngIf="selectableProduct.PasswordManager.baseStorageGb"
+            >•
+            {{
+              "gbEncryptedFileStorage"
+                | i18n : selectableProduct.PasswordManager.baseStorageGb + "GB"
+            }}</small
+          >
+          <small *ngIf="selectableProduct.hasGroups"
+            >• {{ "controlAccessWithGroups" | i18n }}</small
+          >
+          <small *ngIf="selectableProduct.hasApi">• {{ "trackAuditLogs" | i18n }}</small>
+          <small *ngIf="selectableProduct.hasDirectory"
+            >• {{ "syncUsersFromDirectory" | i18n }}</small
+          >
+          <small *ngIf="selectableProduct.hasSelfHost"
+            >• {{ "onPremHostingOptional" | i18n }}</small
+          >
+          <small *ngIf="selectableProduct.usersGetPremium">• {{ "usersGetPremium" | i18n }}</small>
+          <small *ngIf="selectableProduct.product != productTypes.Free"
+            >• {{ "priorityCustomerSupport" | i18n }}</small
+          >
+          <small *ngIf="selectableProduct.trialPeriodDays && createOrganization"
+            >•
+            {{ "xDayFreeTrial" | i18n : selectableProduct.trialPeriodDays }}
+          </small>
+        </ng-template>
       </ng-template>
       <span *ngIf="selectableProduct.product != productTypes.Free">
         <ng-container *ngIf="selectableProduct.PasswordManager.basePrice && !acceptingSponsorship">
-          {{ selectableProduct.PasswordManager.basePrice / 12 | currency : "$" }} /{{
-            "month" | i18n
-          }},
+          {{
+            (selectableProduct.isAnnual
+              ? selectableProduct.PasswordManager.basePrice / 12
+              : selectableProduct.PasswordManager.basePrice
+            ) | currency : "$"
+          }}
+          /{{ "month" | i18n }},
           {{ "includesXUsers" | i18n : selectableProduct.PasswordManager.baseSeats }}
           <ng-container *ngIf="selectableProduct.PasswordManager.hasAdditionalSeatsOption">
             {{ ("additionalUsers" | i18n).toLowerCase() }}
-            {{ selectableProduct.PasswordManager.seatPrice / 12 | currency : "$" }} /{{
-              "month" | i18n
+            {{
+              (selectableProduct.isAnnual
+                ? selectableProduct.PasswordManager.seatPrice / 12
+                : selectableProduct.PasswordManager.seatPrice
+              ) | currency : "$"
             }}
+            /{{ "month" | i18n }}
           </ng-container>
         </ng-container>
       </span>
@@ -137,7 +168,13 @@
         "
       >
         {{
-          "costPerUser" | i18n : (selectableProduct.PasswordManager.seatPrice / 12 | currency : "$")
+          "costPerUser"
+            | i18n
+              : ((selectableProduct.isAnnual
+                  ? selectableProduct.PasswordManager.seatPrice / 12
+                  : selectableProduct.PasswordManager.seatPrice
+                )
+                  | currency : "$")
         }}
         /{{ "month" | i18n }}
       </span>
@@ -249,7 +286,13 @@
           {{ "annually" | i18n }}
           <small *ngIf="selectablePlan.PasswordManager.basePrice">
             {{ "basePrice" | i18n }}:
-            {{ selectablePlan.PasswordManager.basePrice / 12 | currency : "$" }} &times; 12
+            {{
+              (selectablePlan.isAnnual
+                ? selectablePlan.PasswordManager.basePrice / 12
+                : selectablePlan.PasswordManager.basePrice
+              ) | currency : "$"
+            }}
+            &times; 12
             {{ "monthAbbr" | i18n }}
             =
             <ng-container *ngIf="acceptingSponsorship; else notAcceptingSponsorship">
@@ -269,8 +312,13 @@
             >
             <span *ngIf="!selectablePlan.PasswordManager.baseSeats">{{ "users" | i18n }}:</span>
             {{ formGroup.controls["additionalSeats"].value || 0 }} &times;
-            {{ selectablePlan.PasswordManager.seatPrice / 12 | currency : "$" }} &times; 12
-            {{ "monthAbbr" | i18n }} =
+            {{
+              (selectablePlan.isAnnual
+                ? selectablePlan.PasswordManager.seatPrice / 12
+                : selectablePlan.PasswordManager.seatPrice
+              ) | currency : "$"
+            }}
+            &times; 12 {{ "monthAbbr" | i18n }} =
             {{
               passwordManagerSeatTotal(selectablePlan, formGroup.value.additionalSeats)
                 | currency : "$"
@@ -280,7 +328,12 @@
           <small *ngIf="selectablePlan.PasswordManager.hasAdditionalStorageOption">
             {{ "additionalStorageGb" | i18n }}:
             {{ formGroup.controls["additionalStorage"].value || 0 }} &times;
-            {{ selectablePlan.PasswordManager.additionalStoragePricePerGb / 12 | currency : "$" }}
+            {{
+              (selectablePlan.isAnnual
+                ? selectablePlan.PasswordManager.additionalStoragePricePerGb / 12
+                : selectablePlan.PasswordManager.additionalStoragePricePerGb
+              ) | currency : "$"
+            }}
             &times; 12 {{ "monthAbbr" | i18n }} =
             {{ additionalStorageTotal(selectablePlan) | currency : "$" }} /{{ "year" | i18n }}
           </small>
@@ -339,7 +392,10 @@
     <small class="text-muted font-italic mb-3 d-block">
       {{ paymentDesc }}
     </small>
-    <app-payment *ngIf="createOrganization" [hideCredit]="true"></app-payment>
+    <app-payment
+      *ngIf="createOrganization || upgradeRequiresPaymentMethod"
+      [hideCredit]="true"
+    ></app-payment>
     <app-tax-info (onCountryChanged)="changedCountry()"></app-tax-info>
     <div id="price" class="my-4">
       <div class="text-muted text-sm">

@@ -14,12 +14,12 @@ import { KeyConnectorService } from "@bitwarden/common/auth/abstractions/key-con
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
 import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
 import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
-import { ForceResetPasswordReason } from "@bitwarden/common/auth/models/domain/force-reset-password-reason";
+import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/force-set-password-reason";
 import {
-  PasswordLogInCredentials,
-  SsoLogInCredentials,
-  UserApiLogInCredentials,
-} from "@bitwarden/common/auth/models/domain/log-in-credentials";
+  PasswordLoginCredentials,
+  SsoLoginCredentials,
+  UserApiLoginCredentials,
+} from "@bitwarden/common/auth/models/domain/login-credentials";
 import { TokenTwoFactorRequest } from "@bitwarden/common/auth/models/request/identity-token/token-two-factor.request";
 import { PasswordRequest } from "@bitwarden/common/auth/models/request/password.request";
 import { TwoFactorEmailRequest } from "@bitwarden/common/auth/models/request/two-factor-email.request";
@@ -179,7 +179,7 @@ export class LoginCommand {
         }
         try {
           response = await this.authService.logIn(
-            new UserApiLogInCredentials(clientId, clientSecret)
+            new UserApiLoginCredentials(clientId, clientSecret)
           );
         } catch (e) {
           // handle API key login failures
@@ -196,7 +196,7 @@ export class LoginCommand {
         }
       } else if (ssoCode != null && ssoCodeVerifier != null) {
         response = await this.authService.logIn(
-          new SsoLogInCredentials(
+          new SsoLoginCredentials(
             ssoCode,
             ssoCodeVerifier,
             this.ssoRedirectUri,
@@ -206,7 +206,7 @@ export class LoginCommand {
         );
       } else {
         response = await this.authService.logIn(
-          new PasswordLogInCredentials(email, password, null, twoFactor)
+          new PasswordLoginCredentials(email, password, null, twoFactor)
         );
       }
       if (response.requiresEncryptionKeyMigration) {
@@ -215,7 +215,7 @@ export class LoginCommand {
         );
       }
       if (response.captchaSiteKey) {
-        const credentials = new PasswordLogInCredentials(email, password);
+        const credentials = new PasswordLoginCredentials(email, password);
         const handledResponse = await this.handleCaptchaRequired(twoFactor, credentials);
 
         // Error Response
@@ -326,13 +326,13 @@ export class LoginCommand {
 
       // Handle updating passwords if NOT using an API Key for authentication
       if (
-        response.forcePasswordReset != ForceResetPasswordReason.None &&
+        response.forcePasswordReset != ForceSetPasswordReason.None &&
         clientId == null &&
         clientSecret == null
       ) {
-        if (response.forcePasswordReset === ForceResetPasswordReason.AdminForcePasswordReset) {
+        if (response.forcePasswordReset === ForceSetPasswordReason.AdminForcePasswordReset) {
           return await this.updateTempPassword();
-        } else if (response.forcePasswordReset === ForceResetPasswordReason.WeakMasterPassword) {
+        } else if (response.forcePasswordReset === ForceSetPasswordReason.WeakMasterPassword) {
           return await this.updateWeakPassword(password);
         }
       }
@@ -586,7 +586,7 @@ export class LoginCommand {
 
   private async handleCaptchaRequired(
     twoFactorRequest: TokenTwoFactorRequest,
-    credentials: PasswordLogInCredentials = null
+    credentials: PasswordLoginCredentials = null
   ): Promise<AuthResult | Response> {
     const badCaptcha = Response.badRequest(
       "Your authentication request has been flagged and will require user interaction to proceed.\n" +

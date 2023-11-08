@@ -6,6 +6,7 @@ export enum FeatureFlag {
   PasswordlessLogin = "passwordless-login",
   AutofillV2 = "autofill-v2",
   BrowserFilelessImport = "browser-fileless-import",
+  ItemShare = "item-share",
   FlexibleCollections = "flexible-collections",
   BulkCollectionAccess = "bulk-collection-access",
 }

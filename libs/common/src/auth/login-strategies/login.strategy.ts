@@ -18,13 +18,13 @@ import { TokenService } from "../abstractions/token.service";
 import { TwoFactorService } from "../abstractions/two-factor.service";
 import { TwoFactorProviderType } from "../enums/two-factor-provider-type";
 import { AuthResult } from "../models/domain/auth-result";
-import { ForceResetPasswordReason } from "../models/domain/force-reset-password-reason";
+import { ForceSetPasswordReason } from "../models/domain/force-set-password-reason";
 import {
-  PasswordlessLogInCredentials,
-  PasswordLogInCredentials,
-  SsoLogInCredentials,
-  UserApiLogInCredentials,
-} from "../models/domain/log-in-credentials";
+  AuthRequestLoginCredentials,
+  PasswordLoginCredentials,
+  SsoLoginCredentials,
+  UserApiLoginCredentials,
+} from "../models/domain/login-credentials";
 import { DeviceRequest } from "../models/request/identity-token/device.request";
 import { PasswordTokenRequest } from "../models/request/identity-token/password-token.request";
 import { SsoTokenRequest } from "../models/request/identity-token/sso-token.request";
@@ -36,7 +36,7 @@ import { IdentityTwoFactorResponse } from "../models/response/identity-two-facto
 
 type IdentityResponse = IdentityTokenResponse | IdentityTwoFactorResponse | IdentityCaptchaResponse;
 
-export abstract class LogInStrategy {
+export abstract class LoginStrategy {
   protected abstract tokenRequest: UserApiTokenRequest | PasswordTokenRequest | SsoTokenRequest;
   protected captchaBypassToken: string = null;
 
@@ -54,10 +54,10 @@ export abstract class LogInStrategy {
 
   abstract logIn(
     credentials:
-      | UserApiLogInCredentials
-      | PasswordLogInCredentials
-      | SsoLogInCredentials
-      | PasswordlessLogInCredentials
+      | UserApiLoginCredentials
+      | PasswordLoginCredentials
+      | SsoLoginCredentials
+      | AuthRequestLoginCredentials
   ): Promise<AuthResult>;
 
   async logInTwoFactor(
@@ -166,7 +166,7 @@ export abstract class LogInStrategy {
 
     // Convert boolean to enum
     if (response.forcePasswordReset) {
-      result.forcePasswordReset = ForceResetPasswordReason.AdminForcePasswordReset;
+      result.forcePasswordReset = ForceSetPasswordReason.AdminForcePasswordReset;
     }
 
     // Must come before setting keys, user key needs email to update additional keys

@@ -5,8 +5,8 @@ import { first } from "rxjs/operators";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
-import { ForceResetPasswordReason } from "@bitwarden/common/auth/models/domain/force-reset-password-reason";
-import { SsoLogInCredentials } from "@bitwarden/common/auth/models/domain/log-in-credentials";
+import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/force-set-password-reason";
+import { SsoLoginCredentials } from "@bitwarden/common/auth/models/domain/login-credentials";
 import { TrustedDeviceUserDecryptionOption } from "@bitwarden/common/auth/models/domain/user-decryption-options/trusted-device-user-decryption-option";
 import { SsoPreValidateResponse } from "@bitwarden/common/auth/models/response/sso-pre-validate.response";
 import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
@@ -182,7 +182,7 @@ export class SsoComponent {
   private async logIn(code: string, codeVerifier: string, orgSsoIdentifier: string): Promise<void> {
     this.loggingIn = true;
     try {
-      const credentials = new SsoLogInCredentials(
+      const credentials = new SsoLoginCredentials(
         code,
         codeVerifier,
         this.redirectUri,
@@ -201,11 +201,18 @@ export class SsoComponent {
       // Everything after the 2FA check is considered a successful login
       // Just have to figure out where to send the user
 
-      // Save off the OrgSsoIdentifier for use in the TDE flows
+      // Save off the OrgSsoIdentifier for use in the TDE flows (or elsewhere)
       // - TDE login decryption options component
       // - Browser SSO on extension open
       // Note: you cannot set this in state before 2FA b/c there won't be an account in state.
       await this.stateService.setUserSsoOrganizationIdentifier(orgSsoIdentifier);
+
+      // Users enrolled in admin acct recovery can be forced to set a new password after
+      // having the admin set a temp password for them (affects TDE & standard users)
+      if (authResult.forcePasswordReset == ForceSetPasswordReason.AdminForcePasswordReset) {
+        // Weak password is not a valid scenario here b/c we cannot have evaluated a MP yet
+        return await this.handleForcePasswordReset(orgSsoIdentifier);
+      }
 
       const tdeEnabled = await this.isTrustedDeviceEncEnabled(
         acctDecryptionOpts.trustedDeviceOption
@@ -229,12 +236,6 @@ export class SsoComponent {
       if (requireSetPassword || authResult.resetMasterPassword) {
         // Change implies going no password -> password in this case
         return await this.handleChangePasswordRequired(orgSsoIdentifier);
-      }
-
-      // Users enrolled in admin acct recovery can be forced to set a new password after
-      // having the admin set a temp password for them
-      if (authResult.forcePasswordReset == ForceResetPasswordReason.AdminForcePasswordReset) {
-        return await this.handleForcePasswordReset(orgSsoIdentifier);
       }
 
       // Standard SSO login success case
@@ -277,12 +278,12 @@ export class SsoComponent {
       !acctDecryptionOpts.hasMasterPassword &&
       acctDecryptionOpts.trustedDeviceOption.hasManageResetPasswordPermission
     ) {
-      // Change implies going no password -> password in this case
-      return await this.handleChangePasswordRequired(orgIdentifier);
-    }
-
-    if (authResult.forcePasswordReset !== ForceResetPasswordReason.None) {
-      return await this.handleForcePasswordReset(orgIdentifier);
+      // Set flag so that auth guard can redirect to set password screen after decryption (trusted or untrusted device)
+      // Note: we cannot directly navigate in this scenario as we are in a pre-decryption state, and
+      // if you try to set a new MP before decrypting, you will invalidate the user's data by making a new user key.
+      await this.stateService.setForceSetPasswordReason(
+        ForceSetPasswordReason.TdeUserWithoutPasswordHasPasswordResetPermission
+      );
     }
 
     if (this.onSuccessfulLoginTde != null) {

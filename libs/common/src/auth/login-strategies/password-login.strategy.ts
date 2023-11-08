@@ -14,17 +14,17 @@ import { AuthService } from "../abstractions/auth.service";
 import { TokenService } from "../abstractions/token.service";
 import { TwoFactorService } from "../abstractions/two-factor.service";
 import { AuthResult } from "../models/domain/auth-result";
-import { ForceResetPasswordReason } from "../models/domain/force-reset-password-reason";
-import { PasswordLogInCredentials } from "../models/domain/log-in-credentials";
+import { ForceSetPasswordReason } from "../models/domain/force-set-password-reason";
+import { PasswordLoginCredentials } from "../models/domain/login-credentials";
 import { PasswordTokenRequest } from "../models/request/identity-token/password-token.request";
 import { TokenTwoFactorRequest } from "../models/request/identity-token/token-two-factor.request";
 import { IdentityCaptchaResponse } from "../models/response/identity-captcha.response";
 import { IdentityTokenResponse } from "../models/response/identity-token.response";
 import { IdentityTwoFactorResponse } from "../models/response/identity-two-factor.response";
 
-import { LogInStrategy } from "./login.strategy";
+import { LoginStrategy } from "./login.strategy";
 
-export class PasswordLogInStrategy extends LogInStrategy {
+export class PasswordLoginStrategy extends LoginStrategy {
   get email() {
     return this.tokenRequest.email;
   }
@@ -42,7 +42,7 @@ export class PasswordLogInStrategy extends LogInStrategy {
    * Options to track if the user needs to update their password due to a password that does not meet an organization's
    * master password policy.
    */
-  private forcePasswordResetReason: ForceResetPasswordReason = ForceResetPasswordReason.None;
+  private forcePasswordResetReason: ForceSetPasswordReason = ForceSetPasswordReason.None;
 
   constructor(
     cryptoService: CryptoService,
@@ -82,16 +82,16 @@ export class PasswordLogInStrategy extends LogInStrategy {
     if (
       !result.requiresTwoFactor &&
       !result.requiresCaptcha &&
-      this.forcePasswordResetReason != ForceResetPasswordReason.None
+      this.forcePasswordResetReason != ForceSetPasswordReason.None
     ) {
-      await this.stateService.setForcePasswordResetReason(this.forcePasswordResetReason);
+      await this.stateService.setForceSetPasswordReason(this.forcePasswordResetReason);
       result.forcePasswordReset = this.forcePasswordResetReason;
     }
 
     return result;
   }
 
-  override async logIn(credentials: PasswordLogInCredentials) {
+  override async logIn(credentials: PasswordLoginCredentials) {
     const { email, masterPassword, captchaToken, twoFactor } = credentials;
 
     this.masterKey = await this.authService.makePreloginKey(masterPassword, email);
@@ -128,13 +128,13 @@ export class PasswordLogInStrategy extends LogInStrategy {
       if (!meetsRequirements) {
         if (authResult.requiresCaptcha || authResult.requiresTwoFactor) {
           // Save the flag to this strategy for later use as the master password is about to pass out of scope
-          this.forcePasswordResetReason = ForceResetPasswordReason.WeakMasterPassword;
+          this.forcePasswordResetReason = ForceSetPasswordReason.WeakMasterPassword;
         } else {
           // Authentication was successful, save the force update password options with the state service
-          await this.stateService.setForcePasswordResetReason(
-            ForceResetPasswordReason.WeakMasterPassword
+          await this.stateService.setForceSetPasswordReason(
+            ForceSetPasswordReason.WeakMasterPassword
           );
-          authResult.forcePasswordReset = ForceResetPasswordReason.WeakMasterPassword;
+          authResult.forcePasswordReset = ForceSetPasswordReason.WeakMasterPassword;
         }
       }
     }
@@ -180,7 +180,7 @@ export class PasswordLogInStrategy extends LogInStrategy {
   }
 
   private evaluateMasterPassword(
-    { masterPassword, email }: PasswordLogInCredentials,
+    { masterPassword, email }: PasswordLoginCredentials,
     options: MasterPasswordPolicyOptions
   ): boolean {
     const passwordStrength = this.passwordStrengthService.getPasswordStrength(

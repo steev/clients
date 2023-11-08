@@ -1,3 +1,4 @@
+import { BrowserApi } from "../browser/browser-api";
 import AbstractChromeStorageService from "../services/abstractions/abstract-chrome-storage-api.service";
 
 import { portName } from "./port-name";
@@ -8,7 +9,7 @@ export class BackgroundChromeStorageService extends AbstractChromeStorageService
   constructor(chromeStorageArea: chrome.storage.StorageArea) {
     super(chromeStorageArea);
 
-    chrome.runtime.onConnect.addListener((port) => {
+    BrowserApi.addListener(chrome.runtime.onConnect, (port) => {
       if (port.name !== portName(chromeStorageArea)) {
         return;
       }

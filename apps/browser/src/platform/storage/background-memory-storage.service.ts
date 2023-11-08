@@ -1,5 +1,7 @@
 import { MemoryStorageService } from "@bitwarden/common/platform/services/memory-storage.service";
 
+import { BrowserApi } from "../browser/browser-api";
+
 import { MemoryStoragePortMessage } from "./port-messages";
 import { portName } from "./port-name";
 
@@ -9,7 +11,7 @@ export class BackgroundMemoryStorageService extends MemoryStorageService {
   constructor() {
     super();
 
-    chrome.runtime.onConnect.addListener((port) => {
+    BrowserApi.addListener(chrome.runtime.onConnect, (port) => {
       if (port.name !== portName(chrome.storage.session)) {
         return;
       }
@@ -22,7 +24,7 @@ export class BackgroundMemoryStorageService extends MemoryStorageService {
       // Initialize the new memory storage service with existing data
       this.sendMessage({
         action: "initialization",
-        data: Array.from(this.store.entries()),
+        data: this.store.keys(),
       });
     });
     this.updates$.subscribe((update) => {

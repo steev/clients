@@ -1,7 +1,7 @@
-import { Component, NgZone, OnDestroy, OnInit } from "@angular/core";
+import { Component, NgZone, OnInit } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { Subject, takeUntil } from "rxjs";
+import { takeUntil } from "rxjs";
 import { first } from "rxjs/operators";
 
 import { LoginComponent as BaseLoginComponent } from "@bitwarden/angular/auth/components/login.component";
@@ -15,6 +15,7 @@ import { PolicyResponse } from "@bitwarden/common/admin-console/models/response/
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { DevicesApiServiceAbstraction } from "@bitwarden/common/auth/abstractions/devices-api.service.abstraction";
 import { LoginService } from "@bitwarden/common/auth/abstractions/login.service";
+import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
 import { ListResponse } from "@bitwarden/common/models/response/list.response";
 import { AppIdService } from "@bitwarden/common/platform/abstractions/app-id.service";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
@@ -33,13 +34,12 @@ import { RouterService, StateService } from "../../core";
   selector: "app-login",
   templateUrl: "login.component.html",
 })
-export class LoginComponent extends BaseLoginComponent implements OnInit, OnDestroy {
+// eslint-disable-next-line rxjs-angular/prefer-takeuntil
+export class LoginComponent extends BaseLoginComponent implements OnInit {
   showResetPasswordAutoEnrollWarning = false;
   enforcedPasswordPolicyOptions: MasterPasswordPolicyOptions;
   policies: ListResponse<PolicyResponse>;
   showPasswordless = false;
-
-  private destroy$ = new Subject<void>();
 
   constructor(
     devicesApiService: DevicesApiServiceAbstraction,
@@ -145,11 +145,6 @@ export class LoginComponent extends BaseLoginComponent implements OnInit, OnDest
     }
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   async goAfterLogIn() {
     const masterPassword = this.formGroup.value.masterPassword;
 
@@ -209,5 +204,13 @@ export class LoginComponent extends BaseLoginComponent implements OnInit, OnDest
       await this.stateService.setRememberedEmail(null);
     }
     await super.submit(false);
+  }
+
+  protected override handleMigrateEncryptionKey(result: AuthResult): boolean {
+    if (!result.requiresEncryptionKeyMigration) {
+      return false;
+    }
+    this.router.navigate(["migrate-legacy-encryption"]);
+    return true;
   }
 }

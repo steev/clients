@@ -12,6 +12,7 @@ import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folde
 import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
 import { CipherView } from "@bitwarden/common/vault/models/view/cipher.view";
 
+import { openUnlockPopout } from "../../auth/popup/utils/auth-popout-window";
 import AddUnlockVaultQueueMessage from "../../background/models/add-unlock-vault-queue-message";
 import AddChangePasswordQueueMessage from "../../background/models/addChangePasswordQueueMessage";
 import AddLoginQueueMessage from "../../background/models/addLoginQueueMessage";
@@ -21,6 +22,7 @@ import LockedVaultPendingNotificationsItem from "../../background/models/lockedV
 import { NotificationQueueMessageType } from "../../background/models/notificationQueueMessageType";
 import { BrowserApi } from "../../platform/browser/browser-api";
 import { BrowserStateService } from "../../platform/services/abstractions/browser-state.service";
+import { openAddEditVaultItemPopout } from "../../vault/popup/utils/vault-popout-window";
 import { AutofillService } from "../services/abstractions/autofill.service";
 
 export default class NotificationBackground {
@@ -47,8 +49,8 @@ export default class NotificationBackground {
 
     BrowserApi.messageListener(
       "notification.background",
-      async (msg: any, sender: chrome.runtime.MessageSender) => {
-        await this.processMessage(msg, sender);
+      (msg: any, sender: chrome.runtime.MessageSender) => {
+        this.processMessage(msg, sender);
       }
     );
 
@@ -96,7 +98,7 @@ export default class NotificationBackground {
             "addToLockedVaultPendingNotifications",
             retryMessage
           );
-          await BrowserApi.tabSendMessageData(sender.tab, "promptForLogin");
+          await openUnlockPopout(sender.tab);
           return;
         }
         await this.saveOrUpdateCredentials(sender.tab, msg.edit, msg.folder);
@@ -118,8 +120,11 @@ export default class NotificationBackground {
             break;
         }
         break;
-      case "promptForLogin":
+      case "bgUnlockPopoutOpened":
         await this.unlockVault(sender.tab);
+        break;
+      case "bgReopenUnlockPopout":
+        await openUnlockPopout(sender.tab);
         break;
       default:
         break;
@@ -447,9 +452,7 @@ export default class NotificationBackground {
       collectionIds: cipherView.collectionIds,
     });
 
-    await BrowserApi.tabSendMessageData(senderTab, "openAddEditCipher", {
-      cipherId: cipherView.id,
-    });
+    await openAddEditVaultItemPopout(senderTab, { cipherId: cipherView.id });
   }
 
   private async folderExists(folderId: string) {
@@ -464,7 +467,7 @@ export default class NotificationBackground {
   private async getDecryptedCipherById(cipherId: string) {
     const cipher = await this.cipherService.get(cipherId);
     if (cipher != null && cipher.type === CipherType.Login) {
-      return await cipher.decrypt();
+      return await cipher.decrypt(await this.cipherService.getKeyForCipherKeyDecryption(cipher));
     }
     return null;
   }

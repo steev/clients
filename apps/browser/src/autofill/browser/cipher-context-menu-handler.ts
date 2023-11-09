@@ -1,5 +1,4 @@
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
-import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { StateFactory } from "@bitwarden/common/platform/factories/state-factory";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
@@ -12,7 +11,6 @@ import {
   authServiceFactory,
   AuthServiceInitOptions,
 } from "../../auth/background/service-factories/auth-service.factory";
-import { userVerificationServiceFactory } from "../../auth/background/service-factories/user-verification-service.factory";
 import { Account } from "../../models/account";
 import { CachedServices } from "../../platform/background/service-factories/factory-options";
 import { BrowserApi } from "../../platform/browser/browser-api";
@@ -20,6 +18,7 @@ import {
   cipherServiceFactory,
   CipherServiceInitOptions,
 } from "../../vault/background/service_factories/cipher-service.factory";
+import { AutofillCipherTypeId } from "../types";
 
 import { MainContextMenuHandler } from "./main-context-menu-handler";
 
@@ -39,8 +38,7 @@ export class CipherContextMenuHandler {
   constructor(
     private mainContextMenuHandler: MainContextMenuHandler,
     private authService: AuthService,
-    private cipherService: CipherService,
-    private userVerificationService: UserVerificationService
+    private cipherService: CipherService
   ) {}
 
   static async create(cachedServices: CachedServices) {
@@ -69,9 +67,6 @@ export class CipherContextMenuHandler {
         clipboardWriteCallback: NOT_IMPLEMENTED,
         win: self,
       },
-      stateMigrationServiceOptions: {
-        stateFactory: stateFactory,
-      },
       stateServiceOptions: {
         stateFactory: stateFactory,
       },
@@ -79,8 +74,7 @@ export class CipherContextMenuHandler {
     return new CipherContextMenuHandler(
       await MainContextMenuHandler.mv3Create(cachedServices),
       await authServiceFactory(cachedServices, serviceOptions),
-      await cipherServiceFactory(cachedServices, serviceOptions),
-      await userVerificationServiceFactory(cachedServices, serviceOptions)
+      await cipherServiceFactory(cachedServices, serviceOptions)
     );
   }
 
@@ -166,33 +160,67 @@ export class CipherContextMenuHandler {
       return;
     }
 
-    const ciphers = await this.cipherService.getAllDecryptedForUrl(url);
+    const ciphers = await this.cipherService.getAllDecryptedForUrl(url, [
+      CipherType.Card,
+      CipherType.Identity,
+    ]);
     ciphers.sort((a, b) => this.cipherService.sortCiphersByLastUsedThenName(a, b));
 
-    if (ciphers.length === 0) {
-      await this.mainContextMenuHandler.noLogins(url);
-      return;
+    const groupedCiphers: Record<AutofillCipherTypeId, CipherView[]> = ciphers.reduce(
+      (ciphersByType, cipher) => {
+        if (!cipher?.type) {
+          return ciphersByType;
+        }
+
+        const existingCiphersOfType = ciphersByType[cipher.type as AutofillCipherTypeId] || [];
+
+        return {
+          ...ciphersByType,
+          [cipher.type]: [...existingCiphersOfType, cipher],
+        };
+      },
+      {
+        [CipherType.Login]: [],
+        [CipherType.Card]: [],
+        [CipherType.Identity]: [],
+      }
+    );
+
+    if (groupedCiphers[CipherType.Login].length === 0) {
+      await this.mainContextMenuHandler.noLogins();
+    }
+
+    if (groupedCiphers[CipherType.Identity].length === 0) {
+      await this.mainContextMenuHandler.noIdentities();
+    }
+
+    if (groupedCiphers[CipherType.Card].length === 0) {
+      await this.mainContextMenuHandler.noCards();
     }
 
     for (const cipher of ciphers) {
-      await this.updateForCipher(url, cipher);
+      await this.updateForCipher(cipher);
     }
   }
 
-  private async updateForCipher(url: string, cipher: CipherView) {
+  private async updateForCipher(cipher: CipherView) {
     if (
       cipher == null ||
-      cipher.type !== CipherType.Login ||
-      (await this.userVerificationService.hasMasterPasswordAndMasterKeyHash())
+      !new Set([CipherType.Login, CipherType.Card, CipherType.Identity]).has(cipher.type)
     ) {
       return;
     }
 
     let title = cipher.name;
-    if (!Utils.isNullOrEmpty(title)) {
+
+    if (cipher.type === CipherType.Login && !Utils.isNullOrEmpty(title) && cipher.login?.username) {
       title += ` (${cipher.login.username})`;
     }
 
-    await this.mainContextMenuHandler.loadOptions(title, cipher.id, url, cipher);
+    if (cipher.type === CipherType.Card && cipher.card?.subTitle) {
+      title += ` ${cipher.card.subTitle}`;
+    }
+
+    await this.mainContextMenuHandler.loadOptions(title, cipher.id, cipher);
   }
 }

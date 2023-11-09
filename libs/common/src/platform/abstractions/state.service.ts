@@ -7,13 +7,15 @@ import { ProviderData } from "../../admin-console/models/data/provider.data";
 import { Policy } from "../../admin-console/models/domain/policy";
 import { AdminAuthRequestStorable } from "../../auth/models/domain/admin-auth-req-storable";
 import { EnvironmentUrls } from "../../auth/models/domain/environment-urls";
-import { ForceResetPasswordReason } from "../../auth/models/domain/force-reset-password-reason";
+import { ForceSetPasswordReason } from "../../auth/models/domain/force-set-password-reason";
 import { KdfConfig } from "../../auth/models/domain/kdf-config";
 import { BiometricKey } from "../../auth/types/biometric-key";
 import { KdfType, ThemeType, UriMatchType } from "../../enums";
 import { EventData } from "../../models/data/event.data";
 import { WindowState } from "../../models/domain/window-state";
-import { GeneratedPasswordHistory } from "../../tools/generator/password";
+import { GeneratorOptions } from "../../tools/generator/generator-options";
+import { GeneratedPasswordHistory, PasswordGeneratorOptions } from "../../tools/generator/password";
+import { UsernameGeneratorOptions } from "../../tools/generator/username";
 import { SendData } from "../../tools/send/models/data/send.data";
 import { SendView } from "../../tools/send/models/view/send.view";
 import { CipherData } from "../../vault/models/data/cipher.data";
@@ -389,9 +391,9 @@ export abstract class StateService<T extends Account = Account> {
   setEverHadUserKey: (value: boolean, options?: StorageOptions) => Promise<void>;
   getEverBeenUnlocked: (options?: StorageOptions) => Promise<boolean>;
   setEverBeenUnlocked: (value: boolean, options?: StorageOptions) => Promise<void>;
-  getForcePasswordResetReason: (options?: StorageOptions) => Promise<ForceResetPasswordReason>;
-  setForcePasswordResetReason: (
-    value: ForceResetPasswordReason,
+  getForceSetPasswordReason: (options?: StorageOptions) => Promise<ForceSetPasswordReason>;
+  setForceSetPasswordReason: (
+    value: ForceSetPasswordReason,
     options?: StorageOptions
   ) => Promise<void>;
   getInstalledVersion: (options?: StorageOptions) => Promise<string>;
@@ -439,12 +441,18 @@ export abstract class StateService<T extends Account = Account> {
     value: { [id: string]: OrganizationData },
     options?: StorageOptions
   ) => Promise<void>;
-  getPasswordGenerationOptions: (options?: StorageOptions) => Promise<any>;
-  setPasswordGenerationOptions: (value: any, options?: StorageOptions) => Promise<void>;
-  getUsernameGenerationOptions: (options?: StorageOptions) => Promise<any>;
-  setUsernameGenerationOptions: (value: any, options?: StorageOptions) => Promise<void>;
-  getGeneratorOptions: (options?: StorageOptions) => Promise<any>;
-  setGeneratorOptions: (value: any, options?: StorageOptions) => Promise<void>;
+  getPasswordGenerationOptions: (options?: StorageOptions) => Promise<PasswordGeneratorOptions>;
+  setPasswordGenerationOptions: (
+    value: PasswordGeneratorOptions,
+    options?: StorageOptions
+  ) => Promise<void>;
+  getUsernameGenerationOptions: (options?: StorageOptions) => Promise<UsernameGeneratorOptions>;
+  setUsernameGenerationOptions: (
+    value: UsernameGeneratorOptions,
+    options?: StorageOptions
+  ) => Promise<void>;
+  getGeneratorOptions: (options?: StorageOptions) => Promise<GeneratorOptions>;
+  setGeneratorOptions: (value: GeneratorOptions, options?: StorageOptions) => Promise<void>;
   /**
    * Gets the user's Pin, encrypted by the user key
    */
@@ -495,8 +503,6 @@ export abstract class StateService<T extends Account = Account> {
   setVaultTimeoutAction: (value: string, options?: StorageOptions) => Promise<void>;
   getApproveLoginRequests: (options?: StorageOptions) => Promise<boolean>;
   setApproveLoginRequests: (value: boolean, options?: StorageOptions) => Promise<void>;
-  getStateVersion: () => Promise<number>;
-  setStateVersion: (value: number) => Promise<void>;
   getWindow: () => Promise<WindowState>;
   setWindow: (value: WindowState) => Promise<void>;
   /**

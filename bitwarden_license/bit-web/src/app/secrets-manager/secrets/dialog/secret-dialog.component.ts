@@ -29,6 +29,7 @@ export interface SecretOperation {
   operation: OperationType;
   projectId?: string;
   secretId?: string;
+  organizationEnabled: boolean;
 }
 
 @Component({
@@ -40,7 +41,7 @@ export class SecretDialogComponent implements OnInit {
       validators: [Validators.required, Validators.maxLength(500), BitValidators.trimValidator],
       updateOn: "submit",
     }),
-    value: new FormControl("", [Validators.required, Validators.maxLength(3500)]),
+    value: new FormControl("", [Validators.required, Validators.maxLength(25000)]),
     notes: new FormControl("", {
       validators: [Validators.maxLength(7000), BitValidators.trimValidator],
       updateOn: "submit",
@@ -163,6 +164,11 @@ export class SecretDialogComponent implements OnInit {
   }
 
   submit = async () => {
+    if (!this.data.organizationEnabled) {
+      this.platformUtilsService.showToast("error", null, this.i18nService.t("secretsCannotCreate"));
+      return;
+    }
+
     this.formGroup.markAllAsTouched();
 
     if (this.formGroup.invalid) {

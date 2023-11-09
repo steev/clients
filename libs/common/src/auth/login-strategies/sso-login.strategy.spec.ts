@@ -21,17 +21,17 @@ import { DeviceTrustCryptoServiceAbstraction } from "../abstractions/device-trus
 import { KeyConnectorService } from "../abstractions/key-connector.service";
 import { TokenService } from "../abstractions/token.service";
 import { TwoFactorService } from "../abstractions/two-factor.service";
-import { SsoLogInCredentials } from "../models/domain/log-in-credentials";
+import { SsoLoginCredentials } from "../models/domain/login-credentials";
 import { IdentityTokenResponse } from "../models/response/identity-token.response";
 import { IUserDecryptionOptionsServerResponse } from "../models/response/user-decryption-options/user-decryption-options.response";
 
 import { identityTokenResponseFactory } from "./login.strategy.spec";
-import { SsoLogInStrategy } from "./sso-login.strategy";
+import { SsoLoginStrategy } from "./sso-login.strategy";
 
 // TODO: Add tests for new trySetUserKeyWithApprovedAdminRequestIfExists logic
 // https://bitwarden.atlassian.net/browse/PM-3339
 
-describe("SsoLogInStrategy", () => {
+describe("SsoLoginStrategy", () => {
   let cryptoService: MockProxy<CryptoService>;
   let apiService: MockProxy<ApiService>;
   let tokenService: MockProxy<TokenService>;
@@ -46,8 +46,8 @@ describe("SsoLogInStrategy", () => {
   let authRequestCryptoService: MockProxy<AuthRequestCryptoServiceAbstraction>;
   let i18nService: MockProxy<I18nService>;
 
-  let ssoLogInStrategy: SsoLogInStrategy;
-  let credentials: SsoLogInCredentials;
+  let ssoLoginStrategy: SsoLoginStrategy;
+  let credentials: SsoLoginCredentials;
 
   const deviceId = Utils.newGuid();
   const keyConnectorUrl = "KEY_CONNECTOR_URL";
@@ -76,7 +76,7 @@ describe("SsoLogInStrategy", () => {
     appIdService.getAppId.mockResolvedValue(deviceId);
     tokenService.decodeToken.mockResolvedValue({});
 
-    ssoLogInStrategy = new SsoLogInStrategy(
+    ssoLoginStrategy = new SsoLoginStrategy(
       cryptoService,
       apiService,
       tokenService,
@@ -91,13 +91,13 @@ describe("SsoLogInStrategy", () => {
       authRequestCryptoService,
       i18nService
     );
-    credentials = new SsoLogInCredentials(ssoCode, ssoCodeVerifier, ssoRedirectUrl, ssoOrgId);
+    credentials = new SsoLoginCredentials(ssoCode, ssoCodeVerifier, ssoRedirectUrl, ssoOrgId);
   });
 
   it("sends SSO information to server", async () => {
     apiService.postIdentityToken.mockResolvedValue(identityTokenResponseFactory());
 
-    await ssoLogInStrategy.logIn(credentials);
+    await ssoLoginStrategy.logIn(credentials);
 
     expect(apiService.postIdentityToken).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -120,7 +120,7 @@ describe("SsoLogInStrategy", () => {
     tokenResponse.key = null;
     apiService.postIdentityToken.mockResolvedValue(tokenResponse);
 
-    await ssoLogInStrategy.logIn(credentials);
+    await ssoLoginStrategy.logIn(credentials);
 
     expect(cryptoService.setMasterKey).not.toHaveBeenCalled();
     expect(cryptoService.setUserKey).not.toHaveBeenCalled();
@@ -133,7 +133,7 @@ describe("SsoLogInStrategy", () => {
     apiService.postIdentityToken.mockResolvedValue(tokenResponse);
 
     // Act
-    await ssoLogInStrategy.logIn(credentials);
+    await ssoLoginStrategy.logIn(credentials);
 
     // Assert
     expect(cryptoService.setMasterKeyEncryptedUserKey).toHaveBeenCalledTimes(1);
@@ -195,7 +195,7 @@ describe("SsoLogInStrategy", () => {
       const cryptoSvcSetUserKeySpy = jest.spyOn(cryptoService, "setUserKey");
 
       // Act
-      await ssoLogInStrategy.logIn(credentials);
+      await ssoLoginStrategy.logIn(credentials);
 
       // Assert
       expect(deviceTrustCryptoService.getDeviceKey).toHaveBeenCalledTimes(1);
@@ -216,7 +216,7 @@ describe("SsoLogInStrategy", () => {
       deviceTrustCryptoService.decryptUserKeyWithDeviceKey.mockResolvedValue(mockUserKey);
 
       // Act
-      await ssoLogInStrategy.logIn(credentials);
+      await ssoLoginStrategy.logIn(credentials);
 
       // Assert
       expect(cryptoService.setUserKey).not.toHaveBeenCalled();
@@ -237,7 +237,7 @@ describe("SsoLogInStrategy", () => {
         deviceTrustCryptoService.getDeviceKey.mockResolvedValue(mockDeviceKey);
 
         // Act
-        await ssoLogInStrategy.logIn(credentials);
+        await ssoLoginStrategy.logIn(credentials);
 
         // Assert
         expect(cryptoService.setUserKey).not.toHaveBeenCalled();
@@ -256,7 +256,7 @@ describe("SsoLogInStrategy", () => {
       deviceTrustCryptoService.decryptUserKeyWithDeviceKey.mockResolvedValue(null);
 
       // Act
-      await ssoLogInStrategy.logIn(credentials);
+      await ssoLoginStrategy.logIn(credentials);
 
       // Assert
       expect(cryptoService.setUserKey).not.toHaveBeenCalled();
@@ -266,11 +266,14 @@ describe("SsoLogInStrategy", () => {
   describe("Key Connector", () => {
     let tokenResponse: IdentityTokenResponse;
     beforeEach(() => {
-      tokenResponse = identityTokenResponseFactory();
+      tokenResponse = identityTokenResponseFactory(null, {
+        HasMasterPassword: false,
+        KeyConnectorOption: { KeyConnectorUrl: keyConnectorUrl },
+      });
       tokenResponse.keyConnectorUrl = keyConnectorUrl;
     });
 
-    it("gets and sets the master key if Key Connector is enabled", async () => {
+    it("gets and sets the master key if Key Connector is enabled and the user doesn't have a master password", async () => {
       const masterKey = new SymmetricCryptoKey(
         new Uint8Array(64).buffer as CsprngArray
       ) as MasterKey;
@@ -278,17 +281,17 @@ describe("SsoLogInStrategy", () => {
       apiService.postIdentityToken.mockResolvedValue(tokenResponse);
       cryptoService.getMasterKey.mockResolvedValue(masterKey);
 
-      await ssoLogInStrategy.logIn(credentials);
+      await ssoLoginStrategy.logIn(credentials);
 
       expect(keyConnectorService.setMasterKeyFromUrl).toHaveBeenCalledWith(keyConnectorUrl);
     });
 
-    it("converts new SSO user to Key Connector on first login", async () => {
+    it("converts new SSO user with no master password to Key Connector on first login", async () => {
       tokenResponse.key = null;
 
       apiService.postIdentityToken.mockResolvedValue(tokenResponse);
 
-      await ssoLogInStrategy.logIn(credentials);
+      await ssoLoginStrategy.logIn(credentials);
 
       expect(keyConnectorService.convertNewSsoUserToKeyConnector).toHaveBeenCalledWith(
         tokenResponse,
@@ -296,7 +299,7 @@ describe("SsoLogInStrategy", () => {
       );
     });
 
-    it("decrypts and sets the user key if Key Connector is enabled", async () => {
+    it("decrypts and sets the user key if Key Connector is enabled and the user doesn't have a master password", async () => {
       const userKey = new SymmetricCryptoKey(new Uint8Array(64).buffer as CsprngArray) as UserKey;
       const masterKey = new SymmetricCryptoKey(
         new Uint8Array(64).buffer as CsprngArray
@@ -306,7 +309,58 @@ describe("SsoLogInStrategy", () => {
       cryptoService.getMasterKey.mockResolvedValue(masterKey);
       cryptoService.decryptUserKeyWithMasterKey.mockResolvedValue(userKey);
 
-      await ssoLogInStrategy.logIn(credentials);
+      await ssoLoginStrategy.logIn(credentials);
+
+      expect(cryptoService.decryptUserKeyWithMasterKey).toHaveBeenCalledWith(masterKey);
+      expect(cryptoService.setUserKey).toHaveBeenCalledWith(userKey);
+    });
+  });
+
+  describe("Key Connector Pre-TDE", () => {
+    let tokenResponse: IdentityTokenResponse;
+    beforeEach(() => {
+      tokenResponse = identityTokenResponseFactory();
+      tokenResponse.userDecryptionOptions = null;
+      tokenResponse.keyConnectorUrl = keyConnectorUrl;
+    });
+
+    it("gets and sets the master key if Key Connector is enabled and the user doesn't have a master password", async () => {
+      const masterKey = new SymmetricCryptoKey(
+        new Uint8Array(64).buffer as CsprngArray
+      ) as MasterKey;
+
+      apiService.postIdentityToken.mockResolvedValue(tokenResponse);
+      cryptoService.getMasterKey.mockResolvedValue(masterKey);
+
+      await ssoLoginStrategy.logIn(credentials);
+
+      expect(keyConnectorService.setMasterKeyFromUrl).toHaveBeenCalledWith(keyConnectorUrl);
+    });
+
+    it("converts new SSO user with no master password to Key Connector on first login", async () => {
+      tokenResponse.key = null;
+
+      apiService.postIdentityToken.mockResolvedValue(tokenResponse);
+
+      await ssoLoginStrategy.logIn(credentials);
+
+      expect(keyConnectorService.convertNewSsoUserToKeyConnector).toHaveBeenCalledWith(
+        tokenResponse,
+        ssoOrgId
+      );
+    });
+
+    it("decrypts and sets the user key if Key Connector is enabled and the user doesn't have a master password", async () => {
+      const userKey = new SymmetricCryptoKey(new Uint8Array(64).buffer as CsprngArray) as UserKey;
+      const masterKey = new SymmetricCryptoKey(
+        new Uint8Array(64).buffer as CsprngArray
+      ) as MasterKey;
+
+      apiService.postIdentityToken.mockResolvedValue(tokenResponse);
+      cryptoService.getMasterKey.mockResolvedValue(masterKey);
+      cryptoService.decryptUserKeyWithMasterKey.mockResolvedValue(userKey);
+
+      await ssoLoginStrategy.logIn(credentials);
 
       expect(cryptoService.decryptUserKeyWithMasterKey).toHaveBeenCalledWith(masterKey);
       expect(cryptoService.setUserKey).toHaveBeenCalledWith(userKey);

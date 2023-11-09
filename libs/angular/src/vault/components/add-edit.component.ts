@@ -21,7 +21,6 @@ import { SendApiService } from "@bitwarden/common/tools/send/services/send-api.s
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
-import { PasswordRepromptService } from "@bitwarden/common/vault/abstractions/password-reprompt.service";
 import { CipherRepromptType } from "@bitwarden/common/vault/enums/cipher-reprompt-type";
 import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
@@ -34,6 +33,7 @@ import { LoginUriView } from "@bitwarden/common/vault/models/view/login-uri.view
 import { LoginView } from "@bitwarden/common/vault/models/view/login.view";
 import { SecureNoteView } from "@bitwarden/common/vault/models/view/secure-note.view";
 import { DialogService } from "@bitwarden/components";
+import { PasswordRepromptService } from "@bitwarden/vault";
 
 @Directive()
 export class AddEditComponent implements OnInit, OnDestroy {
@@ -225,7 +225,9 @@ export class AddEditComponent implements OnInit, OnDestroy {
     if (this.cipher == null) {
       if (this.editMode) {
         const cipher = await this.loadCipher();
-        this.cipher = await cipher.decrypt();
+        this.cipher = await cipher.decrypt(
+          await this.cipherService.getKeyForCipherKeyDecryption(cipher)
+        );
 
         // Adjust Cipher Name if Cloning
         if (this.cloneMode) {
@@ -265,6 +267,11 @@ export class AddEditComponent implements OnInit, OnDestroy {
       }
     }
 
+    // We don't want to copy passkeys when we clone a cipher
+    if (this.cloneMode && this.cipher?.login?.hasFido2Credentials) {
+      this.cipher.login.fido2Credentials = null;
+    }
+
     this.folders$ = this.folderService.folderViews$;
 
     if (this.editMode && this.previousCipherId !== this.cipherId) {
@@ -272,6 +279,9 @@ export class AddEditComponent implements OnInit, OnDestroy {
     }
     this.previousCipherId = this.cipherId;
     this.reprompt = this.cipher.reprompt !== CipherRepromptType.None;
+    if (this.reprompt) {
+      this.cipher.login.autofillOnPageLoad = this.autofillOnPageLoadOptions[2].value;
+    }
   }
 
   async submit(): Promise<boolean> {
@@ -319,7 +329,7 @@ export class AddEditComponent implements OnInit, OnDestroy {
           : this.collections.filter((c) => (c as any).checked).map((c) => c.id);
     }
 
-    // Clear current Cipher Id to trigger "Add" cipher flow
+    // Clear current Cipher Id if exists to trigger "Add" cipher flow
     if (this.cloneMode) {
       this.cipher.id = null;
     }
@@ -570,8 +580,10 @@ export class AddEditComponent implements OnInit, OnDestroy {
     this.reprompt = !this.reprompt;
     if (this.reprompt) {
       this.cipher.reprompt = CipherRepromptType.Password;
+      this.cipher.login.autofillOnPageLoad = this.autofillOnPageLoadOptions[2].value;
     } else {
       this.cipher.reprompt = CipherRepromptType.None;
+      this.cipher.login.autofillOnPageLoad = this.autofillOnPageLoadOptions[0].value;
     }
   }
 

@@ -1,12 +1,13 @@
 import { Component } from "@angular/core";
 import { ActivatedRoute, Params, Router } from "@angular/router";
 
-import { OrganizationUserService } from "@bitwarden/common/abstractions/organization-user/organization-user.service";
+import { ApiService } from "@bitwarden/common/abstractions/api.service";
+import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
+import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
 import {
   OrganizationUserAcceptInitRequest,
   OrganizationUserAcceptRequest,
-} from "@bitwarden/common/abstractions/organization-user/requests";
-import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
+} from "@bitwarden/common/admin-console/abstractions/organization-user/requests";
 import { PolicyApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/policy/policy-api.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { Policy } from "@bitwarden/common/admin-console/models/domain/policy";
@@ -43,7 +44,8 @@ export class AcceptOrganizationComponent extends BaseAcceptComponent {
     private logService: LogService,
     private organizationApiService: OrganizationApiServiceAbstraction,
     private organizationUserService: OrganizationUserService,
-    private messagingService: MessagingService
+    private messagingService: MessagingService,
+    private apiService: ApiService
   ) {
     super(router, platformUtilsService, i18nService, route, stateService);
   }
@@ -67,6 +69,7 @@ export class AcceptOrganizationComponent extends BaseAcceptComponent {
     }
 
     await this.actionPromise;
+    await this.apiService.refreshIdentityToken();
     await this.stateService.setOrganizationInvitation(null);
     this.platformUtilService.showToast(
       "success",

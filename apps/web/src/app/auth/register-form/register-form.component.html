@@ -25,12 +25,8 @@
     </div>
 
     <div class="tw-mb-3">
-      <app-callout
-        type="info"
-        [enforcedPolicyOptions]="enforcedPolicyOptions"
-        *ngIf="enforcedPolicyOptions"
-      >
-      </app-callout>
+      <auth-password-callout [policy]="enforcedPolicyOptions" *ngIf="enforcedPolicyOptions">
+      </auth-password-callout>
       <bit-form-field>
         <bit-label>{{ "masterPass" | i18n }}</bit-label>
         <input
@@ -89,7 +85,7 @@
     </div>
 
     <div [hidden]="!showCaptcha()">
-      <iframe id="hcaptcha_iframe" height="80"></iframe>
+      <iframe id="hcaptcha_iframe" height="80" sandbox="allow-scripts allow-same-origin"></iframe>
     </div>
     <div class="tw-mb-4 tw-flex tw-items-start">
       <input

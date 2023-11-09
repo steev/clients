@@ -1,6 +1,5 @@
 import { matches, mock } from "jest-mock-extended";
 
-import { DeviceResponse } from "../../abstractions/devices/responses/device.response";
 import { DeviceType } from "../../enums";
 import { EncryptionType } from "../../enums/encryption-type.enum";
 import { AppIdService } from "../../platform/abstractions/app-id.service";
@@ -17,6 +16,7 @@ import {
   UserKey,
 } from "../../platform/models/domain/symmetric-crypto-key";
 import { CsprngArray } from "../../types/csprng";
+import { DeviceResponse } from "../abstractions/devices/responses/device.response";
 import { DevicesApiServiceAbstraction } from "../abstractions/devices-api.service.abstraction";
 import { UpdateDevicesTrustRequest } from "../models/request/update-devices-trust.request";
 import { ProtectedDeviceResponse } from "../models/response/protected-device.response";
@@ -168,16 +168,16 @@ describe("deviceTrustCryptoService", () => {
       it("creates a new non-null 64 byte device key, securely stores it, and returns it", async () => {
         const mockRandomBytes = new Uint8Array(deviceKeyBytesLength) as CsprngArray;
 
-        const cryptoFuncSvcRandomBytesSpy = jest
-          .spyOn(cryptoFunctionService, "randomBytes")
+        const cryptoFuncSvcGenerateKeySpy = jest
+          .spyOn(cryptoFunctionService, "aesGenerateKey")
           .mockResolvedValue(mockRandomBytes);
 
         // TypeScript will allow calling private methods if the object is of type 'any'
         // This is a hacky workaround, but it allows for cleaner tests
         const deviceKey = await (deviceTrustCryptoService as any).makeDeviceKey();
 
-        expect(cryptoFuncSvcRandomBytesSpy).toHaveBeenCalledTimes(1);
-        expect(cryptoFuncSvcRandomBytesSpy).toHaveBeenCalledWith(deviceKeyBytesLength);
+        expect(cryptoFuncSvcGenerateKeySpy).toHaveBeenCalledTimes(1);
+        expect(cryptoFuncSvcGenerateKeySpy).toHaveBeenCalledWith(deviceKeyBytesLength * 8);
 
         expect(deviceKey).not.toBeNull();
         expect(deviceKey).toBeInstanceOf(SymmetricCryptoKey);

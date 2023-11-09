@@ -33,20 +33,17 @@ import { TokenService } from "../abstractions/token.service";
 import { TwoFactorService } from "../abstractions/two-factor.service";
 import { TwoFactorProviderType } from "../enums/two-factor-provider-type";
 import { AuthResult } from "../models/domain/auth-result";
-import { ForceResetPasswordReason } from "../models/domain/force-reset-password-reason";
-import { PasswordLogInCredentials } from "../models/domain/log-in-credentials";
+import { ForceSetPasswordReason } from "../models/domain/force-set-password-reason";
+import { PasswordLoginCredentials } from "../models/domain/login-credentials";
 import { PasswordTokenRequest } from "../models/request/identity-token/password-token.request";
 import { TokenTwoFactorRequest } from "../models/request/identity-token/token-two-factor.request";
 import { IdentityCaptchaResponse } from "../models/response/identity-captcha.response";
 import { IdentityTokenResponse } from "../models/response/identity-token.response";
 import { IdentityTwoFactorResponse } from "../models/response/identity-two-factor.response";
 import { MasterPasswordPolicyResponse } from "../models/response/master-password-policy.response";
-import {
-  IUserDecryptionOptionsServerResponse,
-  UserDecryptionOptionsResponse,
-} from "../models/response/user-decryption-options/user-decryption-options.response";
+import { IUserDecryptionOptionsServerResponse } from "../models/response/user-decryption-options/user-decryption-options.response";
 
-import { PasswordLogInStrategy } from "./password-login.strategy";
+import { PasswordLoginStrategy } from "./password-login.strategy";
 
 const email = "hello@world.com";
 const masterPassword = "password";
@@ -65,10 +62,6 @@ const name = "NAME";
 const defaultUserDecryptionOptionsServerResponse: IUserDecryptionOptionsServerResponse = {
   HasMasterPassword: true,
 };
-const userDecryptionOptions = new UserDecryptionOptionsResponse(
-  defaultUserDecryptionOptionsServerResponse
-);
-const acctDecryptionOptions = AccountDecryptionOptions.fromResponse(userDecryptionOptions);
 
 const decodedToken = {
   sub: userId,
@@ -103,7 +96,7 @@ export function identityTokenResponseFactory(
 }
 
 // TODO: add tests for latest changes to base class for TDE
-describe("LogInStrategy", () => {
+describe("LoginStrategy", () => {
   let cryptoService: MockProxy<CryptoService>;
   let apiService: MockProxy<ApiService>;
   let tokenService: MockProxy<TokenService>;
@@ -117,8 +110,8 @@ describe("LogInStrategy", () => {
   let policyService: MockProxy<PolicyService>;
   let passwordStrengthService: MockProxy<PasswordStrengthServiceAbstraction>;
 
-  let passwordLogInStrategy: PasswordLogInStrategy;
-  let credentials: PasswordLogInCredentials;
+  let passwordLoginStrategy: PasswordLoginStrategy;
+  let credentials: PasswordLoginCredentials;
 
   beforeEach(async () => {
     cryptoService = mock<CryptoService>();
@@ -137,8 +130,8 @@ describe("LogInStrategy", () => {
     appIdService.getAppId.mockResolvedValue(deviceId);
     tokenService.decodeToken.calledWith(accessToken).mockResolvedValue(decodedToken);
 
-    // The base class is abstract so we test it via PasswordLogInStrategy
-    passwordLogInStrategy = new PasswordLogInStrategy(
+    // The base class is abstract so we test it via PasswordLoginStrategy
+    passwordLoginStrategy = new PasswordLoginStrategy(
       cryptoService,
       apiService,
       tokenService,
@@ -152,7 +145,7 @@ describe("LogInStrategy", () => {
       policyService,
       authService
     );
-    credentials = new PasswordLogInCredentials(email, masterPassword);
+    credentials = new PasswordLoginCredentials(email, masterPassword);
   });
 
   describe("base class", () => {
@@ -174,7 +167,7 @@ describe("LogInStrategy", () => {
       const idTokenResponse = identityTokenResponseFactory();
       apiService.postIdentityToken.mockResolvedValue(idTokenResponse);
 
-      await passwordLogInStrategy.logIn(credentials);
+      await passwordLoginStrategy.logIn(credentials);
 
       expect(stateService.addAccount).toHaveBeenCalledWith(
         new Account({
@@ -197,7 +190,7 @@ describe("LogInStrategy", () => {
             },
           },
           keys: new AccountKeys(),
-          decryptionOptions: acctDecryptionOptions,
+          decryptionOptions: AccountDecryptionOptions.fromResponse(idTokenResponse),
         })
       );
       expect(messagingService.send).toHaveBeenCalledWith("loggedIn");
@@ -218,7 +211,7 @@ describe("LogInStrategy", () => {
       accountKeys.deviceKey = deviceKey;
 
       // Act
-      await passwordLogInStrategy.logIn(credentials);
+      await passwordLoginStrategy.logIn(credentials);
 
       // Assert
       expect(stateService.addAccount).toHaveBeenCalledWith(
@@ -233,10 +226,10 @@ describe("LogInStrategy", () => {
 
       apiService.postIdentityToken.mockResolvedValue(tokenResponse);
 
-      const result = await passwordLogInStrategy.logIn(credentials);
+      const result = await passwordLoginStrategy.logIn(credentials);
 
       expect(result).toEqual({
-        forcePasswordReset: ForceResetPasswordReason.AdminForcePasswordReset,
+        forcePasswordReset: ForceSetPasswordReason.AdminForcePasswordReset,
         resetMasterPassword: true,
         twoFactorProviders: null,
         captchaSiteKey: "",
@@ -255,7 +248,7 @@ describe("LogInStrategy", () => {
       cryptoService.getMasterKey.mockResolvedValue(masterKey);
       cryptoService.decryptUserKeyWithMasterKey.mockResolvedValue(userKey);
 
-      const result = await passwordLogInStrategy.logIn(credentials);
+      const result = await passwordLoginStrategy.logIn(credentials);
 
       expect(stateService.addAccount).not.toHaveBeenCalled();
       expect(messagingService.send).not.toHaveBeenCalled();
@@ -274,7 +267,7 @@ describe("LogInStrategy", () => {
       cryptoService.getMasterKey.mockResolvedValue(masterKey);
       cryptoService.decryptUserKeyWithMasterKey.mockResolvedValue(userKey);
 
-      await passwordLogInStrategy.logIn(credentials);
+      await passwordLoginStrategy.logIn(credentials);
 
       // User symmetric key must be set before the new RSA keypair is generated
       expect(cryptoService.setUserKey).toHaveBeenCalled();
@@ -302,7 +295,7 @@ describe("LogInStrategy", () => {
 
       apiService.postIdentityToken.mockResolvedValue(tokenResponse);
 
-      const result = await passwordLogInStrategy.logIn(credentials);
+      const result = await passwordLoginStrategy.logIn(credentials);
 
       expect(stateService.addAccount).not.toHaveBeenCalled();
       expect(messagingService.send).not.toHaveBeenCalled();
@@ -332,7 +325,7 @@ describe("LogInStrategy", () => {
 
       apiService.postIdentityToken.mockResolvedValue(tokenResponse);
 
-      const result = await passwordLogInStrategy.logIn(credentials);
+      const result = await passwordLoginStrategy.logIn(credentials);
 
       expect(stateService.addAccount).not.toHaveBeenCalled();
       expect(messagingService.send).not.toHaveBeenCalled();
@@ -350,7 +343,7 @@ describe("LogInStrategy", () => {
       tokenService.getTwoFactorToken.mockResolvedValue(twoFactorToken);
       apiService.postIdentityToken.mockResolvedValue(identityTokenResponseFactory());
 
-      await passwordLogInStrategy.logIn(credentials);
+      await passwordLoginStrategy.logIn(credentials);
 
       expect(apiService.postIdentityToken).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -372,7 +365,7 @@ describe("LogInStrategy", () => {
         twoFactorRemember
       );
 
-      await passwordLogInStrategy.logIn(credentials);
+      await passwordLoginStrategy.logIn(credentials);
 
       expect(apiService.postIdentityToken).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -387,7 +380,7 @@ describe("LogInStrategy", () => {
 
     it("sends 2FA token provided by user to server (two-step)", async () => {
       // Simulate a partially completed login
-      passwordLogInStrategy.tokenRequest = new PasswordTokenRequest(
+      passwordLoginStrategy.tokenRequest = new PasswordTokenRequest(
         email,
         masterPasswordHash,
         null,
@@ -396,7 +389,7 @@ describe("LogInStrategy", () => {
 
       apiService.postIdentityToken.mockResolvedValue(identityTokenResponseFactory());
 
-      await passwordLogInStrategy.logInTwoFactor(
+      await passwordLoginStrategy.logInTwoFactor(
         new TokenTwoFactorRequest(twoFactorProviderType, twoFactorToken, twoFactorRemember),
         null
       );

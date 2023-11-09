@@ -80,7 +80,9 @@ export class CreateCommand {
     try {
       await this.cipherService.createWithServer(cipher);
       const newCipher = await this.cipherService.get(cipher.id);
-      const decCipher = await newCipher.decrypt();
+      const decCipher = await newCipher.decrypt(
+        await this.cipherService.getKeyForCipherKeyDecryption(newCipher)
+      );
       const res = new CipherResponse(decCipher);
       return Response.success(res);
     } catch (e) {
@@ -141,7 +143,9 @@ export class CreateCommand {
         new Uint8Array(fileBuf).buffer
       );
       const updatedCipher = await this.cipherService.get(cipher.id);
-      const decCipher = await updatedCipher.decrypt();
+      const decCipher = await updatedCipher.decrypt(
+        await this.cipherService.getKeyForCipherKeyDecryption(updatedCipher)
+      );
       return Response.success(new CipherResponse(decCipher));
     } catch (e) {
       return Response.error(e);
@@ -180,7 +184,9 @@ export class CreateCommand {
       const groups =
         req.groups == null
           ? null
-          : req.groups.map((g) => new SelectionReadOnlyRequest(g.id, g.readOnly, g.hidePasswords));
+          : req.groups.map(
+              (g) => new SelectionReadOnlyRequest(g.id, g.readOnly, g.hidePasswords, g.manage)
+            );
       const request = new CollectionRequest();
       request.name = (await this.cryptoService.encrypt(req.name, orgKey)).encryptedString;
       request.externalId = req.externalId;

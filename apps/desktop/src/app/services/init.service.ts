@@ -11,12 +11,13 @@ import { EnvironmentService as EnvironmentServiceAbstraction } from "@bitwarden/
 import { I18nService as I18nServiceAbstraction } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PlatformUtilsService as PlatformUtilsServiceAbstraction } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService as StateServiceAbstraction } from "@bitwarden/common/platform/abstractions/state.service";
+import { ConfigService } from "@bitwarden/common/platform/services/config/config.service";
 import { ContainerService } from "@bitwarden/common/platform/services/container.service";
 import { EventUploadService } from "@bitwarden/common/services/event/event-upload.service";
 import { VaultTimeoutService } from "@bitwarden/common/services/vault-timeout/vault-timeout.service";
 import { SyncService as SyncServiceAbstraction } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 
-import { I18nService } from "../../platform/services/i18n.service";
+import { I18nRendererService } from "../../platform/services/i18n.renderer.service";
 import { NativeMessagingService } from "../../services/native-messaging.service";
 
 @Injectable()
@@ -35,7 +36,8 @@ export class InitService {
     private cryptoService: CryptoServiceAbstraction,
     private nativeMessagingService: NativeMessagingService,
     private themingService: AbstractThemingService,
-    private encryptService: EncryptService
+    private encryptService: EncryptService,
+    private configService: ConfigService
   ) {}
 
   init() {
@@ -49,7 +51,7 @@ export class InitService {
       this.syncService.fullSync(true);
       await this.vaultTimeoutService.init(true);
       const locale = await this.stateService.getLocale();
-      await (this.i18nService as I18nService).init(locale);
+      await (this.i18nService as I18nRendererService).init(locale);
       (this.eventUploadService as EventUploadService).init(true);
       this.twoFactorService.init();
       setTimeout(() => this.notificationsService.init(), 3000);
@@ -71,6 +73,8 @@ export class InitService {
 
       const containerService = new ContainerService(this.cryptoService, this.encryptService);
       containerService.attachToGlobal(this.win);
+
+      this.configService.init();
     };
   }
 }

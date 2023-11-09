@@ -1,7 +1,7 @@
 import { Utils } from "../../../platform/misc/utils";
 import { TwoFactorProviderType } from "../../enums/two-factor-provider-type";
 
-import { ForceResetPasswordReason } from "./force-reset-password-reason";
+import { ForceSetPasswordReason } from "./force-set-password-reason";
 
 export class AuthResult {
   captchaSiteKey = "";
@@ -13,10 +13,11 @@ export class AuthResult {
    * */
   resetMasterPassword = false;
 
-  forcePasswordReset: ForceResetPasswordReason = ForceResetPasswordReason.None;
+  forcePasswordReset: ForceSetPasswordReason = ForceSetPasswordReason.None;
   twoFactorProviders: Map<TwoFactorProviderType, { [key: string]: string }> = null;
   ssoEmail2FaSessionToken?: string;
   email: string;
+  requiresEncryptionKeyMigration: boolean;
 
   get requiresCaptcha() {
     return !Utils.isNullOrWhitespace(this.captchaSiteKey);

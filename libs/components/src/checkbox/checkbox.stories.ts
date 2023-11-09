@@ -152,3 +152,12 @@ export const Custom: Story = {
     `,
   }),
 };
+
+export const Indeterminate: Story = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <input type="checkbox" bitCheckbox [indeterminate]="true">
+    `,
+  }),
+};

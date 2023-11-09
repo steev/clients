@@ -10,12 +10,12 @@ import {
 } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { Router } from "@angular/router";
-import { ipcRenderer } from "electron";
 import { IndividualConfig, ToastrService } from "ngx-toastr";
 import { firstValueFrom, Subject, takeUntil } from "rxjs";
 
 import { ModalRef } from "@bitwarden/angular/components/modal/modal.ref";
 import { ModalService } from "@bitwarden/angular/services/modal.service";
+import { FingerprintDialogComponent } from "@bitwarden/auth";
 import { EventUploadService } from "@bitwarden/common/abstractions/event/event-upload.service";
 import { NotificationsService } from "@bitwarden/common/abstractions/notifications.service";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
@@ -27,7 +27,7 @@ import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { KeyConnectorService } from "@bitwarden/common/auth/abstractions/key-connector.service";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
-import { ForceResetPasswordReason } from "@bitwarden/common/auth/models/domain/force-reset-password-reason";
+import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/force-set-password-reason";
 import { VaultTimeoutAction } from "@bitwarden/common/enums/vault-timeout-action.enum";
 import { BroadcasterService } from "@bitwarden/common/platform/abstractions/broadcaster.service";
 import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
@@ -55,6 +55,7 @@ import { FolderAddEditComponent } from "../vault/app/vault/folder-add-edit.compo
 import { SettingsComponent } from "./accounts/settings.component";
 import { ExportComponent } from "./tools/export/export.component";
 import { GeneratorComponent } from "./tools/generator.component";
+import { ImportDesktopComponent } from "./tools/import/import-desktop.component";
 import { PasswordGeneratorHistoryComponent } from "./tools/password-generator-history.component";
 
 const BroadcasterSubscriptionId = "AppComponent";
@@ -226,13 +227,13 @@ export class AppComponent implements OnInit, OnDestroy {
             this.systemService.cancelProcessReload();
             break;
           case "reloadProcess":
-            ipcRenderer.send("reload-process");
+            ipc.platform.reloadProcess();
             break;
           case "syncStarted":
             break;
           case "syncCompleted":
             await this.updateAppMenu();
-            await this.configService.fetchServerConfig();
+            this.configService.triggerServerConfigFetch();
             break;
           case "openSettings":
             await this.openModal<SettingsComponent>(SettingsComponent, this.settingsRef);
@@ -244,18 +245,8 @@ export class AppComponent implements OnInit, OnDestroy {
             const fingerprint = await this.cryptoService.getFingerprint(
               await this.stateService.getUserId()
             );
-            const result = await this.dialogService.openSimpleDialog({
-              title: { key: "fingerprintPhrase" },
-              content:
-                this.i18nService.t("yourAccountsFingerprint") + ":\n" + fingerprint.join("-"),
-              acceptButtonText: { key: "learnMore" },
-              cancelButtonText: { key: "close" },
-              type: "info",
-            });
-
-            if (result) {
-              this.platformUtilsService.launchUri("https://bitwarden.com/help/fingerprint-phrase/");
-            }
+            const dialogRef = FingerprintDialogComponent.open(this.dialogService, { fingerprint });
+            await firstValueFrom(dialogRef.closed);
             break;
           }
           case "deleteAccount":
@@ -338,6 +329,9 @@ export class AppComponent implements OnInit, OnDestroy {
             }
             this.messagingService.send("scheduleNextSync");
             break;
+          case "importVault":
+            await this.dialogService.open(ImportDesktopComponent);
+            break;
           case "exportVault":
             await this.openExportVault();
             break;
@@ -375,8 +369,8 @@ export class AppComponent implements OnInit, OnDestroy {
               (await this.authService.getAuthStatus(message.userId)) ===
               AuthenticationStatus.Locked;
             const forcedPasswordReset =
-              (await this.stateService.getForcePasswordResetReason({ userId: message.userId })) !=
-              ForceResetPasswordReason.None;
+              (await this.stateService.getForceSetPasswordReason({ userId: message.userId })) !=
+              ForceSetPasswordReason.None;
             if (locked) {
               this.messagingService.send("locked", { userId: message.userId });
             } else if (forcedPasswordReset) {

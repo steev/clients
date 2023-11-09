@@ -103,7 +103,9 @@ export class GetCommand extends DownloadCommand {
     if (Utils.isGuid(id)) {
       const cipher = await this.cipherService.get(id);
       if (cipher != null) {
-        decCipher = await cipher.decrypt();
+        decCipher = await cipher.decrypt(
+          await this.cipherService.getKeyForCipherKeyDecryption(cipher)
+        );
       }
     } else if (id.trim() !== "") {
       let ciphers = await this.cipherService.getAllDecrypted();
@@ -425,7 +427,9 @@ export class GetCommand extends DownloadCommand {
       const groups =
         response.groups == null
           ? null
-          : response.groups.map((g) => new SelectionReadOnly(g.id, g.readOnly, g.hidePasswords));
+          : response.groups.map(
+              (g) => new SelectionReadOnly(g.id, g.readOnly, g.hidePasswords, g.manage)
+            );
       const res = new OrganizationCollectionResponse(decCollection, groups);
       return Response.success(res);
     } catch (e) {

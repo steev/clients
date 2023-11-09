@@ -11,7 +11,7 @@ import { LoginService } from "@bitwarden/common/auth/abstractions/login.service"
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
 import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
 import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
-import { ForceResetPasswordReason } from "@bitwarden/common/auth/models/domain/force-reset-password-reason";
+import { ForceSetPasswordReason } from "@bitwarden/common/auth/models/domain/force-set-password-reason";
 import { TrustedDeviceUserDecryptionOption } from "@bitwarden/common/auth/models/domain/user-decryption-options/trusted-device-user-decryption-option";
 import { TokenTwoFactorRequest } from "@bitwarden/common/auth/models/request/identity-token/token-two-factor.request";
 import { TwoFactorEmailRequest } from "@bitwarden/common/auth/models/request/two-factor-email.request";
@@ -215,12 +215,36 @@ export class TwoFactorComponent extends CaptchaProtectedComponent implements OnI
     await this.handleLoginResponse(authResult);
   }
 
+  protected handleMigrateEncryptionKey(result: AuthResult): boolean {
+    if (!result.requiresEncryptionKeyMigration) {
+      return false;
+    }
+
+    this.platformUtilsService.showToast(
+      "error",
+      this.i18nService.t("errorOccured"),
+      this.i18nService.t("encryptionKeyMigrationRequired")
+    );
+    return true;
+  }
+
   private async handleLoginResponse(authResult: AuthResult) {
     if (this.handleCaptchaRequired(authResult)) {
       return;
+    } else if (this.handleMigrateEncryptionKey(authResult)) {
+      return;
     }
 
+    // Save off the OrgSsoIdentifier for use in the TDE flows
+    // - TDE login decryption options component
+    // - Browser SSO on extension open
+    await this.stateService.setUserSsoOrganizationIdentifier(this.orgIdentifier);
     this.loginService.clearValues();
+
+    // note: this flow affects both TDE & standard users
+    if (this.isForcePasswordResetRequired(authResult)) {
+      return await this.handleForcePasswordReset(this.orgIdentifier);
+    }
 
     const acctDecryptionOpts: AccountDecryptionOptions =
       await this.stateService.getAccountDecryptionOptions();
@@ -244,12 +268,6 @@ export class TwoFactorComponent extends CaptchaProtectedComponent implements OnI
       return await this.handleChangePasswordRequired(this.orgIdentifier);
     }
 
-    // Users can be forced to reset their password via an admin or org policy
-    // disallowing weak passwords
-    if (authResult.forcePasswordReset !== ForceResetPasswordReason.None) {
-      return await this.handleForcePasswordReset(this.orgIdentifier);
-    }
-
     return await this.handleSuccessfulLogin();
   }
 
@@ -257,7 +275,7 @@ export class TwoFactorComponent extends CaptchaProtectedComponent implements OnI
     trustedDeviceOption: TrustedDeviceUserDecryptionOption
   ): Promise<boolean> {
     const ssoTo2faFlowActive = this.route.snapshot.queryParamMap.get("sso") === "true";
-    const trustedDeviceEncryptionFeatureActive = await this.configService.getFeatureFlagBool(
+    const trustedDeviceEncryptionFeatureActive = await this.configService.getFeatureFlag<boolean>(
       FeatureFlag.TrustedDeviceEncryption
     );
 
@@ -278,14 +296,12 @@ export class TwoFactorComponent extends CaptchaProtectedComponent implements OnI
       !acctDecryptionOpts.hasMasterPassword &&
       acctDecryptionOpts.trustedDeviceOption.hasManageResetPasswordPermission
     ) {
-      // Change implies going no password -> password in this case
-      return await this.handleChangePasswordRequired(orgIdentifier);
-    }
-
-    // Users can be forced to reset their password via an admin or org policy
-    // disallowing weak passwords
-    if (authResult.forcePasswordReset !== ForceResetPasswordReason.None) {
-      return await this.handleForcePasswordReset(orgIdentifier);
+      // Set flag so that auth guard can redirect to set password screen after decryption (trusted or untrusted device)
+      // Note: we cannot directly navigate to the set password screen in this scenario as we are in a pre-decryption state, and
+      // if you try to set a new MP before decrypting, you will invalidate the user's data by making a new user key.
+      await this.stateService.setForceSetPasswordReason(
+        ForceSetPasswordReason.TdeUserWithoutPasswordHasPasswordResetPermission
+      );
     }
 
     if (this.onSuccessfulLoginTde != null) {
@@ -308,6 +324,25 @@ export class TwoFactorComponent extends CaptchaProtectedComponent implements OnI
         identifier: orgIdentifier,
       },
     });
+  }
+
+  /**
+   * Determines if a user needs to reset their password based on certain conditions.
+   * Users can be forced to reset their password via an admin or org policy disallowing weak passwords.
+   * Note: this is different from the SSO component login flow as a user can
+   * login with MP and then have to pass 2FA to finish login and we can actually
+   * evaluate if they have a weak password at that time.
+   *
+   * @param {AuthResult} authResult - The authentication result.
+   * @returns {boolean} Returns true if a password reset is required, false otherwise.
+   */
+  private isForcePasswordResetRequired(authResult: AuthResult): boolean {
+    const forceResetReasons = [
+      ForceSetPasswordReason.AdminForcePasswordReset,
+      ForceSetPasswordReason.WeakMasterPassword,
+    ];
+
+    return forceResetReasons.includes(authResult.forcePasswordReset);
   }
 
   private async handleForcePasswordReset(orgIdentifier: string) {

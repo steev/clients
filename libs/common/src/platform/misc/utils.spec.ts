@@ -459,20 +459,26 @@ describe("Utils Service", () => {
     });
   });
 
-  describe("ArrayBuffer to Hex and Hex to ArrayBuffer Conversion", () => {
-    runInBothEnvironments("should allow round-trip conversion for an arbitrary buffer", () => {
-      // Create an arbitrary buffer
-      const originalBuffer = new Uint8Array([10, 20, 30, 40, 255]).buffer;
+  describe("ArrayBuffer and Hex string round trip conversions", () => {
+    runInBothEnvironments(
+      "should allow round-trip conversion from ArrayBuffer to hex and back",
+      () => {
+        const originalBuffer = new Uint8Array([10, 20, 30, 40, 255]).buffer; // arbitrary buffer
+        const hexString = Utils.fromBufferToHex(originalBuffer);
+        const roundTripBuffer = Utils.hexStringToArrayBuffer(hexString);
+        expect(new Uint8Array(roundTripBuffer)).toEqual(new Uint8Array(originalBuffer));
+      }
+    );
 
-      // Convert the buffer to a hex string
-      const hexString = Utils.fromBufferToHex(originalBuffer);
-
-      // Convert the hex string back to an ArrayBuffer
-      const roundTripBuffer = Utils.hexStringToArrayBuffer(hexString);
-
-      // The original buffer and the round-tripped buffer should contain the same bytes
-      expect(new Uint8Array(roundTripBuffer)).toEqual(new Uint8Array(originalBuffer));
-    });
+    runInBothEnvironments(
+      "should allow round-trip conversion from hex to ArrayBuffer and back",
+      () => {
+        const hexString = "0a141e28ff"; // arbitrary hex string
+        const bufferFromHex = Utils.hexStringToArrayBuffer(hexString);
+        const roundTripHexString = Utils.fromBufferToHex(bufferFromHex);
+        expect(roundTripHexString).toBe(hexString);
+      }
+    );
   });
 
   describe("mapToRecord", () => {

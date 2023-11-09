@@ -4,7 +4,7 @@ import { Router } from "@angular/router";
 import { LoginService } from "@bitwarden/common/auth/abstractions/login.service";
 import { WebAuthnLoginServiceAbstraction } from "@bitwarden/common/auth/abstractions/webauthn/webauthn-login.service.abstraction";
 import { ForceResetPasswordReason } from "@bitwarden/common/auth/models/domain/force-reset-password-reason";
-import { WebAuthnLoginCredentialAssertionView } from "@bitwarden/common/auth/models/view/webauthn-login/webauthn-login-assertion.view";
+import { WebAuthnLoginCredentialAssertionView } from "@bitwarden/common/auth/models/view/webauthn-login/webauthn-login-credential-assertion.view";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";

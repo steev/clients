@@ -136,6 +136,43 @@ export class Utils {
     }
   }
 
+  /**
+   * Converts a base64 encoded string to an ArrayBuffer.
+   *
+   * @param {string} b64 - The base64 encoded string to convert.
+   * @return {ArrayBuffer | null} The ArrayBuffer representation of the input string, or null if the input is null.
+   */
+  static fromB64ToArrayBuffer(b64: string): ArrayBuffer | null {
+    if (b64 == null) {
+      return null;
+    }
+
+    if (Utils.isNode) {
+      // In Node, Buffer is used to handle binary data.
+      const buffer = Buffer.from(b64, "base64");
+
+      // Convert the Buffer to a new Uint8Array to ensure that the ArrayBuffer
+      // is not part of a larger pool of memory which could lead to potential data leaks.
+      // This makes a copy of the buffer to ensure it's a standalone ArrayBuffer.
+      const uint8Array = new Uint8Array(buffer.length);
+      uint8Array.set(buffer);
+      return uint8Array.buffer;
+    } else {
+      // In browser environments, atob() is used to decode a base64 encoded string to a binary string.
+      const binaryString = atob(b64);
+
+      // Create a Uint8Array with the same length as the binary string.
+      // Each character of the binary string represents a byte, so we convert
+      // each character's charCode to a byte in the Uint8Array.
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      return bytes.buffer;
+    }
+  }
+
   static fromBufferToUrlB64(buffer: ArrayBuffer): string {
     return Utils.fromB64toUrlB64(Utils.fromBufferToB64(buffer));
   }

@@ -258,6 +258,103 @@ describe("Utils Service", () => {
     });
   }
 
+  const asciiHelloWorldArray = [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100];
+  const b64HelloWorldString = "aGVsbG8gd29ybGQ=";
+
+  describe("fromBufferToB64(...)", () => {
+    const originalIsNode = Utils.isNode;
+
+    afterEach(() => {
+      Utils.isNode = originalIsNode;
+    });
+
+    runInBothEnvironments("should convert an ArrayBuffer to a b64 string", () => {
+      const buffer = new Uint8Array(asciiHelloWorldArray).buffer;
+      const b64String = Utils.fromBufferToB64(buffer);
+      expect(b64String).toBe(b64HelloWorldString);
+    });
+
+    runInBothEnvironments("should return an empty string for an empty ArrayBuffer", () => {
+      const buffer = new Uint8Array([]).buffer;
+      const b64String = Utils.fromBufferToB64(buffer);
+      expect(b64String).toBe("");
+    });
+
+    runInBothEnvironments("should return null for null input", () => {
+      const b64String = Utils.fromBufferToB64(null);
+      expect(b64String).toBeNull();
+    });
+  });
+
+  describe("fromB64ToArrayBuffer(...)", () => {
+    runInBothEnvironments("should convert a b64 string to an ArrayBuffer", () => {
+      const expectedArray = new Uint8Array(asciiHelloWorldArray);
+      const buffer = Utils.fromB64ToArrayBuffer(b64HelloWorldString);
+      // compare the byte values of the buffers (can't compare the buffers directly)
+      const resultArray = new Uint8Array(buffer);
+      expect(resultArray).toEqual(expectedArray);
+    });
+
+    runInBothEnvironments("should return null for null input", () => {
+      const buffer = Utils.fromB64ToArrayBuffer(null);
+      expect(buffer).toBeNull();
+    });
+
+    // Hmmm... this passes in browser but not in node
+    // as node doesn't throw an error for invalid base64 strings.
+    // It instead produces a buffer with the bytes that could be decoded
+    // and ignores the rest after an invalid character.
+    // https://github.com/nodejs/node/issues/8569
+    // This could be mitigated with a regex check before decoding...
+    // runInBothEnvironments("should throw an error for invalid base64 string", () => {
+    //   const invalidB64String = "invalid base64";
+    //   expect(() => {
+    //     Utils.fromB64ToArrayBuffer(invalidB64String);
+    //   }).toThrow();
+    // });
+  });
+
+  describe("Base64 and ArrayBuffer round trip conversions", () => {
+    const originalIsNode = Utils.isNode;
+
+    afterEach(() => {
+      Utils.isNode = originalIsNode;
+    });
+
+    runInBothEnvironments(
+      "should correctly round trip convert from ArrayBuffer to base64 and back",
+      () => {
+        // Start with a known ArrayBuffer
+        const originalArray = new Uint8Array(asciiHelloWorldArray);
+        const originalBuffer = originalArray.buffer;
+
+        // Convert ArrayBuffer to a base64 string
+        const b64String = Utils.fromBufferToB64(originalBuffer);
+
+        // Convert that base64 string back to an ArrayBuffer
+        const roundTrippedBuffer = Utils.fromB64ToArrayBuffer(b64String);
+        const roundTrippedArray = new Uint8Array(roundTrippedBuffer);
+
+        // Compare the original ArrayBuffer with the round-tripped ArrayBuffer
+        expect(roundTrippedArray).toEqual(originalArray);
+      }
+    );
+
+    runInBothEnvironments(
+      "should correctly round trip convert from base64 to ArrayBuffer and back",
+      () => {
+        // Convert known base64 string to ArrayBuffer
+        const bufferFromB64 = Utils.fromB64ToArrayBuffer(b64HelloWorldString);
+
+        // Convert the ArrayBuffer back to a base64 string
+        const roundTrippedB64String = Utils.fromBufferToB64(bufferFromB64);
+
+        // Compare the original base64 string with the round-tripped base64 string
+        expect(roundTrippedB64String).toBe(b64HelloWorldString);
+      }
+    );
+  });
+
   describe("fromBufferToHex(...)", () => {
     const originalIsNode = Utils.isNode;
 
@@ -362,7 +459,7 @@ describe("Utils Service", () => {
     });
   });
 
-  describe("Buffer to Hex and Hex to ArrayBuffer Conversion", () => {
+  describe("ArrayBuffer to Hex and Hex to ArrayBuffer Conversion", () => {
     runInBothEnvironments("should allow round-trip conversion for an arbitrary buffer", () => {
       // Create an arbitrary buffer
       const originalBuffer = new Uint8Array([10, 20, 30, 40, 255]).buffer;

@@ -15,28 +15,50 @@ import { WebAuthnLoginAssertionResponseRequest } from "./request/webauthn-login-
 import { CredentialAssertionOptionsResponse } from "./response/credential-assertion-options.response";
 import { WebAuthnLoginService } from "./webauthn-login.service";
 
-// At the top of your test file
+// Save off the original classes so we can restore them after all tests are done if they exist
 const originalPublicKeyCredential = global.PublicKeyCredential;
 const originalAuthenticatorAssertionResponse = global.AuthenticatorAssertionResponse;
+
+function generateRandomBase64ForArrayBufferLength(byteLength: number): string {
+  // Determine the number of base64 characters: every 3 bytes need 4 base64 characters
+  const b64Length = Math.ceil(byteLength / 3) * 4;
+
+  // Generate random base64 characters
+  let b64String = "";
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  for (let i = 0; i < b64Length; i++) {
+    b64String += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  // Add necessary padding ('='), which is only needed if byteLength is not divisible by 3
+  while (b64String.length % 4 !== 0) {
+    b64String += "=";
+  }
+
+  return b64String;
+}
 
 // AuthenticatorAssertionResponse && PublicKeyCredential are only available in secure contexts
 // so we need to mock them and assign them to the global object to make them available
 // for the tests
-
-// TODO: going to have to update MockAuthenticatorAssertionResponse with public b64 strings which get
-// converted to array buffers so we can test the values in the response
 class MockAuthenticatorAssertionResponse implements AuthenticatorAssertionResponse {
-  clientDataJSON: ArrayBuffer = new ArrayBuffer(32);
-  authenticatorData: ArrayBuffer = new ArrayBuffer(196);
-  signature: ArrayBuffer = new ArrayBuffer(72);
-  userHandle: ArrayBuffer = new ArrayBuffer(16);
+  clientDataJSONB64Str = generateRandomBase64ForArrayBufferLength(32);
+  authenticatorDataB64Str = generateRandomBase64ForArrayBufferLength(196);
+  signatureB64Str = generateRandomBase64ForArrayBufferLength(72);
+  userHandleB64Str = generateRandomBase64ForArrayBufferLength(16);
+
+  clientDataJSON: ArrayBuffer = Utils.fromB64ToArrayBuffer(this.clientDataJSONB64Str);
+  authenticatorData: ArrayBuffer = Utils.fromB64ToArrayBuffer(this.authenticatorDataB64Str);
+  signature: ArrayBuffer = Utils.fromB64ToArrayBuffer(this.signatureB64Str);
+  userHandle: ArrayBuffer = Utils.fromB64ToArrayBuffer(this.userHandleB64Str);
 }
 
 class MockPublicKeyCredential implements PublicKeyCredential {
   authenticatorAttachment = "cross-platform";
   id = "mockCredentialId";
   type = "public-key";
-  rawId: ArrayBuffer = new ArrayBuffer(32);
+  rawIdB64Str = generateRandomBase64ForArrayBufferLength(32);
+  rawId: ArrayBuffer = Utils.fromB64ToArrayBuffer(this.rawIdB64Str);
   response: MockAuthenticatorAssertionResponse = new MockAuthenticatorAssertionResponse();
 
   // Use random 64 character hex string (32 bytes - matters for symmetric key creation)
@@ -186,11 +208,7 @@ describe("WebAuthnLoginService", () => {
     });
   });
 
-  // TODO: finish testing this
   describe("assertCredential(...)", () => {
-    // TODO: check that the device response (WebAuthnLoginAssertionResponseRequest) does not contain any PRF information
-    //  in the WebAuthnLoginResponseRequest.extensions
-
     it("should assert credential and return WebAuthnLoginAssertionView on success", async () => {
       // Arrange
       const webAuthnLoginService = setup(true);
@@ -273,7 +291,23 @@ describe("WebAuthnLoginService", () => {
 
       expect(result).toBeInstanceOf(WebAuthnLoginCredentialAssertionView);
       expect(result.token).toEqual(credentialAssertionOptions.token);
+
       expect(result.deviceResponse).toBeInstanceOf(WebAuthnLoginAssertionResponseRequest);
+      expect(result.deviceResponse.id).toEqual(publicKeyCredential.id);
+      expect(result.deviceResponse.rawId).toEqual(publicKeyCredential.rawIdB64Str);
+      expect(result.deviceResponse.type).toEqual(publicKeyCredential.type);
+      // extensions being empty could change in the future but for now it is expected
+      expect(result.deviceResponse.extensions).toEqual({});
+      // but it should never contain any PRF information
+      expect("prf" in result.deviceResponse.extensions).toBe(false);
+
+      expect(result.deviceResponse.response).toEqual({
+        authenticatorData: publicKeyCredential.response.authenticatorDataB64Str,
+        clientDataJSON: publicKeyCredential.response.clientDataJSONB64Str,
+        signature: publicKeyCredential.response.signatureB64Str,
+        userHandle: publicKeyCredential.response.userHandleB64Str,
+      });
+
       expect(result.prfKey).toEqual(prfKey);
     });
   });

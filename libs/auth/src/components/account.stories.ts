@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 
+import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 
 import { AccountSwitcherService } from "../../../../apps/browser/src/auth/popup/services/account-switcher.service";
@@ -12,7 +13,11 @@ import { AccountComponent } from "./account.component";
   providedIn: "root",
 })
 class MockAccountSwitcherService {
-  SPECIAL_ACCOUNT_ID = "addAccount";
+  SPECIAL_ADD_ACCOUNT_ID = "addAccount";
+
+  get specialAccountAddId() {
+    return this.SPECIAL_ADD_ACCOUNT_ID;
+  }
 
   async selectAccount(id: string) {
     return;
@@ -32,23 +37,66 @@ export default {
             return new I18nMockService({
               switchToAccount: "switchToAccount",
               activeAccount: "activeAccount",
+              active: "active",
+              unlocked: "unlocked",
+              locked: "locked",
             });
           },
         },
       ],
     }),
   ],
-  args: {
-    account: {
-      id: "John Doe",
-      name: "John Doe",
-      email: "test@testing.com",
-      status: "active",
-      isSelected: true,
-    },
-  },
 } as Meta;
 
 type Story = StoryObj<AccountComponent>;
 
-export const Default: Story = {};
+export const Unlocked: Story = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <div class="tw-py-16 tw-px-8 -tw-my-10 -tw-mx-5 tw-bg-background-alt">
+        <auth-account [account]="account"></auth-account>
+      </div>
+    `,
+  }),
+  args: {
+    account: {
+      name: "John Doe",
+      id: "John Doe",
+      isSelected: false,
+      server: "jdoe@example.com",
+      status: AuthenticationStatus.Unlocked,
+    },
+  },
+};
+
+export const Locked: Story = {
+  ...Unlocked,
+  args: {
+    account: {
+      ...Unlocked.args.account,
+      status: AuthenticationStatus.Locked,
+    },
+  },
+};
+
+export const Active: Story = {
+  ...Unlocked,
+  args: {
+    account: {
+      ...Unlocked.args.account,
+      isSelected: true,
+    },
+  },
+};
+
+export const AddAccount: Story = {
+  ...Unlocked,
+  args: {
+    account: {
+      name: "Add Account",
+      id: "addAccount",
+      isSelected: false,
+    },
+  },
+};

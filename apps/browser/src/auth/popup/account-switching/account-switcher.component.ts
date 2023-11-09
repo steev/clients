@@ -2,10 +2,6 @@ import { Location } from "@angular/common";
 import { Component } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
-import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
-import { UserId } from "@bitwarden/common/types/guid";
-
 import { BrowserRouterService } from "../../../platform/popup/services/browser-router.service";
 import { AccountSwitcherService } from "../services/account-switcher.service";
 
@@ -17,41 +13,8 @@ export class AccountSwitcherComponent {
     private accountSwitcherService: AccountSwitcherService,
     private router: Router,
     private routerService: BrowserRouterService,
-    private accountService: AccountService,
     private location: Location
-  ) {
-    this.accountService.addAccount("Mario" as UserId, {
-      name: "Mario",
-      email: "mario@test.com",
-      status: AuthenticationStatus.Unlocked,
-    });
-
-    this.accountService.addAccount("Luigi" as UserId, {
-      name: "Luigi",
-      email: "luigi@test.com",
-      status: AuthenticationStatus.Unlocked,
-    });
-
-    this.accountService.addAccount("Yoshi" as UserId, {
-      name: "Yoshi",
-      email: "yoshi@test.com",
-      status: AuthenticationStatus.Unlocked,
-    });
-
-    this.accountService.addAccount("Bowser" as UserId, {
-      name: "Bowser",
-      email: "bowser@test.com",
-      status: AuthenticationStatus.Locked,
-    });
-
-    this.accountService.addAccount("Toad" as UserId, {
-      name: "Toad",
-      email: "toad@test.com",
-      status: AuthenticationStatus.Locked,
-    });
-
-    this.accountService.switchAccount("Mario" as UserId);
-  }
+  ) {}
 
   get accountLimit() {
     return this.accountSwitcherService.ACCOUNT_LIMIT;

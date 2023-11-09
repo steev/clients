@@ -36,25 +36,13 @@ export class AccountComponent {
 
   get status() {
     if (this.account.isSelected) {
-      return { text: "active", icon: "bwi-check-circle" };
+      return { text: this.i18nService.t("active"), icon: "bwi-check-circle" };
     }
 
     if (this.account.status === AuthenticationStatus.Unlocked) {
-      return { text: "unlocked", icon: "bwi-unlock" };
+      return { text: this.i18nService.t("unlocked"), icon: "bwi-unlock" };
     }
 
-    return { text: "locked", icon: "bwi-lock" };
+    return { text: this.i18nService.t("locked"), icon: "bwi-lock" };
   }
-
-  // get status() {
-  //   if (this.account.isSelected) {
-  //     return { text: this.i18nService.t("active"), icon: "bwi-check-circle" };
-  //   }
-
-  //   if (this.account.status === AuthenticationStatus.Unlocked) {
-  //     return { text: this.i18nService.t("unlocked"), icon: "bwi-unlock" };
-  //   }
-
-  //   return { text: this.i18nService.t("locked"), icon: "bwi-lock" };
-  // }
 }

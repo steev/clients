@@ -1,31 +1,39 @@
 <bit-dialog>
-  <div bitDialogContent>
+  <div bitDialogTitle>{{ "deleteAccount" | i18n }}</div>
+  <div bitDialogContent class="box">
     <form #form [appApiAction]="formPromise" (ngSubmit)="submit()" [formGroup]="deleteForm">
       <p class="modal-text">{{ "deleteAccountDesc" | i18n }}</p>
       <app-callout type="warning" title="{{ 'warning' | i18n }}">
         {{ "deleteAccountWarning" | i18n }}
       </app-callout>
-      <div class="box last">
-        <h1 class="box-header" id="deleteAccountTitle">
-          {{ "deleteAccount" | i18n }}
-        </h1>
+      <h1 class="box-header" id="deleteAccountTitle">
+        {{ "deleteAccount" | i18n }}
+      </h1>
+      <div class="box-content">
         <app-user-verification
           ngDefaultControl
           formControlName="verification"
           name="verification"
-        />
-        <div id="confirmIdentityHelp" class="box-footer">
-          <p>{{ "confirmIdentity" | i18n }}</p>
-        </div>
+        ></app-user-verification>
+      </div>
+      <div id="confirmIdentityHelp" class="box-footer">
+        <p>{{ "confirmIdentity" | i18n }}</p>
       </div>
     </form>
   </div>
   <div bitDialogFooter>
-    <button type="submit" class="danger" [disabled]="form.loading || !secret">
+    <button bitButton type="submit" buttonType="danger" [disabled]="form.loading || !secret">
       <i class="bwi bwi-spinner bwi-spin" [hidden]="!form.loading" aria-hidden="true"></i>
       <span [hidden]="form.loading">{{ "deleteAccount" | i18n }}</span>
     </button>
-    <button type="button" data-dismiss="modal" [disabled]="form.loading">
+    <button
+      bitButton
+      type="button"
+      buttonType="secondary"
+      data-dismiss="modal"
+      [disabled]="form.loading"
+      bitDialogClose
+    >
       {{ "cancel" | i18n }}
     </button>
   </div>

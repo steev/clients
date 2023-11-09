@@ -3,14 +3,15 @@ import "zone.js";
 // Register the locales for the application
 import "../platform/app/locales";
 
-import { DialogModule } from "@angular/cdk/dialog";
 import { NgModule } from "@angular/core";
 
 import { ColorPasswordCountPipe } from "@bitwarden/angular/pipes/color-password-count.pipe";
 import { ColorPasswordPipe } from "@bitwarden/angular/pipes/color-password.pipe";
+import { DialogModule } from "@bitwarden/components";
 
 import { AccessibilityCookieComponent } from "../auth/accessibility-cookie.component";
 import { SetPinComponent } from "../auth/components/set-pin.component";
+import { DeleteAccountComponent } from "../auth/delete-account.component";
 import { EnvironmentComponent } from "../auth/environment.component";
 import { HintComponent } from "../auth/hint.component";
 import { LockComponent } from "../auth/lock.component";
@@ -66,6 +67,7 @@ import { SendComponent } from "./tools/send/send.component";
     CollectionsComponent,
     ColorPasswordPipe,
     ColorPasswordCountPipe,
+    DeleteAccountComponent,
     EnvironmentComponent,
     ExportComponent,
     FolderAddEditComponent,

@@ -244,6 +244,140 @@ describe("Utils Service", () => {
     });
   });
 
+  function runInBothEnvironments(testName: string, testFunc: () => void): void {
+    const environments = [
+      { isNode: true, name: "Node environment" },
+      { isNode: false, name: "non-Node environment" },
+    ];
+
+    environments.forEach((env) => {
+      it(`${testName} in ${env.name}`, () => {
+        Utils.isNode = env.isNode;
+        testFunc();
+      });
+    });
+  }
+
+  describe("fromBufferToHex(...)", () => {
+    const originalIsNode = Utils.isNode;
+
+    afterEach(() => {
+      Utils.isNode = originalIsNode;
+    });
+
+    /**
+     * Creates a string that represents a sequence of hexadecimal byte values in ascending order.
+     * Each byte value corresponds to its position in the sequence.
+     *
+     * @param {number} length - The number of bytes to include in the string.
+     * @return {string} A string of hexadecimal byte values in sequential order.
+     *
+     * @example
+     * // Returns '000102030405060708090a0b0c0d0e0f101112...ff'
+     * createSequentialHexByteString(256);
+     */
+    function createSequentialHexByteString(length: number) {
+      let sequentialHexString = "";
+      for (let i = 0; i < length; i++) {
+        // Convert the number to a hex string and pad with leading zeros if necessary
+        const hexByte = i.toString(16).padStart(2, "0");
+        sequentialHexString += hexByte;
+      }
+      return sequentialHexString;
+    }
+
+    runInBothEnvironments("should convert an ArrayBuffer to a hex string", () => {
+      const buffer = new Uint8Array([0, 1, 10, 16, 255]).buffer;
+      const hexString = Utils.fromBufferToHex(buffer);
+      expect(hexString).toBe("00010a10ff");
+    });
+
+    runInBothEnvironments("should handle an empty buffer", () => {
+      const buffer = new ArrayBuffer(0);
+      const hexString = Utils.fromBufferToHex(buffer);
+      expect(hexString).toBe("");
+    });
+
+    runInBothEnvironments(
+      "should correctly convert a large buffer containing a repeating sequence of all 256 unique byte values to hex",
+      () => {
+        const largeBuffer = new Uint8Array(1024).map((_, index) => index % 256).buffer;
+        const hexString = Utils.fromBufferToHex(largeBuffer);
+        const expectedHexString = createSequentialHexByteString(256).repeat(4);
+        expect(hexString).toBe(expectedHexString);
+      }
+    );
+
+    runInBothEnvironments("should correctly convert a buffer with a single byte to hex", () => {
+      const singleByteBuffer = new Uint8Array([0xab]).buffer;
+      const hexString = Utils.fromBufferToHex(singleByteBuffer);
+      expect(hexString).toBe("ab");
+    });
+
+    runInBothEnvironments(
+      "should correctly convert a buffer with an odd number of bytes to hex",
+      () => {
+        const oddByteBuffer = new Uint8Array([0x01, 0x23, 0x45, 0x67, 0x89]).buffer;
+        const hexString = Utils.fromBufferToHex(oddByteBuffer);
+        expect(hexString).toBe("0123456789");
+      }
+    );
+  });
+
+  describe("hexStringToArrayBuffer(...)", () => {
+    test("should convert a hex string to an ArrayBuffer correctly", () => {
+      const hexString = "ff0a1b"; // Arbitrary hex string
+      const expectedResult = new Uint8Array([255, 10, 27]).buffer;
+      const result = Utils.hexStringToArrayBuffer(hexString);
+      expect(new Uint8Array(result)).toEqual(new Uint8Array(expectedResult));
+    });
+
+    test("should throw an error if the hex string length is not even", () => {
+      const hexString = "abc"; // Odd number of characters
+      expect(() => {
+        Utils.hexStringToArrayBuffer(hexString);
+      }).toThrow("HexString has to be an even length");
+    });
+
+    test("should convert a hex string representing zero to an ArrayBuffer correctly", () => {
+      const hexString = "00";
+      const expectedResult = new Uint8Array([0]).buffer;
+      const result = Utils.hexStringToArrayBuffer(hexString);
+      expect(new Uint8Array(result)).toEqual(new Uint8Array(expectedResult));
+    });
+
+    test("should handle an empty hex string", () => {
+      const hexString = "";
+      const expectedResult = new ArrayBuffer(0);
+      const result = Utils.hexStringToArrayBuffer(hexString);
+      expect(result).toEqual(expectedResult);
+    });
+
+    test("should convert a long hex string to an ArrayBuffer correctly", () => {
+      const hexString = "0102030405060708090a0b0c0d0e0f";
+      const expectedResult = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+        .buffer;
+      const result = Utils.hexStringToArrayBuffer(hexString);
+      expect(new Uint8Array(result)).toEqual(new Uint8Array(expectedResult));
+    });
+  });
+
+  describe("Buffer to Hex and Hex to ArrayBuffer Conversion", () => {
+    runInBothEnvironments("should allow round-trip conversion for an arbitrary buffer", () => {
+      // Create an arbitrary buffer
+      const originalBuffer = new Uint8Array([10, 20, 30, 40, 255]).buffer;
+
+      // Convert the buffer to a hex string
+      const hexString = Utils.fromBufferToHex(originalBuffer);
+
+      // Convert the hex string back to an ArrayBuffer
+      const roundTripBuffer = Utils.hexStringToArrayBuffer(hexString);
+
+      // The original buffer and the round-tripped buffer should contain the same bytes
+      expect(new Uint8Array(roundTripBuffer)).toEqual(new Uint8Array(originalBuffer));
+    });
+  });
+
   describe("mapToRecord", () => {
     it("should handle null", () => {
       expect(Utils.mapToRecord(null)).toEqual(null);

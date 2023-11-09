@@ -23,7 +23,12 @@ export function AccountsDeserializer(
   return accounts;
 }
 
-export const ACCOUNT_ACCOUNTS = new KeyDefinition(ACCOUNT_MEMORY, "accounts", AccountsDeserializer);
+export const ACCOUNT_ACCOUNTS = KeyDefinition.record(
+  ACCOUNT_MEMORY,
+  "accounts",
+  (accountInfo: Jsonify<AccountInfo>) => accountInfo
+);
+
 export const ACCOUNT_ACTIVE_ACCOUNT_ID = new KeyDefinition(
   ACCOUNT_MEMORY,
   "activeAccountId",
@@ -60,6 +65,7 @@ export class AccountServiceImplementation implements InternalAccountService {
 
   async addAccount(userId: UserId, accountData: AccountInfo): Promise<void> {
     await this.accountsState.update((accounts) => {
+      accounts ||= {};
       accounts[userId] = accountData;
       return accounts;
     });
@@ -122,6 +128,7 @@ export class AccountServiceImplementation implements InternalAccountService {
     }
     await this.accountsState.update(
       (accounts) => {
+        accounts ||= {};
         if (accounts[userId] == null) {
           throw new Error("Account does not exist");
         }

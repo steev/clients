@@ -6,6 +6,8 @@ import { SEND_KDF_ITERATIONS } from "@bitwarden/common/enums";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
 import { CryptoFunctionService } from "@bitwarden/common/platform/abstractions/crypto-function.service";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
+import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
 import { SendType } from "@bitwarden/common/tools/send/enums/send-type";
@@ -60,6 +62,8 @@ export class AccessComponent implements OnInit {
     private route: ActivatedRoute,
     private cryptoService: CryptoService,
     private sendApiService: SendApiService,
+    private platformUtilsService: PlatformUtilsService,
+    private i18nService: I18nService,
     protected formBuilder: FormBuilder
   ) {}
 
@@ -123,7 +127,11 @@ export class AccessComponent implements OnInit {
         } else if (e.statusCode === 404) {
           this.unavailable = true;
         } else if (e.statusCode === 400) {
-          //this status is returned on wrong password and we should do nothing.
+          this.platformUtilsService.showToast(
+            "error",
+            this.i18nService.t("errorOccurred"),
+            e.message
+          );
         } else {
           this.error = true;
         }

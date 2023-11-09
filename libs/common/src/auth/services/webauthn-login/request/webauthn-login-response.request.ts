@@ -11,7 +11,8 @@ export abstract class WebAuthnLoginResponseRequest {
     this.rawId = Utils.fromBufferToB64(credential.rawId);
     this.type = credential.type;
 
-    // WARNING: do not add PRF information here by mapping the `extensions` property,
+    // WARNING: do not add PRF information here by mapping
+    // credential.getClientExtensionResults() into the extensions property,
     // as it will be sent to the server (leaking credentials).
     this.extensions = {}; // Extensions are handled client-side
   }

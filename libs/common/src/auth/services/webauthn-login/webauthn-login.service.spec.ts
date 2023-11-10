@@ -229,10 +229,9 @@ describe("WebAuthnLoginService", () => {
       );
     }
 
-    it("should assert credential and return WebAuthnLoginAssertionView on success", async () => {
+    it("should assert the credential and return WebAuthnLoginAssertionView on success", async () => {
       // Arrange
       const webAuthnLoginService = setup(true);
-
       const credentialAssertionOptions = buildCredentialAssertionOptions();
 
       // Mock webAuthnUtils functions
@@ -299,6 +298,41 @@ describe("WebAuthnLoginService", () => {
       });
 
       expect(result.prfKey).toEqual(prfKey);
+    });
+
+    it("should return undefined on non-PublicKeyCredential browser response", async () => {
+      // Arrange
+      const webAuthnLoginService = setup(true);
+      const credentialAssertionOptions = buildCredentialAssertionOptions();
+
+      // Mock the navigatorCredentials.get to return null
+      navigatorCredentials.get.mockResolvedValue(null);
+
+      // Act
+      const result = await webAuthnLoginService.assertCredential(credentialAssertionOptions);
+
+      // Assert
+      expect(result).toBeUndefined();
+    });
+
+    it("should log an error and return undefined when navigatorCredentials.get throws an error", async () => {
+      // Arrange
+      const webAuthnLoginService = setup(true);
+      const credentialAssertionOptions = buildCredentialAssertionOptions();
+
+      // Mock navigatorCredentials.get to throw an error
+      const errorMessage = "Simulated error";
+      navigatorCredentials.get.mockRejectedValue(new Error(errorMessage));
+
+      // Spy on logService.error
+      const logServiceErrorSpy = jest.spyOn(logService, "error");
+
+      // Act
+      const result = await webAuthnLoginService.assertCredential(credentialAssertionOptions);
+
+      // Assert
+      expect(result).toBeUndefined();
+      expect(logServiceErrorSpy).toHaveBeenCalledWith(expect.any(Error));
     });
   });
 });

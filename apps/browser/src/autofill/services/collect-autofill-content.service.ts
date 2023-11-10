@@ -1006,13 +1006,22 @@ class CollectAutofillContentService implements CollectAutofillContentServiceInte
       }
     }
 
-    if (isRemovingNodes) {
-      for (let elementIndex = 0; elementIndex < mutatedElements.length; elementIndex++) {
+    for (let elementIndex = 0; elementIndex < mutatedElements.length; elementIndex++) {
+      const node = mutatedElements[elementIndex];
+      if (isRemovingNodes) {
         this.deleteCachedAutofillElement(
-          mutatedElements[elementIndex] as
-            | ElementWithOpId<HTMLFormElement>
-            | ElementWithOpId<FormFieldElement>
+          node as ElementWithOpId<HTMLFormElement> | ElementWithOpId<FormFieldElement>
         );
+        continue;
+      }
+
+      if (
+        this.isNodeFormFieldElement(node) &&
+        !this.autofillFieldElements.get(node as ElementWithOpId<FormFieldElement>)
+      ) {
+        // We are setting this item to a -1 index because we do not know its position in the DOM.
+        // This value should be updated with the next call to collect page details.
+        this.buildAutofillFieldItem(node as ElementWithOpId<FormFieldElement>, -1);
       }
     }
 

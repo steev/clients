@@ -706,6 +706,11 @@ class OverlayBackground implements OverlayBackgroundInterface {
    */
   private handlePortOnConnect = async (port: chrome.runtime.Port) => {
     const isOverlayListPort = port.name === AutofillOverlayPort.List;
+    const isOverlayButtonPort = port.name === AutofillOverlayPort.Button;
+
+    if (!isOverlayListPort && !isOverlayButtonPort) {
+      return;
+    }
 
     if (isOverlayListPort) {
       this.overlayListPort = port;

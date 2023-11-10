@@ -17,6 +17,7 @@ import { AutoFillConstants } from "./autofill-constants";
 import AutofillOverlayContentService from "./autofill-overlay-content.service";
 
 const defaultWindowReadyState = document.readyState;
+const defaultDocumentVisibilityState = document.visibilityState;
 describe("AutofillOverlayContentService", () => {
   let autofillOverlayContentService: AutofillOverlayContentService;
   let sendExtensionMessageSpy: jest.SpyInstance;
@@ -28,6 +29,10 @@ describe("AutofillOverlayContentService", () => {
       .mockResolvedValue(undefined);
     Object.defineProperty(document, "readyState", {
       value: defaultWindowReadyState,
+      writable: true,
+    });
+    Object.defineProperty(document, "visibilityState", {
+      value: defaultDocumentVisibilityState,
       writable: true,
     });
     Object.defineProperty(document, "activeElement", {
@@ -45,10 +50,16 @@ describe("AutofillOverlayContentService", () => {
   });
 
   describe("init", () => {
+    let setupGlobalEventListenersSpy: jest.SpyInstance;
     let setupMutationObserverSpy: jest.SpyInstance;
 
     beforeEach(() => {
       jest.spyOn(document, "addEventListener");
+      jest.spyOn(window, "addEventListener");
+      setupGlobalEventListenersSpy = jest.spyOn(
+        autofillOverlayContentService as any,
+        "setupGlobalEventListeners"
+      );
       setupMutationObserverSpy = jest.spyOn(
         autofillOverlayContentService as any,
         "setupMutationObserver"
@@ -65,9 +76,34 @@ describe("AutofillOverlayContentService", () => {
 
       expect(document.addEventListener).toHaveBeenCalledWith(
         "DOMContentLoaded",
-        setupMutationObserverSpy
+        setupGlobalEventListenersSpy
       );
-      expect(setupMutationObserverSpy).not.toHaveBeenCalled();
+      expect(setupGlobalEventListenersSpy).not.toHaveBeenCalled();
+    });
+
+    it("sets up a visibility change listener for the DOM", () => {
+      const handleVisibilityChangeEventSpy = jest.spyOn(
+        autofillOverlayContentService as any,
+        "handleVisibilityChangeEvent"
+      );
+
+      autofillOverlayContentService.init();
+
+      expect(document.addEventListener).toHaveBeenCalledWith(
+        "visibilitychange",
+        handleVisibilityChangeEventSpy
+      );
+    });
+
+    it("sets up a focus out listener for the window", () => {
+      const handleFormFieldBlurEventSpy = jest.spyOn(
+        autofillOverlayContentService as any,
+        "handleFormFieldBlurEvent"
+      );
+
+      autofillOverlayContentService.init();
+
+      expect(window.addEventListener).toHaveBeenCalledWith("focusout", handleFormFieldBlurEventSpy);
     });
 
     it("sets up mutation observers for the body and html element", () => {
@@ -1487,7 +1523,8 @@ describe("AutofillOverlayContentService", () => {
       expect(globalThis.document.body.appendChild).not.toHaveBeenCalled();
     });
 
-    it("appends the identified node to the body", () => {
+    it("appends the identified node to the body", async () => {
+      jest.useFakeTimers();
       const injectedElement = document.createElement("div");
       injectedElement.id = "test";
       document.documentElement.appendChild(injectedElement);
@@ -1497,6 +1534,7 @@ describe("AutofillOverlayContentService", () => {
           addedNodes: document.querySelectorAll("#test"),
         } as unknown as MutationRecord,
       ]);
+      jest.advanceTimersByTime(10);
 
       expect(globalThis.document.body.appendChild).toHaveBeenCalledWith(injectedElement);
     });
@@ -1542,6 +1580,28 @@ describe("AutofillOverlayContentService", () => {
 
       expect(blurMostRecentOverlayFieldSpy).toHaveBeenCalled();
       expect(removeAutofillOverlaySpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("handleVisibilityChangeEvent", () => {
+    it("skips removing the overlay if the document is visible", () => {
+      jest.spyOn(autofillOverlayContentService as any, "removeAutofillOverlay");
+
+      autofillOverlayContentService["handleVisibilityChangeEvent"]();
+
+      expect(autofillOverlayContentService["removeAutofillOverlay"]).not.toHaveBeenCalled();
+    });
+
+    it("removes the overlay if the document is not visible", () => {
+      Object.defineProperty(document, "visibilityState", {
+        value: "hidden",
+        writable: true,
+      });
+      jest.spyOn(autofillOverlayContentService as any, "removeAutofillOverlay");
+
+      autofillOverlayContentService["handleVisibilityChangeEvent"]();
+
+      expect(autofillOverlayContentService["removeAutofillOverlay"]).toHaveBeenCalled();
     });
   });
 });

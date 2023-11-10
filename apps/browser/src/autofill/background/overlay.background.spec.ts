@@ -971,6 +971,15 @@ describe("OverlayBackground", () => {
       jest.spyOn(overlayBackground as any, "getOverlayCipherData").mockImplementation();
     });
 
+    it("skips setting up the overlay port if the port connection is not for an overlay element", () => {
+      const port = createPortSpyMock("not-an-overlay-element");
+
+      overlayBackground["handlePortOnConnect"](port);
+
+      expect(port.onMessage.addListener).not.toHaveBeenCalled();
+      expect(port.postMessage).not.toHaveBeenCalled();
+    });
+
     it("sets up the overlay list port if the port connection is for the overlay list", async () => {
       initOverlayElementPorts({ initList: true, initButton: false });
       await flushPromises();

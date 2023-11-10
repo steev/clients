@@ -6,7 +6,7 @@ import { any, mock } from "jest-mock-extended";
 import { BehaviorSubject, firstValueFrom, of, timeout } from "rxjs";
 import { Jsonify } from "type-fest";
 
-import { trackEmissions } from "../../../../spec";
+import { awaitAsync, trackEmissions } from "../../../../spec";
 import { FakeStorageService } from "../../../../spec/fake-storage.service";
 import { AccountInfo, AccountService } from "../../../auth/abstractions/account.service";
 import { AuthenticationStatus } from "../../../auth/enums/authentication-status";
@@ -66,7 +66,7 @@ describe("DefaultUserState", () => {
       name: `Test User ${id}`,
       status: AuthenticationStatus.Unlocked,
     });
-    await new Promise((resolve) => setTimeout(resolve, 1));
+    await awaitAsync();
   };
 
   afterEach(() => {
@@ -74,51 +74,42 @@ describe("DefaultUserState", () => {
   });
 
   it("emits updates for each user switch and update", async () => {
-    diskStorageService.internalUpdateStore({
-      "user_00000000-0000-1000-a000-000000000001_fake_fake": {
-        date: "2022-09-21T13:14:17.648Z",
-        array: ["value1", "value2"],
-      } as Jsonify<TestState>,
-      "user_00000000-0000-1000-a000-000000000002_fake_fake": {
-        date: "2021-09-21T13:14:17.648Z",
-        array: ["user2_value"],
-      },
-    });
+    const user1 = "user_00000000-0000-1000-a000-000000000001_fake_fake";
+    const user2 = "user_00000000-0000-1000-a000-000000000002_fake_fake";
+    const state1 = {
+      date: new Date(2021, 0),
+      array: ["value1"],
+    };
+    const state2 = {
+      date: new Date(2022, 0),
+      array: ["value2"],
+    };
+    const initialState: Record<string, Jsonify<TestState>> = {};
+    initialState[user1] = JSON.parse(JSON.stringify(state1));
+    initialState[user2] = JSON.parse(JSON.stringify(state2));
+    diskStorageService.internalUpdateStore(initialState);
 
     const emissions = trackEmissions(userState.state$);
 
     // User signs in
     changeActiveUser("1");
-    await new Promise<void>((resolve) => setTimeout(resolve, 1));
+    await awaitAsync();
 
     // Service does an update
-    await userState.update((state) => {
-      state.array.push("value3");
-      state.date = new Date(2023, 0);
-      return state;
-    });
-    await new Promise<void>((resolve) => setTimeout(resolve, 1));
+    const updatedState = {
+      date: new Date(2023, 0),
+      array: ["value3"],
+    };
+    await userState.update(() => updatedState);
+    await awaitAsync();
 
     // Emulate an account switch
     await changeActiveUser("2");
 
-    expect(emissions).toHaveLength(3);
-    // Gotten starter user data
-    expect(emissions[0]).toBeTruthy();
-    expect(emissions[0].array).toHaveLength(2);
+    expect(emissions).toEqual([state1, updatedState, state2]);
 
-    // Gotten emission for the update call
-    expect(emissions[1]).toBeTruthy();
-    expect(emissions[1].array).toHaveLength(3);
-    expect(new Date(emissions[1].date).getUTCFullYear()).toBe(2023);
-
-    // The second users data
-    expect(emissions[2]).toBeTruthy();
-    expect(emissions[2].array).toHaveLength(1);
-    expect(new Date(emissions[2].date).getUTCFullYear()).toBe(2021);
-
-    // Should only be called twice to get state, once for each user
-    expect(diskStorageService.mock.get).toHaveBeenCalledTimes(2);
+    // Should be called three time to get state, once for each user and once for the update
+    expect(diskStorageService.mock.get).toHaveBeenCalledTimes(3);
     expect(diskStorageService.mock.get).toHaveBeenNthCalledWith(
       1,
       "user_00000000-0000-1000-a000-000000000001_fake_fake",
@@ -126,6 +117,11 @@ describe("DefaultUserState", () => {
     );
     expect(diskStorageService.mock.get).toHaveBeenNthCalledWith(
       2,
+      "user_00000000-0000-1000-a000-000000000001_fake_fake",
+      any()
+    );
+    expect(diskStorageService.mock.get).toHaveBeenNthCalledWith(
+      3,
       "user_00000000-0000-1000-a000-000000000002_fake_fake",
       any()
     );

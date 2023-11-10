@@ -67,8 +67,13 @@ export class DefaultUserState<T> implements UserState<T> {
     const storageUpdates$ = this.chosenStorageLocation.updates$.pipe(
       combineLatestWith(this.formattedKey$),
       filter(([update, key]) => key !== null && update.key === key),
-      map(([update]) => {
-        return keyDefinition.deserializer(update.value as Jsonify<T>);
+      switchMap(async ([update, key]) => {
+        if (update.updateType === "remove") {
+          return FAKE_DEFAULT;
+        }
+        const jsonData = await this.chosenStorageLocation.get<Jsonify<T>>(key);
+        const data = keyDefinition.deserializer(jsonData);
+        return data;
       })
     );
 

@@ -5,7 +5,6 @@ import { MemoryStorageOptions, StorageOptions } from "../models/domain/storage-o
 export type StorageUpdateType = "save" | "remove";
 export type StorageUpdate = {
   key: string;
-  value?: unknown;
   updateType: StorageUpdateType;
 };
 

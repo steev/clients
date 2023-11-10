@@ -6,7 +6,7 @@
 import { of } from "rxjs";
 import { Jsonify } from "type-fest";
 
-import { trackEmissions } from "../../../../spec";
+import { trackEmissions, awaitAsync } from "../../../../spec";
 import { FakeStorageService } from "../../../../spec/fake-storage.service";
 import { KeyDefinition, globalKeyBuilder } from "../key-definition";
 import { StateDefinition } from "../state-definition";
@@ -53,6 +53,7 @@ describe("DefaultGlobalState", () => {
   it("should emit when storage updates", async () => {
     const emissions = trackEmissions(globalState.state$);
     await diskStorageService.save(globalKey, newData);
+    await awaitAsync(); // storage updates are behind a promise
 
     expect(emissions).toEqual([
       null, // Initial value

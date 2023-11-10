@@ -7,6 +7,9 @@ import { Utils } from "../../../platform/misc/utils";
 import { PrfKey, SymmetricCryptoKey } from "../../../platform/models/domain/symmetric-crypto-key";
 import { AuthService } from "../../abstractions/auth.service";
 import { WebAuthnLoginApiServiceAbstraction } from "../../abstractions/webauthn/webauthn-login-api.service.abstraction";
+import { AuthenticationType } from "../../enums/authentication-type";
+import { AuthResult } from "../../models/domain/auth-result";
+import { WebAuthnLoginCredentials } from "../../models/domain/login-credentials";
 import { WebAuthnLoginCredentialAssertionOptionsView } from "../../models/view/webauthn-login/webauthn-login-credential-assertion-options.view";
 import { WebAuthnLoginCredentialAssertionView } from "../../models/view/webauthn-login/webauthn-login-credential-assertion.view";
 import * as webAuthnUtils from "../../utils/webauthn-utils";
@@ -333,6 +336,44 @@ describe("WebAuthnLoginService", () => {
       // Assert
       expect(result).toBeUndefined();
       expect(logServiceErrorSpy).toHaveBeenCalledWith(expect.any(Error));
+    });
+  });
+
+  describe("logIn(...)", () => {
+    function buildWebAuthnLoginCredentialAssertionView(): WebAuthnLoginCredentialAssertionView {
+      const publicKeyCredential = new MockPublicKeyCredential();
+
+      const deviceResponse = new WebAuthnLoginAssertionResponseRequest(publicKeyCredential);
+
+      const prfKey = new SymmetricCryptoKey(randomBytes(32)) as PrfKey;
+
+      return new WebAuthnLoginCredentialAssertionView("mockToken", deviceResponse, prfKey);
+    }
+
+    it("should accept an assertion with a signed challenge and use it to try and login", async () => {
+      // Arrange
+      const webAuthnLoginService = setup(true); // Assuming setup() is your method to initialize the service
+      const assertion = buildWebAuthnLoginCredentialAssertionView();
+      const mockAuthResult: AuthResult = new AuthResult();
+
+      jest.spyOn(authService, "logIn").mockResolvedValue(mockAuthResult);
+
+      // Act
+      const result = await webAuthnLoginService.logIn(assertion);
+
+      // Assert
+      expect(result).toEqual(mockAuthResult);
+      expect(authService.logIn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          token: assertion.token,
+          deviceResponse: assertion.deviceResponse,
+          prfKey: assertion.prfKey,
+          type: AuthenticationType.WebAuthn,
+        })
+      );
+
+      const callArguments = authService.logIn.mock.calls[0];
+      expect(callArguments[0]).toBeInstanceOf(WebAuthnLoginCredentials);
     });
   });
 });

@@ -1,8 +1,6 @@
 import { Location } from "@angular/common";
 import { Component } from "@angular/core";
-import { Router } from "@angular/router";
 
-import { BrowserRouterService } from "../../../platform/popup/services/browser-router.service";
 import { AccountSwitcherService } from "../services/account-switcher.service";
 
 @Component({
@@ -11,8 +9,7 @@ import { AccountSwitcherService } from "../services/account-switcher.service";
 export class AccountSwitcherComponent {
   constructor(
     private accountSwitcherService: AccountSwitcherService,
-    private router: Router,
-    private routerService: BrowserRouterService,
+
     private location: Location
   ) {}
 
@@ -26,11 +23,6 @@ export class AccountSwitcherComponent {
 
   get accountOptions$() {
     return this.accountSwitcherService.accountOptions$;
-  }
-
-  async selectAccount(id: string) {
-    await this.accountSwitcherService.selectAccount(id);
-    this.router.navigate([this.routerService.getPreviousUrl() ?? "/home"]);
   }
 
   back() {

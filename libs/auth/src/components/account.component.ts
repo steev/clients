@@ -7,6 +7,7 @@ import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authenticatio
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 
 import { AccountSwitcherService } from "../../../../apps/browser/src/auth/popup/services/account-switcher.service";
+import { BrowserRouterService } from "../../../../apps/browser/src/platform/popup/services/browser-router.service";
 import { AvatarModule } from "../../../components/src/avatar";
 
 @Component({
@@ -22,6 +23,7 @@ export class AccountComponent {
   constructor(
     private accountSwitcherService: AccountSwitcherService,
     private router: Router,
+    private routerService: BrowserRouterService,
     private i18nService: I18nService
   ) {}
 
@@ -31,7 +33,7 @@ export class AccountComponent {
 
   async selectAccount(id: string) {
     await this.accountSwitcherService.selectAccount(id);
-    this.router.navigate(["/home"]);
+    this.router.navigate([this.routerService.getPreviousUrl() ?? "/home"]);
   }
 
   get status() {

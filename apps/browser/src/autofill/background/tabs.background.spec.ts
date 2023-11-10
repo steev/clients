@@ -164,6 +164,16 @@ describe("TabsBackground", () => {
         expect(overlayBackground.removePageDetails).toHaveBeenCalledWith(focusedWindowId);
       });
 
+      it("skips updating the current tab data the focusedWindowId is set to a value less than zero", async () => {
+        tab.windowId = -1;
+        triggerTabOnUpdatedEvent(focusedWindowId, { status: "loading" }, tab);
+        await flushPromises();
+
+        expect(mainBackground.refreshBadge).not.toHaveBeenCalled();
+        expect(mainBackground.refreshMenu).not.toHaveBeenCalled();
+        expect(overlayBackground.updateOverlayCiphers).not.toHaveBeenCalled();
+      });
+
       it("skips updating the current tab data if the updated tab is not for the focusedWindowId", async () => {
         tab.windowId = 20;
         triggerTabOnUpdatedEvent(focusedWindowId, { status: "loading" }, tab);

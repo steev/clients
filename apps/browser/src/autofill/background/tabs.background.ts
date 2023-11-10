@@ -81,7 +81,7 @@ export default class TabsBackground {
       this.overlayBackground.removePageDetails(tabId);
     }
 
-    if (this.focusedWindowId && tab.windowId !== this.focusedWindowId) {
+    if (this.focusedWindowId > 0 && tab.windowId !== this.focusedWindowId) {
       return;
     }
 

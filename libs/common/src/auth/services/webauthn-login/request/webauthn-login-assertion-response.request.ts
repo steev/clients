@@ -21,10 +21,10 @@ export class WebAuthnLoginAssertionResponseRequest extends WebAuthnLoginResponse
     }
 
     this.response = {
-      authenticatorData: Utils.fromBufferToB64(credential.response.authenticatorData),
-      signature: Utils.fromBufferToB64(credential.response.signature),
-      clientDataJSON: Utils.fromBufferToB64(credential.response.clientDataJSON),
-      userHandle: Utils.fromBufferToB64(credential.response.userHandle),
+      authenticatorData: Utils.fromBufferToUrlB64(credential.response.authenticatorData),
+      signature: Utils.fromBufferToUrlB64(credential.response.signature),
+      clientDataJSON: Utils.fromBufferToUrlB64(credential.response.clientDataJSON),
+      userHandle: Utils.fromBufferToUrlB64(credential.response.userHandle),
     };
   }
 }

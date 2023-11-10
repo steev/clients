@@ -6,6 +6,9 @@ export class MemoryStorageService extends AbstractMemoryStorageService {
   private store = new Map<string, unknown>();
   private updatesSubject = new Subject<StorageUpdate>();
 
+  get valuesRequireDeserialization(): boolean {
+    return false;
+  }
   get updates$() {
     return this.updatesSubject.asObservable();
   }

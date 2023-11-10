@@ -85,10 +85,13 @@ describe("DefaultGlobalState", () => {
 
     it("should emit once per update", async () => {
       const emissions = trackEmissions(globalState.state$);
+      await awaitAsync(); // storage updates are behind a promise
 
       await globalState.update((state) => {
         return newData;
       });
+
+      await awaitAsync();
 
       expect(emissions).toEqual([
         null, // Initial value
@@ -98,6 +101,8 @@ describe("DefaultGlobalState", () => {
 
     it("should provided combined dependencies", async () => {
       const emissions = trackEmissions(globalState.state$);
+      await awaitAsync(); // storage updates are behind a promise
+
       const combinedDependencies = { date: new Date() };
 
       await globalState.update(
@@ -109,6 +114,8 @@ describe("DefaultGlobalState", () => {
           combineLatestWith: of(combinedDependencies),
         }
       );
+
+      await awaitAsync();
 
       expect(emissions).toEqual([
         null, // Initial value
@@ -135,16 +142,22 @@ describe("DefaultGlobalState", () => {
 
     it("should provide the update callback with the current State", async () => {
       const emissions = trackEmissions(globalState.state$);
+      await awaitAsync(); // storage updates are behind a promise
+
       // Seed with interesting data
       const initialData = { date: new Date(2020, 1, 1) };
       await globalState.update((state, dependencies) => {
         return initialData;
       });
 
+      await awaitAsync();
+
       await globalState.update((state) => {
         expect(state).toEqual(initialData);
         return newData;
       });
+
+      await awaitAsync();
 
       expect(emissions).toEqual([
         null, // Initial value

@@ -8,6 +8,9 @@ import {
 export class ElectronRendererStorageService implements AbstractStorageService {
   private updatesSubject = new Subject<StorageUpdate>();
 
+  get valuesRequireDeserialization(): boolean {
+    return true;
+  }
   get updates$() {
     return this.updatesSubject.asObservable();
   }

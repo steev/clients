@@ -16,6 +16,8 @@ import { GlobalState } from "../global-state";
 import { KeyDefinition, globalKeyBuilder } from "../key-definition";
 import { StateUpdateOptions, populateOptionsWithDefault } from "../state-update-options";
 
+import { getStoredValue } from "./util";
+
 export class DefaultGlobalState<T> implements GlobalState<T> {
   private storageKey: string;
   private seededPromise: Promise<void>;
@@ -41,9 +43,11 @@ export class DefaultGlobalState<T> implements GlobalState<T> {
         if (update.updateType === "remove") {
           return null;
         }
-        const jsonData = await this.chosenLocation.get<Jsonify<T>>(this.storageKey);
-        const data = this.keyDefinition.deserializer(jsonData);
-        return data;
+        return await getStoredValue(
+          this.storageKey,
+          this.chosenLocation,
+          this.keyDefinition.deserializer
+        );
       }),
       shareReplay({ bufferSize: 1, refCount: false })
     );
@@ -83,7 +87,10 @@ export class DefaultGlobalState<T> implements GlobalState<T> {
   }
 
   async getFromState(): Promise<T> {
-    const data = await this.chosenLocation.get<Jsonify<T>>(this.storageKey);
-    return this.keyDefinition.deserializer(data);
+    return await getStoredValue(
+      this.storageKey,
+      this.chosenLocation,
+      this.keyDefinition.deserializer
+    );
   }
 }

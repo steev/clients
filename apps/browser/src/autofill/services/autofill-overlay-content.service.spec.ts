@@ -808,6 +808,17 @@ describe("AutofillOverlayContentService", () => {
         overlayElement: AutofillOverlayElement.List,
       });
     });
+
+    it("sends an extension message requesting an re-collection of page details if they need to update", () => {
+      jest.spyOn(autofillOverlayContentService as any, "sendExtensionMessage");
+      autofillOverlayContentService.pageDetailsUpdateRequired = true;
+
+      autofillOverlayContentService["openAutofillOverlay"]();
+
+      expect(sendExtensionMessageSpy).toHaveBeenCalledWith("bgCollectPageDetails", {
+        sender: "autofillOverlayContentService",
+      });
+    });
   });
 
   describe("focusMostRecentOverlayField", () => {

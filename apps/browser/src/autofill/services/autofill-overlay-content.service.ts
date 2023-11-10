@@ -31,6 +31,7 @@ class AutofillOverlayContentService implements AutofillOverlayContentServiceInte
   isFieldCurrentlyFocused = false;
   isCurrentlyFilling = false;
   isOverlayCiphersPopulated = false;
+  pageDetailsUpdateRequired = false;
   private readonly findTabs = tabbable;
   private readonly sendExtensionMessage = sendExtensionMessage;
   private autofillOverlayVisibility: number;
@@ -113,6 +114,13 @@ class AutofillOverlayContentService implements AutofillOverlayContentServiceInte
     const { isFocusingFieldElement, isOpeningFullOverlay, authStatus } = options;
     if (!this.mostRecentlyFocusedField) {
       return;
+    }
+
+    if (this.pageDetailsUpdateRequired) {
+      this.sendExtensionMessage("bgCollectPageDetails", {
+        sender: "autofillOverlayContentService",
+      });
+      this.pageDetailsUpdateRequired = false;
     }
 
     if (isFocusingFieldElement && !this.recentlyFocusedFieldIsCurrentlyFocused()) {

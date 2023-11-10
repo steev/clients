@@ -456,7 +456,7 @@ class CollectAutofillContentService implements CollectAutofillContentServiceInte
         labelElementsSet.add(currentElement);
       }
 
-      currentElement = currentElement.parentElement.closest("label");
+      currentElement = currentElement.parentElement?.closest("label");
     }
 
     if (
@@ -937,6 +937,7 @@ class CollectAutofillContentService implements CollectAutofillContentServiceInte
           this.isAutofillElementNodeMutated(mutation.addedNodes))
       ) {
         this.domRecentlyMutated = true;
+        this.autofillOverlayContentService.pageDetailsUpdateRequired = true;
         this.noFieldsFound = false;
         continue;
       }
@@ -960,6 +961,7 @@ class CollectAutofillContentService implements CollectAutofillContentServiceInte
     this.currentLocationHref = globalThis.location.href;
 
     this.domRecentlyMutated = true;
+    this.autofillOverlayContentService.pageDetailsUpdateRequired = true;
     this.noFieldsFound = false;
 
     this.autofillFormElements.clear();

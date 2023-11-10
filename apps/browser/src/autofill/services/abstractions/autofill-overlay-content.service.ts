@@ -13,6 +13,7 @@ interface AutofillOverlayContentService {
   isFieldCurrentlyFocused: boolean;
   isCurrentlyFilling: boolean;
   isOverlayCiphersPopulated: boolean;
+  pageDetailsUpdateRequired: boolean;
   init(): void;
   setupAutofillOverlayListenerOnField(
     autofillFieldElement: ElementWithOpId<FormFieldElement>,

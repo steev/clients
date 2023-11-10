@@ -19,46 +19,32 @@ import { WebAuthnLoginService } from "./webauthn-login.service";
 const originalPublicKeyCredential = global.PublicKeyCredential;
 const originalAuthenticatorAssertionResponse = global.AuthenticatorAssertionResponse;
 
-function generateRandomBase64ForArrayBufferLength(byteLength: number): string {
-  // Determine the number of base64 characters: every 3 bytes need 4 base64 characters
-  const b64Length = Math.ceil(byteLength / 3) * 4;
-
-  // Generate random base64 characters
-  let b64String = "";
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  for (let i = 0; i < b64Length; i++) {
-    b64String += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-
-  // Add necessary padding ('='), which is only needed if byteLength is not divisible by 3
-  while (b64String.length % 4 !== 0) {
-    b64String += "=";
-  }
-
-  return b64String;
+function randomBytes(length: number): Uint8Array {
+  return new Uint8Array(Array.from({ length }, (_, k) => k % 255));
 }
 
 // AuthenticatorAssertionResponse && PublicKeyCredential are only available in secure contexts
 // so we need to mock them and assign them to the global object to make them available
 // for the tests
 class MockAuthenticatorAssertionResponse implements AuthenticatorAssertionResponse {
-  clientDataJSONB64Str = generateRandomBase64ForArrayBufferLength(32);
-  authenticatorDataB64Str = generateRandomBase64ForArrayBufferLength(196);
-  signatureB64Str = generateRandomBase64ForArrayBufferLength(72);
-  userHandleB64Str = generateRandomBase64ForArrayBufferLength(16);
+  clientDataJSON: ArrayBuffer = randomBytes(32).buffer;
+  authenticatorData: ArrayBuffer = randomBytes(196).buffer;
+  signature: ArrayBuffer = randomBytes(72).buffer;
+  userHandle: ArrayBuffer = randomBytes(16).buffer;
 
-  clientDataJSON: ArrayBuffer = Utils.fromB64ToArrayBuffer(this.clientDataJSONB64Str);
-  authenticatorData: ArrayBuffer = Utils.fromB64ToArrayBuffer(this.authenticatorDataB64Str);
-  signature: ArrayBuffer = Utils.fromB64ToArrayBuffer(this.signatureB64Str);
-  userHandle: ArrayBuffer = Utils.fromB64ToArrayBuffer(this.userHandleB64Str);
+  clientDataJSONB64Str = Utils.fromBufferToUrlB64(this.clientDataJSON);
+  authenticatorDataB64Str = Utils.fromBufferToUrlB64(this.authenticatorData);
+  signatureB64Str = Utils.fromBufferToUrlB64(this.signature);
+  userHandleB64Str = Utils.fromBufferToUrlB64(this.userHandle);
 }
 
 class MockPublicKeyCredential implements PublicKeyCredential {
   authenticatorAttachment = "cross-platform";
   id = "mockCredentialId";
   type = "public-key";
-  rawIdB64Str = generateRandomBase64ForArrayBufferLength(32);
-  rawId: ArrayBuffer = Utils.fromB64ToArrayBuffer(this.rawIdB64Str);
+  rawId: ArrayBuffer = randomBytes(32).buffer;
+  rawIdB64Str = Utils.fromBufferToB64(this.rawId);
+
   response: MockAuthenticatorAssertionResponse = new MockAuthenticatorAssertionResponse();
 
   // Use random 64 character hex string (32 bytes - matters for symmetric key creation)
@@ -209,10 +195,7 @@ describe("WebAuthnLoginService", () => {
   });
 
   describe("assertCredential(...)", () => {
-    it("should assert credential and return WebAuthnLoginAssertionView on success", async () => {
-      // Arrange
-      const webAuthnLoginService = setup(true);
-
+    function buildCredentialAssertionOptions(): WebAuthnLoginCredentialAssertionOptionsView {
       // Mock credential assertion options
       const challenge = "6CG3jqMCVASJVXySMi9KWw";
       const token = "BWWebAuthnLoginAssertionOptions_CfDJ_2KBN892w";
@@ -240,10 +223,17 @@ describe("WebAuthnLoginService", () => {
         credentialAssertionOptionsServerResponse
       );
 
-      const credentialAssertionOptions = new WebAuthnLoginCredentialAssertionOptionsView(
+      return new WebAuthnLoginCredentialAssertionOptionsView(
         credentialAssertionOptionsResponse.options,
         credentialAssertionOptionsResponse.token
       );
+    }
+
+    it("should assert credential and return WebAuthnLoginAssertionView on success", async () => {
+      // Arrange
+      const webAuthnLoginService = setup(true);
+
+      const credentialAssertionOptions = buildCredentialAssertionOptions();
 
       // Mock webAuthnUtils functions
       const expectedSaltHex = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";

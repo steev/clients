@@ -2,13 +2,16 @@ import { Utils } from "../../../../platform/misc/utils";
 
 import { WebAuthnLoginResponseRequest } from "./webauthn-login-response.request";
 
+// base 64 strings
+export interface WebAuthnLoginAssertionResponseData {
+  authenticatorData: string;
+  signature: string;
+  clientDataJSON: string;
+  userHandle: string;
+}
+
 export class WebAuthnLoginAssertionResponseRequest extends WebAuthnLoginResponseRequest {
-  response: {
-    authenticatorData: string;
-    signature: string;
-    clientDataJSON: string;
-    userHandle: string;
-  };
+  response: WebAuthnLoginAssertionResponseData;
 
   constructor(credential: PublicKeyCredential) {
     super(credential);

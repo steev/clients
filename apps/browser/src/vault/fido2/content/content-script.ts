@@ -16,7 +16,7 @@ async function getFromLocalStorage(keys: string | string[]): Promise<Record<stri
   });
 }
 
-async function isDomainExcluded() {
+async function getActiveUserSettings() {
   // TODO: This is code copied from `notification-bar.tsx`. We should refactor this into a shared function.
   // Look up the active user id from storage
   const activeUserIdKey = "activeUserId";
@@ -27,10 +27,14 @@ async function isDomainExcluded() {
     activeUserId = activeUserStorageValue[activeUserIdKey];
   }
 
-  // Look up the user's settings from storage
-  const userSettingsStorageValue = await getFromLocalStorage(activeUserId);
+  const settingsStorage = await getFromLocalStorage(activeUserId);
 
-  const excludedDomains = userSettingsStorageValue[activeUserId]?.settings?.neverDomains;
+  // Look up the user's settings from storage
+  return settingsStorage?.[activeUserId]?.settings;
+}
+
+async function isDomainExcluded(activeUserSettings: Record<string, any>) {
+  const excludedDomains = activeUserSettings?.neverDomains;
   return excludedDomains && window.location.hostname in excludedDomains;
 }
 
@@ -38,6 +42,10 @@ async function hasActiveUser() {
   const activeUserIdKey = "activeUserId";
   const activeUserStorageValue = await getFromLocalStorage(activeUserIdKey);
   return activeUserStorageValue[activeUserIdKey] !== undefined;
+}
+
+async function isLocationBitwardenVault(activeUserSettings: Record<string, any>) {
+  return window.location.origin === activeUserSettings.serverConfig.environment.vault;
 }
 
 function initializeFido2ContentScript() {
@@ -107,9 +115,21 @@ function initializeFido2ContentScript() {
 }
 
 async function run() {
-  if ((await hasActiveUser()) && (await isFido2FeatureEnabled()) && !(await isDomainExcluded())) {
-    initializeFido2ContentScript();
+  if (!(await hasActiveUser())) {
+    return;
   }
+
+  const activeUserSettings = await getActiveUserSettings();
+  if (
+    activeUserSettings == null ||
+    !(await isFido2FeatureEnabled()) ||
+    (await isDomainExcluded(activeUserSettings)) ||
+    (await isLocationBitwardenVault(activeUserSettings))
+  ) {
+    return;
+  }
+
+  initializeFido2ContentScript();
 }
 
 run();

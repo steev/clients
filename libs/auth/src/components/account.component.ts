@@ -33,7 +33,12 @@ export class AccountComponent {
 
   async selectAccount(id: string) {
     await this.accountSwitcherService.selectAccount(id);
-    this.router.navigate([this.routerService.getPreviousUrl() ?? "/home"]);
+
+    if (id === this.specialAccountAddId) {
+      this.router.navigate(["home"]);
+    } else {
+      this.router.navigate([this.routerService.getPreviousUrl() ?? "/home"]);
+    }
   }
 
   get status() {

@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { combineLatest, map } from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { UserId } from "@bitwarden/common/types/guid";
@@ -22,7 +23,9 @@ export class AccountSwitcherService {
   get accountOptions$() {
     return combineLatest([this.accountService.accounts$, this.accountService.activeAccount$]).pipe(
       map(([accounts, activeAccount]) => {
-        const accountEntries = Object.entries(accounts);
+        const accountEntries = Object.entries(accounts).filter(
+          ([_, account]) => account.status !== AuthenticationStatus.LoggedOut
+        );
         // Accounts shouldn't ever be more than ACCOUNT_LIMIT but just in case do a greater than
         const hasMaxAccounts = accountEntries.length >= this.ACCOUNT_LIMIT;
         const options: { name: string; id: string; isSelected: boolean }[] = accountEntries.map(

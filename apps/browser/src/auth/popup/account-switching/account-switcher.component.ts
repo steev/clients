@@ -3,8 +3,9 @@ import { Component } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { VaultTimeoutService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout.service";
+import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
+import { DialogService } from "@bitwarden/components";
 
-import { BrowserRouterService } from "../../../platform/popup/services/browser-router.service";
 import { AccountSwitcherService } from "../services/account-switcher.service";
 
 @Component({
@@ -14,9 +15,10 @@ export class AccountSwitcherComponent {
   constructor(
     private accountSwitcherService: AccountSwitcherService,
     private vaultTimeoutService: VaultTimeoutService,
+    public messagingService: MessagingService,
+    private dialogService: DialogService,
     private location: Location,
-    private router: Router,
-    private routerService: BrowserRouterService
+    private router: Router
   ) {}
 
   get accountLimit() {
@@ -34,6 +36,20 @@ export class AccountSwitcherComponent {
   async lock() {
     await this.vaultTimeoutService.lock();
     this.router.navigate(["lock"]);
+  }
+
+  async logOut() {
+    const confirmed = await this.dialogService.openSimpleDialog({
+      title: { key: "logOut" },
+      content: { key: "logOutConfirmation" },
+      type: "info",
+    });
+
+    if (confirmed) {
+      this.messagingService.send("logout");
+    }
+
+    this.router.navigate(["account-switcher"]);
   }
 
   back() {

@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { combineLatest, map, tap } from "rxjs";
+import { combineLatest, map } from "rxjs";
 
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
@@ -21,14 +21,8 @@ export class AccountSwitcherService {
 
   get accountOptions$() {
     return combineLatest([this.accountService.accounts$, this.accountService.activeAccount$]).pipe(
-      tap((res) => {
-        console.log("accounts ---");
-        console.log(res);
-      }),
       map(([accounts, activeAccount]) => {
         const accountEntries = Object.entries(accounts);
-        console.log("accountEntries ---");
-        console.log(accountEntries);
         // Accounts shouldn't ever be more than ACCOUNT_LIMIT but just in case do a greater than
         const hasMaxAccounts = accountEntries.length >= this.ACCOUNT_LIMIT;
         const options: { name: string; id: string; isSelected: boolean }[] = accountEntries.map(
@@ -49,9 +43,6 @@ export class AccountSwitcherService {
             isSelected: activeAccount?.id == null,
           });
         }
-
-        console.log("options ---");
-        console.log(options);
 
         return options;
       })

@@ -1,6 +1,10 @@
 import { Location } from "@angular/common";
 import { Component } from "@angular/core";
+import { Router } from "@angular/router";
 
+import { VaultTimeoutService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout.service";
+
+import { BrowserRouterService } from "../../../platform/popup/services/browser-router.service";
 import { AccountSwitcherService } from "../services/account-switcher.service";
 
 @Component({
@@ -9,8 +13,10 @@ import { AccountSwitcherService } from "../services/account-switcher.service";
 export class AccountSwitcherComponent {
   constructor(
     private accountSwitcherService: AccountSwitcherService,
-
-    private location: Location
+    private vaultTimeoutService: VaultTimeoutService,
+    private location: Location,
+    private router: Router,
+    private routerService: BrowserRouterService
   ) {}
 
   get accountLimit() {
@@ -23,6 +29,11 @@ export class AccountSwitcherComponent {
 
   get accountOptions$() {
     return this.accountSwitcherService.accountOptions$;
+  }
+
+  async lock() {
+    await this.vaultTimeoutService.lock();
+    this.router.navigate(["lock"]);
   }
 
   back() {

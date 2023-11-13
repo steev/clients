@@ -1,6 +1,7 @@
 import { Location } from "@angular/common";
-import { Component } from "@angular/core";
+import { Component, OnDestroy } from "@angular/core";
 import { Router } from "@angular/router";
+import { Subject, map, takeUntil } from "rxjs";
 
 import { VaultTimeoutService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout.service";
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
@@ -11,7 +12,9 @@ import { AccountSwitcherService } from "../services/account-switcher.service";
 @Component({
   templateUrl: "account-switcher.component.html",
 })
-export class AccountSwitcherComponent {
+export class AccountSwitcherComponent implements OnDestroy {
+  private destroy$ = new Subject<void>();
+
   constructor(
     private accountSwitcherService: AccountSwitcherService,
     private vaultTimeoutService: VaultTimeoutService,
@@ -33,9 +36,26 @@ export class AccountSwitcherComponent {
     return this.accountSwitcherService.accountOptions$;
   }
 
-  async lock() {
-    await this.vaultTimeoutService.lock();
+  back() {
+    this.location.back();
+  }
+
+  async lock(userId?: string) {
+    await this.vaultTimeoutService.lock(userId ? userId : null);
     this.router.navigate(["lock"]);
+  }
+
+  async lockAll() {
+    this.accountOptions$
+      .pipe(
+        map((accounts) =>
+          accounts
+            .filter((account) => account.id !== this.specialAddAccountId)
+            .map((account) => account.id)
+        ),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((accountIds) => accountIds.forEach(async (id) => await this.lock(id)));
   }
 
   async logOut() {
@@ -52,7 +72,8 @@ export class AccountSwitcherComponent {
     this.router.navigate(["account-switcher"]);
   }
 
-  back() {
-    this.location.back();
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

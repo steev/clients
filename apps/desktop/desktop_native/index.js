@@ -164,17 +164,32 @@ switch (platform) {
         }
         break
       case 'arm64':
-        localFileExisted = existsSync(
-          join(__dirname, 'desktop_native.linux-arm64-musl.node')
-        )
-        try {
-          if (localFileExisted) {
-            nativeBinding = require('./desktop_native.linux-arm64-musl.node')
-          } else {
-            nativeBinding = require('@bitwarden/desktop-native-linux-arm64-musl')
+        if (isMusl()) {
+          localFileExisted = existsSync(
+            join(__dirname, 'desktop_native.linux-arm64-musl.node')
+          )
+          try {
+            if (localFileExisted) {
+              nativeBinding = require('./desktop_native.linux-arm64-musl.node')
+            } else {
+              nativeBinding = require('@bitwarden/desktop-native-linux-arm64-musl')
+            }
+          } catch (e) {
+            loadError = e
           }
-        } catch (e) {
-          loadError = e
+        } else {
+          localFileExisted = existsSync(
+            join(__dirname, 'desktop_native.linux-arm64-gnu.node')
+          )
+          try {
+            if (localFileExisted) {
+              nativeBinding = require('./desktop_native.linux-arm64-gnu.node')
+            } else {
+              nativeBinding = require('@bitwarden/desktop-native-linux-arm64-gnu')
+            }
+          } catch (e) {
+            loadError = e
+          }
         }
         break
       case 'arm':

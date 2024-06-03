@@ -13,8 +13,16 @@ switch (process.platform) {
     break;
 
     default:
-        targets = ['x86_64-unknown-linux-musl'];
+    switch (process.architecture) {
+      case "x86_64":
+        targets = ["x86_64-unknown-linux-musl"];
+      break;
+
+      case "arm64":
+        targets = ["aarch64-unknown-linux-musl"];
+      break;
     break;
+    }
 }
 
 targets.forEach(target => {
